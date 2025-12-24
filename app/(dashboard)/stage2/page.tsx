@@ -181,7 +181,7 @@ export default function Stage2Page() {
 
     const swipes = storage.get<RoleSwipe[]>('roleSwipes', []) ?? [];
     const liked = swipes
-      .filter((swipe) => swipe.swipeDirection === 'right' || swipe.swipeDirection === 'up')
+      .filter((swipe) => swipe.swipeDirection === 'right')
       .map((swipe) => swipe.roleId);
     setLikedRoles(Array.from(new Set(liked)));
   }, []);

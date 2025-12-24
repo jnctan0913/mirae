@@ -221,7 +221,7 @@ export default function Stage1Page() {
     const persistLikedRoles = () => {
       const swipes = storage.get<typeof swipeData[]>('roleSwipes', []) || [];
       const liked = swipes
-        .filter((swipe) => swipe.swipeDirection === 'right' || swipe.swipeDirection === 'up')
+        .filter((swipe) => swipe.swipeDirection === 'right')
         .map((swipe) => swipe.roleId);
       const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
       storage.set('userProfile', {
