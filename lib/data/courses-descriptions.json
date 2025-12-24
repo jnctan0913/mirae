@@ -1,0 +1,1253 @@
+[
+  {
+    "id": 1,
+    "subject_en": "Korean Language",
+    "subject_kr": "국어",
+    "electives": {
+      "general": [
+        {
+          "en": "Speech & Language",
+          "kr": "화법과 언어",
+          "description": {
+            "kr": "화법과 언어의 본질을 이해하여 의사소통 과정에서 담화를 수행할 수 있도록 화법 능력과 언어 탐구 능력을 기르는 과목",
+            "en": "A subject cultivating speech and language inquiry skills to understand the nature of speech and language and perform discourse in communication."
+          }
+        },
+        {
+          "en": "Reading & Writing",
+          "kr": "독서와 작문",
+          "description": {
+            "kr": "독서와 작문의 특성을 이해하여 일상생활 및 학습 상황에 필요한 독서와 작문 능력을 기르는 과목",
+            "en": "A subject cultivating reading and writing skills necessary for daily life and learning by understanding the characteristics of reading and writing."
+          }
+        },
+        {
+          "en": "Literature",
+          "kr": "문학",
+          "description": {
+            "kr": "작품을 깊이 있게 수용·생산하는 활동을 통해 비판적이고 창의적인 사고 역량과 문화 향유 역량을 기르는 과목",
+            "en": "A subject cultivating critical and creative thinking and cultural enjoyment capabilities through deep reception and production of literary works."
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Thematic Reading",
+          "kr": "주제 탐구 독서",
+          "description": {
+            "kr": "주제를 깊이 탐구하는 독서를 통해 자신의 관점과 견해를 형성하고, 스스로 선택한 자료를 읽으며 학업과 진로에 필요한 역량을 기르는 과목",
+            "en": "A subject where students form their own perspectives through deep thematic reading and cultivate academic and career capabilities by reading self-selected materials."
+          }
+        },
+        {
+          "en": "Literature & Film",
+          "kr": "문학과 영상",
+          "description": {
+            "kr": "문학 작품과 영상물을 수용·생산하는 능력과 진로에 필요한 문화적 역량을 기르는 과목",
+            "en": "A subject cultivating the ability to receive and produce literary works and video materials, as well as cultural capabilities needed for careers."
+          }
+        },
+        {
+          "en": "Workplace Communication",
+          "kr": "직무 의사소통",
+          "description": {
+            "kr": "원활한 직무 수행에 필요한 실질적인 의사소통 능력을 기르는 과목",
+            "en": "A subject cultivating practical communication skills required for smooth job performance."
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Book Discussions & Writing",
+          "kr": "독서 토론과 글쓰기",
+          "description": {
+            "kr": "다양한 분야의 책이나 자료를 읽고 토론하며 글을 쓰는 과정에서 비판적·창의적 사고력과 협력적 의사소통 능력을 기르는 과목",
+            "en": "A subject cultivating critical/creative thinking and cooperative communication skills through reading, debating, and writing about books or materials in various fields."
+          }
+        },
+        {
+          "en": "Media Communication",
+          "kr": "매체 의사소통",
+          "description": {
+            "kr": "매체를 통한 의사소통의 현상과 문제점을 비판적으로 탐구하고 바람직한 의사소통 문화를 형성해 나가는 능력을 기르는 과목",
+            "en": "A subject critically exploring communication phenomena and problems through media and cultivating the ability to form a desirable communication culture."
+          }
+        },
+        {
+          "en": "Exploring Language in Everyday Life",
+          "kr": "언어생활 탐구",
+          "description": {
+            "kr": "문법 영역을 중심으로 언어의 힘과 가치를 이해하고 바람직한 언어생활을 실천하는 능력을 기르는 과목",
+            "en": "A subject understanding the power and value of language centered on grammar and cultivating the ability to practice desirable language life."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "subject_en": "Mathematics",
+    "subject_kr": "수학",
+    "electives": {
+      "general": [
+        {
+          "en": "Algebra",
+          "kr": "대수",
+          "description": {
+            "kr": "지수로그함수, 삼각함수, 수열 등을 배우고, 규칙적으로 변하는 관계를 함수로 표현하고 탐구하는 과목",
+            "en": "A subject learning exponents, logarithms, trigonometric functions, and sequences, and expressing and exploring regularly changing relationships as functions."
+          }
+        },
+        {
+          "en": "Calculus I",
+          "kr": "미적분I",
+          "description": {
+            "kr": "무한 개념과 순간 변화, 넓이와 거리 등을 이해하여, 사회와 자연 현상의 변화를 수학적으로 탐구하는 과목",
+            "en": "A subject understanding infinite concepts, instantaneous change, area, and distance to mathematically explore changes in social and natural phenomena."
+          }
+        },
+        {
+          "en": "Probability & Statistics",
+          "kr": "확률과 통계",
+          "description": {
+            "kr": "데이터를 기반으로 문제상황을 분석하는 과목으로, 경우의 수, 확률, 자료의 수집과 분석, 추정을 통해 문제 해결력을 기르는 과목",
+            "en": "A subject analyzing problem situations based on data and cultivating problem-solving skills through permutations, probability, and data analysis."
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Geometry",
+          "kr": "기하",
+          "description": {
+            "kr": "이차곡선, 공간도형, 벡터 등을 활용하여 도형의 구조와 관계를 분석하고, 연역적 추론과 대수와의 연결성을 탐구하는 과목",
+            "en": "A subject analyzing the structure and relationship of figures using conic sections, spatial figures, and vectors, and exploring deductive reasoning and algebraic connections."
+          }
+        },
+        {
+          "en": "Calculus II",
+          "kr": "미적분II",
+          "description": {
+            "kr": "다양한 함수의 미분과 적분, 수열의 극한과 급수 등을 배우고, 여러 가지 상황을 수학적으로 해석하고 탐구하는 과목",
+            "en": "A subject learning differentiation and integration of various functions, limits of sequences and series, and interpreting various situations mathematically."
+          }
+        },
+        {
+          "en": "Mathematics in Economics",
+          "kr": "경제 수학",
+          "description": {
+            "kr": "수학을 활용해 경제 및 금융 현상을 해석하는 과목으로 함수, 행렬, 미분 등을 통해 경제 지표를 설명하고, 경제 활동에서 문제 해결력을 기르는 과목",
+            "en": "A subject utilizing math to interpret economic and financial phenomena, explaining economic indicators using functions and matrices, and cultivating problem-solving skills."
+          }
+        },
+        {
+          "en": "Mathematics for AI",
+          "kr": "인공지능 수학",
+          "description": {
+            "kr": "빅데이터, 알고리즘, 최적화 등 수학 개념을 통해 인공지능의 작동 원리를 배우는 과목",
+            "en": "A subject learning the operating principles of artificial intelligence through mathematical concepts such as big data, algorithms, and optimization."
+          }
+        },
+        {
+          "en": "Workplace Mathematics",
+          "kr": "직무 수학",
+          "description": {
+            "kr": "수와 연산, 도형, 자료 해석 등을 통해 직무 수행 능력을 기르는 과목",
+            "en": "A subject cultivating job performance skills through numbers, operations, figures, and data interpretation."
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Mathematics & Culture",
+          "kr": "수학과 문화",
+          "description": {
+            "kr": "수학과 다양한 문화 영역 간의 융합을 탐구하며, 수학의 역할과 가치를 배우는 과목",
+            "en": "A subject exploring the convergence between mathematics and various cultural areas, learning the role and value of mathematics."
+          }
+        },
+        {
+          "en": "Practical Statistics",
+          "kr": "실용 통계",
+          "description": {
+            "kr": "통계적 탐구로 실생활 문제를 해결하고, 자료를 수집·분석·해석하는 능력을 기르는 과목",
+            "en": "A subject solving real-life problems through statistical inquiry and cultivating the ability to collect, analyze, and interpret data."
+          }
+        },
+        {
+          "en": "Mathematical Projects",
+          "kr": "수학과제 탐구",
+          "description": {
+            "kr": "실생활 사례와 타 교과와의 연결을 통해 수학을 해석하고, 협업과 연구 윤리를 바탕으로 스스로 주제를 설정해 탐구하는 과목",
+            "en": "A subject interpreting mathematics through real-life cases and connections with other subjects, and exploring self-set topics based on collaboration."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "subject_en": "English",
+    "subject_kr": "영어",
+    "electives": {
+      "general": [
+        {
+          "en": "English I",
+          "kr": "영어I",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "English II",
+          "kr": "영어II",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "English Reading & Writing",
+          "kr": "영어 독해와 작문",
+          "description": {
+            "kr": "영어의 듣기, 말하기, 읽기, 쓰기의 네 기능을 통합적으로 다루어 사회생활이나 학업에 필요한 의사소통 능력을 기르는 과목",
+            "en": "A subject integrating listening, speaking, reading, and writing to cultivate communication skills needed for social life or academics."
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "English Literature",
+          "kr": "영미 문학 읽기",
+          "description": {
+            "kr": "시, 희곡, 소설 등 영어로 쓰인 다양한 장르의 문학 작품 감상을 통해 작품을 비판적 창의적으로 표현하는 능력을 기르는 과목",
+            "en": "A subject cultivating the ability to express works critically and creatively through the appreciation of English literary works in various genres."
+          }
+        },
+        {
+          "en": "English Presentation & Debate",
+          "kr": "영어 발표와 토론",
+          "description": {
+            "kr": "다양한 상황에서 적절한 의사소통 전략을 활용하여 영어로 발표·토론할 수 있는 능력을 기르는 과목",
+            "en": "A subject cultivating the ability to present and debate in English by utilizing appropriate communication strategies in various situations."
+          }
+        },
+        {
+          "en": "Advanced English",
+          "kr": "심화 영어",
+          "description": {
+            "kr": "일상생활에 필요한 의사소통 능력을 심화하고 다양한 주제와 관련된 영어 이해 능력과 표현 능력을 기르는 과목",
+            "en": "A subject deepening communication skills needed for daily life and cultivating English understanding and expression skills related to various topics."
+          }
+        },
+        {
+          "en": "Advanced Reading & Writing in English",
+          "kr": "심화 영어 독해와 작문",
+          "description": {
+            "kr": "다양한 주제와 장르의 글을 읽고 이해하며 비판적인 독해 능력을 기르고 자신의 의견을 창의적으로 표현하는 종합적인 영어 문해력 향상을 위한 과목",
+            "en": "A subject for comprehensive English literacy improvement that cultivates critical reading skills by reading texts of various topics and expressing opinions creatively."
+          }
+        },
+        {
+          "en": "Workplace English",
+          "kr": "직무 영어",
+          "description": {
+            "kr": "다양한 직무와 관련하여 기본적이고 핵심적인 실무 영어 역량을 기르는 과목",
+            "en": "A subject cultivating basic and core practical English capabilities related to various duties."
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Everyday English Conversation",
+          "kr": "실생활 영어 회화",
+          "description": {
+            "kr": "실생활 상황에서 친숙하고 일반적인 주제를 듣고 이해하며, 자신의 생각이나 의견 또는 감정을 표현하는 의사소통이 가능한 듣기 말하기 능력 향상을 위한 과목",
+            "en": "A subject for improving listening and speaking skills to enable communication by understanding familiar topics in real-life situations and expressing thoughts or emotions."
+          }
+        },
+        {
+          "en": "English through Media",
+          "kr": "미디어 영어",
+          "description": {
+            "kr": "다양한 유형의 미디어에서 접하는 주제를 이해하고 다양한 미디어를 통해 얻게 되는 정보에 대해 창의적 비판적 사고 능력을 기르는 과목",
+            "en": "A subject understanding topics encountered in media and cultivating creative and critical thinking skills regarding information obtained through media."
+          }
+        },
+        {
+          "en": "English & Global Cultures",
+          "kr": "세계 문화와 영어",
+          "description": {
+            "kr": "세계 영어(World Englishes)를 통해 다양한 현상과 문화를 이해하고, 서로 다른 사고와 문화를 존중하고 세계인과 소통하는 능력을 기르는 과목",
+            "en": "A subject understanding various phenomena and cultures through World Englishes, respecting different thoughts, and communicating with global citizens."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "subject_en": "Social Studies (History & Ethics)",
+    "subject_kr": "사회(역사/도덕 포함)",
+    "electives": {
+      "general": [
+        {
+          "en": "Global Citizenship & Geography",
+          "kr": "세계시민과 지리",
+          "description": {
+            "kr": "세계의 자연환경과 문화, 글로벌 경제, 지정학적 분쟁 등 다채로운 주제를 다루며, 다양한 사회과 선택 과목의 이해에 도움되는 과목",
+            "en": "A subject covering diverse topics such as the world's natural environment, culture, and global economy, helpful for understanding social studies electives."
+          }
+        },
+        {
+          "en": "World History",
+          "kr": "세계사",
+          "description": {
+            "kr": "역사적으로 형성된 각 지역 세계의 고유한 특성을 배우고, 세계의 접촉으로 이루어진 교류·갈등 등의 상호 연관성을 배우는 과목",
+            "en": "A subject learning the unique characteristics of each regional world formed historically and their mutual relationships such as exchange and conflict."
+          }
+        },
+        {
+          "en": "Society & Culture",
+          "kr": "사회와 문화",
+          "description": {
+            "kr": "사회현상에 대한 개념과 이론을 배우고, 사회 변동 및 사회 불평등 현상, 문화 다양성 등 공동체가 직면하고 있는 다양한 과제를 탐구하는 과목",
+            "en": "A subject learning concepts and theories about social phenomena and exploring tasks facing the community like social change and inequality."
+          }
+        },
+        {
+          "en": "Modern Society & Ethics",
+          "kr": "현대사회와 윤리",
+          "description": {
+            "kr": "동 서양의 윤리 이론과 사회사상을 바탕으로 탐구하고, 도덕적 탐구 능력과 윤리적 성찰 및 실천 능력을 기르는 과목",
+            "en": "A subject exploring based on Eastern/Western ethical theories and cultivating moral inquiry skills and ethical reflection."
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Korean Geography",
+          "kr": "한국지리 탐구",
+          "description": {
+            "kr": "우리 국토 및 지역이 당면한 이슈와 쟁점을 탐구, 지리정보를 분석하고 대안을 탐구하는 과목",
+            "en": "A subject exploring issues facing our land and regions, analyzing geographic information, and exploring alternatives."
+          }
+        },
+        {
+          "en": "Exploring Future Cities",
+          "kr": "도시의 미래 탐구",
+          "description": {
+            "kr": "도시를 중심으로 건축, 소비 공간, 스마트 도시, 부동산 등 다양한 주제를 깊이 있게 탐구하는 과목",
+            "en": "A subject deeply exploring various topics centered on cities, such as architecture, consumption spaces, smart cities, and real estate."
+          }
+        },
+        {
+          "en": "East Asian History",
+          "kr": "동아시아 역사 기행",
+          "description": {
+            "kr": "동아시아 지역에서 전개된 교류와 갈등, 침략과 저항, 공존과 평화를 위한 동아시아 갈등의 평화적 해결 방안을 탐구하는 과목",
+            "en": "A subject exploring exchanges, conflicts, and peaceful solutions in the East Asian region for coexistence and peace."
+          }
+        },
+        {
+          "en": "Politics",
+          "kr": "정치",
+          "description": {
+            "kr": "정치 현상을 분석하는 데 필요한 개념과 원리를 배우고, 정치적 쟁점 해결 과정에 요구되는 기능과 역량을 기르는 과목",
+            "en": "A subject learning concepts to analyze political phenomena and cultivating capabilities required for resolving political issues."
+          }
+        },
+        {
+          "en": "Civic Life & Law",
+          "kr": "법과 사회",
+          "description": {
+            "kr": "여러 가지 법적 문제를 탐구 분석하며, 민주시민으로서 사회 논의에 참여할 수 있는 능력을 기르는 과목",
+            "en": "A subject exploring and analyzing legal problems and cultivating the ability to participate in social discussions as a democratic citizen."
+          }
+        },
+        {
+          "en": "Economics",
+          "kr": "경제",
+          "description": {
+            "kr": "경제학의 기본 원리와 이론 체계를 배우고, 현실의 경제 문제를 합리적으로 해결하고 경제 환경의 변화와 대응 방향을 탐구하는 과목",
+            "en": "A subject learning basic economic principles and exploring rational solutions to economic problems and responses to environmental changes."
+          }
+        },
+        {
+          "en": "Ethics & Thought",
+          "kr": "윤리와 사상",
+          "description": {
+            "kr": "한국 및 동·서양의 윤리 사상과 사회사상의 이론과 의미를 배우고, 윤리적 탐구와 성찰 및 문제 해결 능력을 기르는 과목",
+            "en": "A subject learning the theories of Korean, Eastern, and Western ethical thoughts and cultivating ethical inquiry and problem-solving skills."
+          }
+        },
+        {
+          "en": "Humanities & Ethics",
+          "kr": "인문학과 윤리",
+          "description": {
+            "kr": "다양한 고전을 통해 몸과 마음, 감정을 소유한 자기 자신을 이해하고, 타인과 적절한 관계를 맺기 위해 요구되는 우정, 사랑, 배려 등의 가치 및 평등, 책임, 정의 등의 의미를 배우는 과목",
+            "en": "A subject understanding oneself through classics and learning values like friendship, love, care, equality, responsibility, and justice for relationships."
+          }
+        },
+        {
+          "en": "Introduction to International Relations",
+          "kr": "국제 관계의 이해",
+          "description": {
+            "kr": "국제 사회가 직면하고 있는 중요한 이슈들에 대한 지식을 배우고, 각각의 이슈들에 대한 합리적인 의사 결정 역량을 기르는 과목",
+            "en": "A subject learning about important international issues and cultivating rational decision-making capabilities for each issue."
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Travel & Tourism Geography",
+          "kr": "여행지리",
+          "description": {
+            "kr": "여행이라는 주제를 통해 세계 여러 지역의 자연적, 문화적 다양성을 배우고, 다양한 주제 및 전공과의 융합으로 바람직한 여행의 의미를 탐구하는 과목",
+            "en": "A subject learning the natural and cultural diversity of various world regions through travel and exploring the meaning of desirable travel."
+          }
+        },
+        {
+          "en": "Exploring Modern History",
+          "kr": "역사로 탐구하는 현대 세계",
+          "description": {
+            "kr": "제1·2차 세계 대전 이후 현대 세계의 과제를 역사적 맥락으로 탐구하고, 다양한 형태의 역사 자료를 분석 해석하는 능력을 기르는 과목",
+            "en": "A subject exploring modern world tasks after the World Wars in a historical context and cultivating the ability to analyze historical data."
+          }
+        },
+        {
+          "en": "Contemporary Social Issues",
+          "kr": "사회문제 탐구",
+          "description": {
+            "kr": "일상생활에서 접하는 사회문제와 사회의 변화로 인해 발생하는 사회문제에 대해 해결 방안을 탐구하는 과목",
+            "en": "A subject exploring solutions to social problems encountered in daily life and those arising from social changes."
+          }
+        },
+        {
+          "en": "Financial Literacy for Life",
+          "kr": "금융과 경제생활",
+          "description": {
+            "kr": "금융에 대한 기본적인 지식을 배우고, 자산 관리에 대한 합리적인 의사 결정 역량을 기르는 과목",
+            "en": "A subject learning basic financial knowledge and cultivating rational decision-making capabilities for asset management."
+          }
+        },
+        {
+          "en": "Exploring Ethical Dilemmas",
+          "kr": "윤리문제 탐구",
+          "description": {
+            "kr": "동·서양의 윤리 이론, 사회사상, 최신 도덕 심리학 등의 연구 성과에 기반을 두고 윤리적 쟁점들을 구체적인 사례로 탐구하는 과목",
+            "en": "A subject exploring ethical issues as concrete cases based on Eastern/Western ethical theories, social thought, and moral psychology."
+          }
+        },
+        {
+          "en": "Climate & Sustainability",
+          "kr": "기후변화와 지속가능한 세계",
+          "description": {
+            "kr": "기후변화를 둘러싼 다양한 문제와 쟁점을 기후정의 관점에서 이해하고, 적정기술, 순환경제, 에너지 전환 등 기후 변화 문제 해결을 위한 역량을 기르는 과목",
+            "en": "A subject understanding climate change issues from a climate justice perspective and cultivating capabilities for solutions like appropriate technology and circular economy."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "subject_en": "Science",
+    "subject_kr": "과학",
+    "electives": {
+      "general": [
+        {
+          "en": "Physics",
+          "kr": "물리학",
+          "description": {
+            "kr": "힘, 에너지, 전기, 빛 등 자연 현상과 첨단 기술의 원리를 배우고, 문제 해결에 필요한 물리적 소양을 기르는 과목",
+            "en": "A subject learning principles of natural phenomena and advanced technology like force and energy, cultivating physical literacy."
+          }
+        },
+        {
+          "en": "Chemistry",
+          "kr": "화학",
+          "description": {
+            "kr": "일상생활이나 자연 현상에 적용되는 물질 세계의 기본 법칙을 배우고, 문제를 해결할 때 필요한 화학적 소양을 기르는 과목",
+            "en": "A subject learning basic laws of the material world applied to daily life and cultivating chemical literacy for problem-solving."
+          }
+        },
+        {
+          "en": "Life Science",
+          "kr": "생명과학",
+          "description": {
+            "kr": "생명과학 분야의 기본 개념을 배우고, 다양한 생명 현상에 대한 의문점 해결에 필요한 소양을 기르는 과목",
+            "en": "A subject learning basic concepts of life science and cultivating literacy to solve questions about various life phenomena."
+          }
+        },
+        {
+          "en": "Earth Science",
+          "kr": "지구과학",
+          "description": {
+            "kr": "지구시스템과학과 행성우주과학 분야의 기본 개념을 배우고, 지구와 우주에 관한 현상을 배우는 과목",
+            "en": "A subject learning basic concepts of earth system science and planetary/space science, and learning phenomena related to the earth and universe."
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Mechanics & Energy",
+          "kr": "역학과 에너지",
+          "description": {
+            "kr": "물체의 운동과 에너지, 열 현상과 탄성파 등을 중심으로 자연 현상을 배우고, 물리적 사고력을 기르는 과목",
+            "en": "A subject learning natural phenomena centered on object motion, energy, and thermal phenomena, and cultivating physical thinking skills."
+          }
+        },
+        {
+          "en": "Electromagnetic Forces & Matter",
+          "kr": "전자기와 양자",
+          "description": {
+            "kr": "전기·자기 현상, 빛의 성질, 미시 세계의 구조를 탐구하며 첨단 기술의 원리를 배우고, 창의력을 키우는 과목",
+            "en": "A subject exploring electric/magnetic phenomena and the microscopic world, learning principles of advanced technology, and fostering creativity."
+          }
+        },
+        {
+          "en": "Matter & Energy",
+          "kr": "물질과 에너지",
+          "description": {
+            "kr": "물질 변화와 에너지의 관계를 중심으로 화학 개념과 법칙을 탐구하는 과목",
+            "en": "A subject exploring chemical concepts and laws centered on the relationship between material changes and energy."
+          }
+        },
+        {
+          "en": "Chemical Bonding & Reactions",
+          "kr": "화학 반응의 세계",
+          "description": {
+            "kr": "다양한 화학 반응과 관련된 지식과 탐구 방법을 배우고, 화학 관련 문제를 해결하는 능력을 기르는 과목",
+            "en": "A subject learning knowledge and inquiry methods related to chemical reactions and cultivating the ability to solve chemistry-related problems."
+          }
+        },
+        {
+          "en": "Cell Biology & Metabolism",
+          "kr": "세포와 물질대사",
+          "description": {
+            "kr": "세포와 생명체에서 일어나는 다양한 생명 현상을 배우고, 다양한 생명 현상에 대한 의문점을 해결하는 생명과학의 학문적 소양을 기르는 과목",
+            "en": "A subject learning various life phenomena in cells and living organisms and cultivating academic literacy in life science."
+          }
+        },
+        {
+          "en": "Inheritance of Life",
+          "kr": "생물의 유전",
+          "description": {
+            "kr": "생물의 유전 관련 다양한 생명 현상을 배우고, 다양한 생명 현상에 대한 의문점을 해결하는 생명과학의 학문적 소양을 기르는 과목",
+            "en": "A subject learning various life phenomena related to heredity and cultivating academic literacy in life science."
+          }
+        },
+        {
+          "en": "Earth System Science",
+          "kr": "지구시스템과학",
+          "description": {
+            "kr": "지구시스템의 구성 및 구성 권역들의 상호작용에 대한 개념을 배우고, 시 공간적으로 밀접하게 관련된 생물권을 포함한 지구시스템 관련 현상을 탐구하는 과목",
+            "en": "A subject learning concepts of the earth system's composition and interactions, exploring related phenomena including the biosphere."
+          }
+        },
+        {
+          "en": "Planetary & Space Science",
+          "kr": "행성우주과학",
+          "description": {
+            "kr": "행성 지구를 비롯한 천체 및 우주과학 관련 개념을 배우고, 시·공간적으로 밀접하게 관련된 지구 행성계를 포함한 천체와 우주 관련 현상을 탐구하는 과목",
+            "en": "A subject learning concepts related to celestial bodies and space science, exploring phenomena related to the universe and Earth's planetary system."
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "History & Culture of Science",
+          "kr": "과학의 역사와 문화",
+          "description": {
+            "kr": "과학과 사회 문화의 상호작용을 다양한 역사적 사례를 통해 탐구하며 미래 사회를 이끄는 통합적 과학 소양을 기르는 과목",
+            "en": "A subject exploring the interaction between science and social culture through historical cases and cultivating integrated scientific literacy."
+          }
+        },
+        {
+          "en": "Climate Change & Ecology",
+          "kr": "기후변화와 환경생태",
+          "description": {
+            "kr": "기후변화가 초래하는 환경과 생태계의 변화를 이해하고, 기후위기에 대응하는 인류의 노력을 탐색하는 과목",
+            "en": "A subject understanding environmental and ecosystem changes caused by climate change and exploring human efforts to respond to the climate crisis."
+          }
+        },
+        {
+          "en": "Integrated Science Inquiry",
+          "kr": "융합과학 탐구",
+          "description": {
+            "kr": "빅데이터, 인공지능, 모의실험 등을 이용한 탐구 활동을 통해 융합적 사고 및 탐구능력을 기르는 과목",
+            "en": "A subject cultivating convergent thinking and inquiry skills through inquiry activities using big data, AI, and simulations."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "subject_en": "Physical Education",
+    "subject_kr": "체육",
+    "electives": {
+      "general": [
+        {
+          "en": "Physical Education 1",
+          "kr": "체육1",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Physical Education 2",
+          "kr": "체육2",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Exercise & Health",
+          "kr": "운동과 건강",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Sports & Culture",
+          "kr": "스포츠 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Sports & Science",
+          "kr": "스포츠 과학",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Sports & Life 1",
+          "kr": "스포츠 생활1",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Sports & Life 2",
+          "kr": "스포츠 생활2",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "subject_en": "Arts",
+    "subject_kr": "예술",
+    "electives": {
+      "general": [
+        {
+          "en": "Music",
+          "kr": "음악",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Art",
+          "kr": "미술",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Theater",
+          "kr": "연극",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Music Performance & Composition",
+          "kr": "음악 연주와 창작",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Music Appreciation & Critique",
+          "kr": "음악 감상과 비평",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Studio Art",
+          "kr": "미술 창작",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Art Appreciation & Critique",
+          "kr": "미술 감상과 비평",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Music & Media",
+          "kr": "음악과 미디어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Art & Media",
+          "kr": "미술과 매체",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "subject_en": "Technology & Home Economics",
+    "subject_kr": "기술·가정",
+    "electives": {
+      "general": [
+        {
+          "en": "Technology and Home Economics",
+          "kr": "기술·가정",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "The World of Robotics & Engineering",
+          "kr": "로봇과 공학세계",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Exploring Human Ecology",
+          "kr": "생활과학 탐구",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Creative Engineering",
+          "kr": "창의 공학 설계",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Introduction to Intellectual Property",
+          "kr": "지식 재산 일반",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Life Planning & Independent Living",
+          "kr": "생애 설계와 자립",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Child Development & Parenting",
+          "kr": "아동발달과 부모",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "subject_en": "Informatics",
+    "subject_kr": "정보",
+    "electives": {
+      "general": [
+        {
+          "en": "Informatics",
+          "kr": "정보",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Artificial Intelligence 101",
+          "kr": "인공지능 기초",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Data Science",
+          "kr": "데이터 과학",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Software & Life",
+          "kr": "소프트웨어와 생활",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "subject_en": "Foreign Language",
+    "subject_kr": "제2외국어",
+    "electives": {
+      "general": [
+        {
+          "en": "German",
+          "kr": "독일어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "French",
+          "kr": "프랑스어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Spanish",
+          "kr": "스페인어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Chinese",
+          "kr": "중국어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Japanese",
+          "kr": "일본어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Russian",
+          "kr": "러시아어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Arabic",
+          "kr": "아랍어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Vietnamese",
+          "kr": "베트남어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Conversation: German",
+          "kr": "독일어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: French",
+          "kr": "프랑스어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: Spanish",
+          "kr": "스페인어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: Chinese",
+          "kr": "중국어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: Japanese",
+          "kr": "일본어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: Russian",
+          "kr": "러시아어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: Arabic",
+          "kr": "아랍어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Conversation: Vietnamese",
+          "kr": "베트남어 회화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: German",
+          "kr": "심화 독일어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: French",
+          "kr": "심화 프랑스어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: Spanish",
+          "kr": "심화 스페인어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: Chinese",
+          "kr": "심화 중국어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: Japanese",
+          "kr": "심화 일본어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: Russian",
+          "kr": "심화 러시아어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: Arabic",
+          "kr": "심화 아랍어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Advanced: Vietnamese",
+          "kr": "심화 베트남어",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Culture of German-Speaking Countries",
+          "kr": "독일어권 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Culture of French-Speaking Countries",
+          "kr": "프랑스어권 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Culture of Spanish-Speaking Countries",
+          "kr": "스페인어권 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Chinese Culture",
+          "kr": "중국 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Japanese Culture",
+          "kr": "일본 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Russian Culture",
+          "kr": "러시아 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Arabic Culture",
+          "kr": "아랍 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Vietnamese Culture",
+          "kr": "베트남 문화",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "subject_en": "Classical Chinese",
+    "subject_kr": "한문",
+    "electives": {
+      "general": [
+        {
+          "en": "Classical Chinese",
+          "kr": "한문",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Reading Classical Texts in Chinese Characters",
+          "kr": "한문 고전 읽기",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": [
+        {
+          "en": "Chinese Characters in the Korean Language",
+          "kr": "언어생활과 한자",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "subject_en": "Liberal Arts",
+    "subject_kr": "교양",
+    "electives": {
+      "general": [
+        {
+          "en": "Career & Vocation",
+          "kr": "진로와 직업",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Ecology & the Environment",
+          "kr": "생태와 환경",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Human Nature & Philosophy",
+          "kr": "인간과 철학",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Logic",
+          "kr": "논리와 사고",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Human Behavior & Psychology",
+          "kr": "인간과 심리",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Foundations of Education",
+          "kr": "교육의 이해",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Religion & Human Life",
+          "kr": "삶과 종교",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Health & Wellness",
+          "kr": "보건",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "career": [
+        {
+          "en": "Humans & Economic Activity",
+          "kr": "인간과 경제활동",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        },
+        {
+          "en": "Critical Writing",
+          "kr": "논술",
+          "description": {
+            "en": null,
+            "kr": null
+          }
+        }
+      ],
+      "interdisciplinary": []
+    }
+  }
+]

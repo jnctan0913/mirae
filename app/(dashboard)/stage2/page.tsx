@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { storage } from '@/lib/utils/storage';
-import coursesData from '@/lib/data/courses.json';
+import coursesData from '@/lib/data/courses-descriptions.json';
 
 type CourseCategory = 'general' | 'career' | 'interdisciplinary';
 
@@ -14,6 +14,10 @@ type CategoryFilter = CourseCategory | 'all';
 interface CourseLabel {
   en: string;
   kr: string;
+  description?: {
+    en: string | null;
+    kr: string | null;
+  };
 }
 
 interface CourseSubject {
@@ -290,6 +294,33 @@ export default function Stage2Page() {
     : 'Complete Stages 0/1 to see suggestions.';
   const suggestionToggleLabel = language === 'ko' ? '??' : 'Collapse';
   const suggestionToggleOpenLabel = language === 'ko' ? '???' : 'Expand';
+  const infoLabel = language === 'ko' ? '?? ??' : 'View description';
+  const suggestionSubtitle = language === 'ko'
+    ? 'AI ??? Stage 0/1 ???? ?? ??? ???? ?????.'
+    : 'Suggestions are based on Stages 0/1 and your current selections.';
+
+  const getDescription = (course: CourseLabel) => {
+    const description = language === 'ko' ? course.description?.kr : course.description?.en;
+    return description ?? null;
+  };
+
+  const renderInfoButton = (description: string | null) => {
+    if (!description) return null;
+    return (
+      <div className="relative group">
+        <button
+          type="button"
+          aria-label={infoLabel}
+          className="h-6 w-6 rounded-full border border-slate-200 text-xs font-bold text-slate-500 bg-white flex items-center justify-center hover:text-slate-700"
+        >
+          i
+        </button>
+        <div className="pointer-events-none absolute right-0 top-7 z-10 w-64 rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-lg opacity-0 transition-opacity group-hover:opacity-100">
+          {description}
+        </div>
+      </div>
+    );
+  };
 
   const handleSave = () => {
     // Save to database
@@ -304,7 +335,10 @@ export default function Stage2Page() {
 
         <div className="bg-white rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-slate-800">{suggestionTitle}</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-800">{suggestionTitle}</h2>
+              <p className="text-xs text-slate-500 mt-1">{suggestionSubtitle}</p>
+            </div>
             <button
               type="button"
               onClick={() => setShowSuggestions((prev) => !prev)}
@@ -333,8 +367,13 @@ export default function Stage2Page() {
                         key={suggestion.key}
                         className="rounded-lg border border-slate-200 bg-slate-50 p-3"
                       >
-                        <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
-                        <p className="text-xs text-slate-500">{subjectLabel}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
+                            <p className="text-xs text-slate-500">{subjectLabel}</p>
+                          </div>
+                          {renderInfoButton(getDescription(suggestion.label))}
+                        </div>
                         {suggestion.reasons.size > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {Array.from(suggestion.reasons).map((reason) => (
@@ -486,15 +525,19 @@ export default function Stage2Page() {
                               course.en
                             );
                             const courseLabel = language === 'ko' ? course.kr : course.en;
+                            const description = getDescription(course);
                             return (
                               <div
                                 key={key}
                                 className="flex items-center justify-between gap-2 bg-gray-100 p-3 rounded-lg"
                               >
-                                <span className="text-sm font-medium text-slate-800">
-                                  {courseLabel}
-                                </span>
-                                <div className="flex gap-2">
+                                <div>
+                                  <span className="text-sm font-medium text-slate-800">
+                                    {courseLabel}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {renderInfoButton(description)}
                                   <button
                                     type="button"
                                     onClick={() => addToAnchor(key)}
@@ -542,13 +585,16 @@ export default function Stage2Page() {
                           <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
                           <p className="text-xs text-slate-500">{subjectLabel}</p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeSelection(key)}
-                          className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-blue-200 text-blue-700"
-                        >
-                          {removeLabel}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {renderInfoButton(getDescription(course))}
+                          <button
+                            type="button"
+                            onClick={() => removeSelection(key)}
+                            className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-blue-200 text-blue-700"
+                          >
+                            {removeLabel}
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -576,13 +622,16 @@ export default function Stage2Page() {
                           <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
                           <p className="text-xs text-slate-500">{subjectLabel}</p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeSelection(key)}
-                          className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-yellow-200 text-amber-700"
-                        >
-                          {removeLabel}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {renderInfoButton(getDescription(course))}
+                          <button
+                            type="button"
+                            onClick={() => removeSelection(key)}
+                            className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-yellow-200 text-amber-700"
+                          >
+                            {removeLabel}
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
