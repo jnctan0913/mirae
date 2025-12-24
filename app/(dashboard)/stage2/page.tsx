@@ -1,35 +1,135 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
+import coursesData from '@/lib/data/courses.json';
 
-const subjects = [
-  { id: 'math', label: { ko: '수학', en: 'Math' } },
-  { id: 'english', label: { ko: '영어', en: 'English' } },
-  { id: 'korean-history', label: { ko: '한국사', en: 'Korean History' } },
-  { id: 'physics', label: { ko: '물리학', en: 'Physics' } },
-  { id: 'chemistry', label: { ko: '화학', en: 'Chemistry' } },
-  { id: 'biology', label: { ko: '생명과학', en: 'Biology' } },
-  { id: 'economics', label: { ko: '경제', en: 'Economics' } },
-  { id: 'law', label: { ko: '정치와 법', en: 'Politics & Law' } },
-  { id: 'social', label: { ko: '사회문화', en: 'Social Studies' } },
-  { id: 'art', label: { ko: '미술', en: 'Art' } },
-  { id: 'music', label: { ko: '음악', en: 'Music' } },
-  { id: 'pe', label: { ko: '체육', en: 'Physical Education' } },
-  { id: 'design-thinking', label: { ko: '디자인 사고', en: 'Design Thinking' } },
-  { id: 'social-issues', label: { ko: '사회문제 탐구', en: 'Social Issues' } },
-  { id: 'stats', label: { ko: '통계', en: 'Statistics' } },
-  { id: 'programming', label: { ko: '프로그래밍', en: 'Programming' } },
-];
+type CourseCategory = 'general' | 'career' | 'interdisciplinary';
+
+interface CourseLabel {
+  en: string;
+  kr: string;
+}
+
+interface CourseSubject {
+  id: number;
+  subject_en: string;
+  subject_kr: string;
+  electives: Record<CourseCategory, CourseLabel[]>;
+}
+
+interface CourseLookupItem extends CourseLabel {
+  subjectEn: string;
+  subjectKr: string;
+  category: CourseCategory;
+}
+
+const categories: CourseCategory[] = ['general', 'career', 'interdisciplinary'];
+const categoryLabels: Record<CourseCategory, { en: string; ko: string }> = {
+  general: { en: 'General', ko: '??' },
+  career: { en: 'Career', ko: '??' },
+  interdisciplinary: { en: 'Interdisciplinary', ko: '??' },
+};
+
+const maxBucketSize = 6;
+const courses = coursesData as CourseSubject[];
+
+const createCourseKey = (
+  subjectEn: string,
+  category: CourseCategory,
+  courseEn: string
+) => `${subjectEn}::${category}::${courseEn}`;
 
 export default function Stage2Page() {
   const [anchor, setAnchor] = useState<string[]>([]);
   const [signal, setSignal] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const { completeStage } = useUserStore();
   const { language, t } = useI18n();
+  const selectedKeys = useMemo(() => new Set([...anchor, ...signal]), [anchor, signal]);
+  const normalizedSearch = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
+  const filteredCourses = useMemo<CourseSubject[]>(() => {
+    if (!normalizedSearch) return courses;
+
+    return courses
+      .map((subject) => {
+        const subjectMatches =
+          subject.subject_en.toLowerCase().includes(normalizedSearch) ||
+          subject.subject_kr.toLowerCase().includes(normalizedSearch);
+
+        const filteredElectives = categories.reduce(
+          (acc, category) => {
+            if (subjectMatches) {
+              acc[category] = subject.electives[category];
+            } else {
+              acc[category] = subject.electives[category].filter((course) => {
+                return (
+                  course.en.toLowerCase().includes(normalizedSearch) ||
+                  course.kr.toLowerCase().includes(normalizedSearch)
+                );
+              });
+            }
+            return acc;
+          },
+          {} as Record<CourseCategory, CourseLabel[]>
+        );
+
+        const hasMatches = categories.some((category) => filteredElectives[category].length > 0);
+        if (!hasMatches) return null;
+
+        return {
+          ...subject,
+          electives: filteredElectives,
+        };
+      })
+      .filter((subject): subject is CourseSubject => subject !== null);
+  }, [normalizedSearch]);
+  const courseLookup = useMemo(() => {
+    const lookup = new Map<string, CourseLookupItem>();
+    courses.forEach((subject) => {
+      categories.forEach((category) => {
+        subject.electives[category].forEach((course) => {
+          const key = createCourseKey(subject.subject_en, category, course.en);
+          lookup.set(key, {
+            ...course,
+            subjectEn: subject.subject_en,
+            subjectKr: subject.subject_kr,
+            category,
+          });
+        });
+      });
+    });
+    return lookup;
+  }, []);
+
+  const addToAnchor = (key: string) => {
+    setSignal((prev) => prev.filter((item) => item !== key));
+    setAnchor((prev) => {
+      if (prev.includes(key) || prev.length >= maxBucketSize) return prev;
+      return [...prev, key];
+    });
+  };
+
+  const addToSignal = (key: string) => {
+    setAnchor((prev) => prev.filter((item) => item !== key));
+    setSignal((prev) => {
+      if (prev.includes(key) || prev.length >= maxBucketSize) return prev;
+      return [...prev, key];
+    });
+  };
+
+  const removeSelection = (key: string) => {
+    setAnchor((prev) => prev.filter((item) => item !== key));
+    setSignal((prev) => prev.filter((item) => item !== key));
+  };
+
+  const addToAnchorLabel = language === 'ko' ? 'Anchor에 추가' : 'Add to Anchor';
+  const addToSignalLabel = language === 'ko' ? 'Signal에 추가' : 'Add to Signal';
+  const removeLabel = language === 'ko' ? '제거' : 'Remove';
+  const searchPlaceholder = language === 'ko' ? '과목 검색' : 'Search courses';
 
   const handleSave = () => {
     // Save to database
@@ -46,23 +146,86 @@ export default function Stage2Page() {
           {/* Available subjects */}
           <div className="bg-white rounded-xl p-6">
             <h2 className="font-bold mb-4">{t('stage2Subjects')}</h2>
-            <div className="space-y-2">
-              {subjects
-                .filter((s) => !anchor.includes(s.id) && !signal.includes(s.id))
-                .map((subject) => (
-                  <div
-                    key={subject.id}
-                    className="bg-gray-100 p-3 rounded-lg cursor-pointer hover:bg-gray-200 transition"
-                    onClick={() => {
-                      // Simple click to add - will be replaced with drag-drop
-                      if (anchor.length < 6) {
-                        setAnchor([...anchor, subject.id]);
-                      }
-                    }}
-                  >
-                    {subject.label[language]}
+            <div className="mb-4">
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={searchPlaceholder}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              />
+            </div>
+            <div className="space-y-6">
+              {filteredCourses.map((subject) => {
+                const subjectLabel = language === 'ko' ? subject.subject_kr : subject.subject_en;
+                return (
+                  <div key={subject.id}>
+                    <h3 className="text-sm font-semibold text-slate-700">{subjectLabel}</h3>
+                    {categories.map((category) => {
+                      const items = subject.electives[category];
+                      if (!items.length) return null;
+
+                      const availableItems = items.filter((course) => {
+                        const key = createCourseKey(subject.subject_en, category, course.en);
+                        return !selectedKeys.has(key);
+                      });
+
+                      if (!availableItems.length) return null;
+
+                      const categoryLabel =
+                        language === 'ko'
+                          ? categoryLabels[category].ko
+                          : categoryLabels[category].en;
+
+                      return (
+                        <div key={category} className="mt-3">
+                          <p className="text-xs uppercase tracking-wide text-slate-500">
+                            {categoryLabel}
+                          </p>
+                          <div className="mt-2 space-y-2">
+                            {availableItems.map((course) => {
+                              const key = createCourseKey(
+                                subject.subject_en,
+                                category,
+                                course.en
+                              );
+                              const courseLabel = language === 'ko' ? course.kr : course.en;
+                              return (
+                                <div
+                                  key={key}
+                                  className="flex items-center justify-between gap-2 bg-gray-100 p-3 rounded-lg"
+                                >
+                                  <span className="text-sm font-medium text-slate-800">
+                                    {courseLabel}
+                                  </span>
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => addToAnchor(key)}
+                                      disabled={anchor.length >= maxBucketSize}
+                                      className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700 disabled:opacity-50"
+                                    >
+                                      {addToAnchorLabel}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => addToSignal(key)}
+                                      disabled={signal.length >= maxBucketSize}
+                                      className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700 disabled:opacity-50"
+                                    >
+                                      {addToSignalLabel}
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                );
+              })}
             </div>
           </div>
 
@@ -70,15 +233,28 @@ export default function Stage2Page() {
           <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-6">
             <h2 className="font-bold mb-4">{t('stage2Anchor')}</h2>
             <div className="space-y-2 min-h-[200px]">
-              {anchor.map((subjectId) => {
-                const subject = subjects.find((s) => s.id === subjectId);
+              {anchor.map((key) => {
+                const course = courseLookup.get(key);
+                if (!course) return null;
+                const courseLabel = language === 'ko' ? course.kr : course.en;
+                const subjectLabel = language === 'ko' ? course.subjectKr : course.subjectEn;
                 return (
-                <div
-                  key={subjectId}
-                  className="bg-white p-3 rounded-lg border-2 border-blue-300"
-                >
-                  {subject?.label[language]}
-                </div>
+                  <div
+                    key={key}
+                    className="bg-white p-3 rounded-lg border-2 border-blue-300 flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
+                      <p className="text-xs text-slate-500">{subjectLabel}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSelection(key)}
+                      className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-blue-200 text-blue-700"
+                    >
+                      {removeLabel}
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -91,15 +267,28 @@ export default function Stage2Page() {
           <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6">
             <h2 className="font-bold mb-4">{t('stage2Signal')}</h2>
             <div className="space-y-2 min-h-[200px]">
-              {signal.map((subjectId) => {
-                const subject = subjects.find((s) => s.id === subjectId);
+              {signal.map((key) => {
+                const course = courseLookup.get(key);
+                if (!course) return null;
+                const courseLabel = language === 'ko' ? course.kr : course.en;
+                const subjectLabel = language === 'ko' ? course.subjectKr : course.subjectEn;
                 return (
-                <div
-                  key={subjectId}
-                  className="bg-white p-3 rounded-lg border-2 border-yellow-300"
-                >
-                  {subject?.label[language]}
-                </div>
+                  <div
+                    key={key}
+                    className="bg-white p-3 rounded-lg border-2 border-yellow-300 flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
+                      <p className="text-xs text-slate-500">{subjectLabel}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSelection(key)}
+                      className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-yellow-200 text-amber-700"
+                    >
+                      {removeLabel}
+                    </button>
+                  </div>
                 );
               })}
             </div>

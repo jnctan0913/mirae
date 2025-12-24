@@ -1,0 +1,294 @@
+[
+  {
+    "id": 1,
+    "subject_en": "Korean Language",
+    "subject_kr": "국어",
+    "electives": {
+      "general": [
+        { "en": "Speech & Language", "kr": "화법과 언어" },
+        { "en": "Reading & Writing", "kr": "독서와 작문" },
+        { "en": "Literature", "kr": "문학" }
+      ],
+      "career": [
+        { "en": "Thematic Reading", "kr": "주제 탐구 독서" },
+        { "en": "Literature & Film", "kr": "문학과 영상" },
+        { "en": "Workplace Communication", "kr": "직무 의사소통" }
+      ],
+      "interdisciplinary": [
+        { "en": "Book Discussions & Writing", "kr": "독서 토론과 글쓰기" },
+        { "en": "Media Communication", "kr": "매체 의사소통" },
+        { "en": "Exploring Language in Everyday Life", "kr": "언어생활 탐구" }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "subject_en": "Mathematics",
+    "subject_kr": "수학",
+    "electives": {
+      "general": [
+        { "en": "Algebra", "kr": "대수" },
+        { "en": "Calculus I", "kr": "미적분I" },
+        { "en": "Probability & Statistics", "kr": "확률과 통계" }
+      ],
+      "career": [
+        { "en": "Geometry", "kr": "기하" },
+        { "en": "Calculus II", "kr": "미적분II" },
+        { "en": "Mathematics in Economics", "kr": "경제 수학" },
+        { "en": "Mathematics for AI", "kr": "인공지능 수학" },
+        { "en": "Workplace Mathematics", "kr": "직무 수학" }
+      ],
+      "interdisciplinary": [
+        { "en": "Mathematics & Culture", "kr": "수학과 문화" },
+        { "en": "Practical Statistics", "kr": "실용 통계" },
+        { "en": "Mathematical Projects", "kr": "수학과제 탐구" }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "subject_en": "English",
+    "subject_kr": "영어",
+    "electives": {
+      "general": [
+        { "en": "English I", "kr": "영어I" },
+        { "en": "English II", "kr": "영어II" },
+        { "en": "English Reading & Writing", "kr": "영어 독해와 작문" }
+      ],
+      "career": [
+        { "en": "English Literature", "kr": "영미 문학 읽기" },
+        { "en": "English Presentation & Debate", "kr": "영어 발표와 토론" },
+        { "en": "Advanced English", "kr": "심화 영어" },
+        { "en": "Advanced Reading & Writing in English", "kr": "심화 영어 독해와 작문" },
+        { "en": "Workplace English", "kr": "직무 영어" }
+      ],
+      "interdisciplinary": [
+        { "en": "Everyday English Conversation", "kr": "실생활 영어 회화" },
+        { "en": "English through Media", "kr": "미디어 영어" },
+        { "en": "English & Global Cultures", "kr": "세계 문화와 영어" }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "subject_en": "Social Studies (History & Ethics)",
+    "subject_kr": "사회(역사/도덕 포함)",
+    "electives": {
+      "general": [
+        { "en": "Global Citizenship & Geography", "kr": "세계시민과 지리" },
+        { "en": "World History", "kr": "세계사" },
+        { "en": "Society & Culture", "kr": "사회와 문화" },
+        { "en": "Modern Society & Ethics", "kr": "현대사회와 윤리" }
+      ],
+      "career": [
+        { "en": "Korean Geography", "kr": "한국지리 탐구" },
+        { "en": "Exploring Future Cities", "kr": "도시의 미래 탐구" },
+        { "en": "East Asian History", "kr": "동아시아 역사 기행" },
+        { "en": "Politics", "kr": "정치" },
+        { "en": "Civic Life & Law", "kr": "법과 사회" },
+        { "en": "Economics", "kr": "경제" },
+        { "en": "Ethics & Thought", "kr": "윤리와 사상" },
+        { "en": "Humanities & Ethics", "kr": "인문학과 윤리" },
+        { "en": "Introduction to International Relations", "kr": "국제 관계의 이해" }
+      ],
+      "interdisciplinary": [
+        { "en": "Travel & Tourism Geography", "kr": "여행지리" },
+        { "en": "Exploring Modern History", "kr": "역사로 탐구하는 현대 세계" },
+        { "en": "Contemporary Social Issues", "kr": "사회문제 탐구" },
+        { "en": "Financial Literacy for Life", "kr": "금융과 경제생활" },
+        { "en": "Exploring Ethical Dilemmas", "kr": "윤리문제 탐구" },
+        { "en": "Climate & Sustainability", "kr": "기후변화와 지속가능한 세계" }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "subject_en": "Science",
+    "subject_kr": "과학",
+    "electives": {
+      "general": [
+        { "en": "Physics", "kr": "물리학" },
+        { "en": "Chemistry", "kr": "화학" },
+        { "en": "Life Science", "kr": "생명과학" },
+        { "en": "Earth Science", "kr": "지구과학" }
+      ],
+      "career": [
+        { "en": "Mechanics & Energy", "kr": "역학과 에너지" },
+        { "en": "Electromagnetic Forces & Matter", "kr": "전자기와 양자" },
+        { "en": "Matter & Energy", "kr": "물질과 에너지" },
+        { "en": "Chemical Bonding & Reactions", "kr": "화학 반응의 세계" },
+        { "en": "Cell Biology & Metabolism", "kr": "세포와 물질대사" },
+        { "en": "Inheritance of Life", "kr": "생물의 유전" },
+        { "en": "Earth System Science", "kr": "지구시스템과학" },
+        { "en": "Planetary & Space Science", "kr": "행성우주과학" }
+      ],
+      "interdisciplinary": [
+        { "en": "History & Culture of Science", "kr": "과학의 역사와 문화" },
+        { "en": "Climate Change & Ecology", "kr": "기후변화와 환경생태" },
+        { "en": "Integrated Science Inquiry", "kr": "융합과학 탐구" }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "subject_en": "Physical Education",
+    "subject_kr": "체육",
+    "electives": {
+      "general": [
+        { "en": "Physical Education 1", "kr": "체육1" },
+        { "en": "Physical Education 2", "kr": "체육2" }
+      ],
+      "career": [
+        { "en": "Exercise & Health", "kr": "운동과 건강" },
+        { "en": "Sports & Culture", "kr": "스포츠 문화" },
+        { "en": "Sports & Science", "kr": "스포츠 과학" }
+      ],
+      "interdisciplinary": [
+        { "en": "Sports & Life 1", "kr": "스포츠 생활1" },
+        { "en": "Sports & Life 2", "kr": "스포츠 생활2" }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "subject_en": "Arts",
+    "subject_kr": "예술",
+    "electives": {
+      "general": [
+        { "en": "Music", "kr": "음악" },
+        { "en": "Art", "kr": "미술" },
+        { "en": "Theater", "kr": "연극" }
+      ],
+      "career": [
+        { "en": "Music Performance & Composition", "kr": "음악 연주와 창작" },
+        { "en": "Music Appreciation & Critique", "kr": "음악 감상과 비평" },
+        { "en": "Studio Art", "kr": "미술 창작" },
+        { "en": "Art Appreciation & Critique", "kr": "미술 감상과 비평" }
+      ],
+      "interdisciplinary": [
+        { "en": "Music & Media", "kr": "음악과 미디어" },
+        { "en": "Art & Media", "kr": "미술과 매체" }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "subject_en": "Technology & Home Economics",
+    "subject_kr": "기술·가정",
+    "electives": {
+      "general": [
+        { "en": "Technology and Home Economics", "kr": "기술·가정" }
+      ],
+      "career": [
+        { "en": "The World of Robotics & Engineering", "kr": "로봇과 공학세계" },
+        { "en": "Exploring Human Ecology", "kr": "생활과학 탐구" }
+      ],
+      "interdisciplinary": [
+        { "en": "Creative Engineering", "kr": "창의 공학 설계" },
+        { "en": "Introduction to Intellectual Property", "kr": "지식 재산 일반" },
+        { "en": "Life Planning & Independent Living", "kr": "생애 설계와 자립" },
+        { "en": "Child Development & Parenting", "kr": "아동발달과 부모" }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "subject_en": "Informatics",
+    "subject_kr": "정보",
+    "electives": {
+      "general": [
+        { "en": "Informatics", "kr": "정보" }
+      ],
+      "career": [
+        { "en": "Artificial Intelligence 101", "kr": "인공지능 기초" },
+        { "en": "Data Science", "kr": "데이터 과학" }
+      ],
+      "interdisciplinary": [
+        { "en": "Software & Life", "kr": "소프트웨어와 생활" }
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "subject_en": "Foreign Language",
+    "subject_kr": "제2외국어",
+    "electives": {
+      "general": [
+        { "en": "German", "kr": "독일어" },
+        { "en": "French", "kr": "프랑스어" },
+        { "en": "Spanish", "kr": "스페인어" },
+        { "en": "Chinese", "kr": "중국어" },
+        { "en": "Japanese", "kr": "일본어" },
+        { "en": "Russian", "kr": "러시아어" },
+        { "en": "Arabic", "kr": "아랍어" },
+        { "en": "Vietnamese", "kr": "베트남어" }
+      ],
+      "career": [
+        { "en": "Conversation: German", "kr": "독일어 회화" },
+        { "en": "Conversation: French", "kr": "프랑스어 회화" },
+        { "en": "Conversation: Spanish", "kr": "스페인어 회화" },
+        { "en": "Conversation: Chinese", "kr": "중국어 회화" },
+        { "en": "Conversation: Japanese", "kr": "일본어 회화" },
+        { "en": "Conversation: Russian", "kr": "러시아어 회화" },
+        { "en": "Conversation: Arabic", "kr": "아랍어 회화" },
+        { "en": "Conversation: Vietnamese", "kr": "베트남어 회화" },
+        { "en": "Advanced: German", "kr": "심화 독일어" },
+        { "en": "Advanced: French", "kr": "심화 프랑스어" },
+        { "en": "Advanced: Spanish", "kr": "심화 스페인어" },
+        { "en": "Advanced: Chinese", "kr": "심화 중국어" },
+        { "en": "Advanced: Japanese", "kr": "심화 일본어" },
+        { "en": "Advanced: Russian", "kr": "심화 러시아어" },
+        { "en": "Advanced: Arabic", "kr": "심화 아랍어" },
+        { "en": "Advanced: Vietnamese", "kr": "심화 베트남어" }
+      ],
+      "interdisciplinary": [
+        { "en": "Culture of German-Speaking Countries", "kr": "독일어권 문화" },
+        { "en": "Culture of French-Speaking Countries", "kr": "프랑스어권 문화" },
+        { "en": "Culture of Spanish-Speaking Countries", "kr": "스페인어권 문화" },
+        { "en": "Chinese Culture", "kr": "중국 문화" },
+        { "en": "Japanese Culture", "kr": "일본 문화" },
+        { "en": "Russian Culture", "kr": "러시아 문화" },
+        { "en": "Arabic Culture", "kr": "아랍 문화" },
+        { "en": "Vietnamese Culture", "kr": "베트남 문화" }
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "subject_en": "Classical Chinese",
+    "subject_kr": "한문",
+    "electives": {
+      "general": [
+        { "en": "Classical Chinese", "kr": "한문" }
+      ],
+      "career": [
+        { "en": "Reading Classical Texts in Chinese Characters", "kr": "한문 고전 읽기" }
+      ],
+      "interdisciplinary": [
+        { "en": "Chinese Characters in the Korean Language", "kr": "언어생활과 한자" }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "subject_en": "Liberal Arts",
+    "subject_kr": "교양",
+    "electives": {
+      "general": [
+        { "en": "Career & Vocation", "kr": "진로와 직업" },
+        { "en": "Ecology & the Environment", "kr": "생태와 환경" },
+        { "en": "Human Nature & Philosophy", "kr": "인간과 철학" },
+        { "en": "Logic", "kr": "논리와 사고" },
+        { "en": "Human Behavior & Psychology", "kr": "인간과 심리" },
+        { "en": "Foundations of Education", "kr": "교육의 이해" },
+        { "en": "Religion & Human Life", "kr": "삶과 종교" },
+        { "en": "Health & Wellness", "kr": "보건" }
+      ],
+      "career": [
+        { "en": "Humans & Economic Activity", "kr": "인간과 경제활동" },
+        { "en": "Critical Writing", "kr": "논술" }
+      ],
+      "interdisciplinary": []
+    }
+  }
+]
