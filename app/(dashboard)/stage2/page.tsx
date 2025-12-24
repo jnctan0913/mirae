@@ -281,8 +281,9 @@ export default function Stage2Page() {
     setSignal((prev) => prev.filter((item) => item !== key));
   };
 
-  const addToAnchorLabel = language === 'ko' ? 'Anchor? ??' : 'Add to Anchor';
-  const addToSignalLabel = language === 'ko' ? 'Signal? ??' : 'Add to Signal';
+  const addToAnchorLabel = language === 'ko' ? '필수과목에 추가' : 'Add to Required';
+  const addToSignalLabel =
+    language === 'ko' ? '관심·성향 선택과목에 추가' : 'Add to Electives';
   const removeLabel = language === 'ko' ? '??' : 'Remove';
   const searchPlaceholder = language === 'ko' ? '?? ??' : 'Search courses';
   const subjectTitle = language === 'ko' ? '??' : 'Subjects';
@@ -329,11 +330,17 @@ export default function Stage2Page() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-8">
+    <div
+      className="min-h-screen p-8"
+      style={{
+        background:
+          'linear-gradient(135deg, #9BCBFF 0%, #C7B9FF 25%, #F4A9C8 50%, #FFD1A8 75%, #BEEDE3 100%)',
+      }}
+    >
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">{t('stage2Title')}</h1>
 
-        <div className="bg-white rounded-xl p-6 mb-6">
+        <div className="bg-white/80 rounded-2xl p-6 mb-6 shadow-sm backdrop-blur border border-white/60">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-slate-800">{suggestionTitle}</h2>
@@ -342,7 +349,7 @@ export default function Stage2Page() {
             <button
               type="button"
               onClick={() => setShowSuggestions((prev) => !prev)}
-              className="text-xs font-semibold px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50"
+              className="text-xs font-semibold px-3 py-1 rounded-full border border-white/70 text-slate-600 hover:bg-white/70 transition-all duration-300 ease-out"
             >
               {showSuggestions ? suggestionToggleLabel : suggestionToggleOpenLabel}
             </button>
@@ -365,7 +372,7 @@ export default function Stage2Page() {
                     return (
                       <div
                         key={suggestion.key}
-                        className="rounded-lg border border-slate-200 bg-slate-50 p-3"
+                        className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-sm transition-all duration-300 ease-out"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
@@ -379,7 +386,7 @@ export default function Stage2Page() {
                             {Array.from(suggestion.reasons).map((reason) => (
                               <span
                                 key={reason}
-                                className="text-[11px] px-2 py-1 rounded-full bg-white text-slate-600 border border-slate-200"
+                                className="text-[11px] px-2 py-1 rounded-full bg-white/80 text-slate-600 border border-white/70"
                               >
                                 {reason}
                               </span>
@@ -391,7 +398,7 @@ export default function Stage2Page() {
                             type="button"
                             onClick={() => addToAnchor(suggestion.key)}
                             disabled={anchor.length >= maxBucketSize}
-                            className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700 disabled:opacity-50"
+                            className="text-xs font-semibold px-2 py-1 rounded-full bg-sky-100/80 text-sky-700 disabled:opacity-50 transition-all duration-300 ease-out"
                           >
                             {addToAnchorLabel}
                           </button>
@@ -399,7 +406,7 @@ export default function Stage2Page() {
                             type="button"
                             onClick={() => addToSignal(suggestion.key)}
                             disabled={signal.length >= maxBucketSize}
-                            className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700 disabled:opacity-50"
+                            className="text-xs font-semibold px-2 py-1 rounded-full bg-rose-100/80 text-rose-700 disabled:opacity-50 transition-all duration-300 ease-out"
                           >
                             {addToSignalLabel}
                           </button>
@@ -415,14 +422,14 @@ export default function Stage2Page() {
 
         <div className="grid gap-6 md:grid-cols-[260px_1fr]">
           {/* Subject list */}
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-white/80 rounded-2xl p-6 shadow-sm backdrop-blur border border-white/60">
             <h2 className="font-bold mb-4">{subjectTitle}</h2>
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              className="w-full rounded-xl border border-white/70 px-3 py-2 text-sm focus:border-sky-200 focus:outline-none bg-white/80 transition-all duration-300 ease-out"
             />
             <div className="mt-4 space-y-2 max-h-[520px] overflow-y-auto pr-1">
               {filteredSubjects.length === 0 && (
@@ -436,10 +443,10 @@ export default function Stage2Page() {
                     key={subject.id}
                     type="button"
                     onClick={() => setSelectedSubjectId(subject.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold transition ${
+                    className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition ${
                       isActive
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        ? 'bg-sky-100/80 text-sky-700'
+                        : 'bg-white/70 text-slate-700 hover:bg-white/90'
                     }`}
                   >
                     {label}
@@ -451,7 +458,7 @@ export default function Stage2Page() {
 
           {/* Courses + buckets */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white/80 rounded-2xl p-6 shadow-sm backdrop-blur border border-white/60">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">
@@ -479,10 +486,10 @@ export default function Stage2Page() {
                         key={category}
                         type="button"
                         onClick={() => setSelectedCategory(category)}
-                        className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
+                        className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all duration-300 ease-out ${
                           isActive
-                            ? 'bg-slate-900 text-white border-slate-900'
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                            ? 'bg-slate-800 text-white border-slate-800'
+                            : 'bg-white/80 text-slate-600 border-white/70 hover:bg-white'
                         }`}
                       >
                         {label}
@@ -529,7 +536,7 @@ export default function Stage2Page() {
                             return (
                               <div
                                 key={key}
-                                className="flex items-center justify-between gap-2 bg-gray-100 p-3 rounded-lg"
+                                className="flex items-center justify-between gap-2 bg-white/70 p-3 rounded-xl border border-white/70 transition-all duration-300 ease-out"
                               >
                                 <div>
                                   <span className="text-sm font-medium text-slate-800">
@@ -542,7 +549,7 @@ export default function Stage2Page() {
                                     type="button"
                                     onClick={() => addToAnchor(key)}
                                     disabled={anchor.length >= maxBucketSize}
-                                    className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700 disabled:opacity-50"
+                                    className="text-xs font-semibold px-2 py-1 rounded-full bg-sky-100/80 text-sky-700 disabled:opacity-50 transition-all duration-300 ease-out"
                                   >
                                     {addToAnchorLabel}
                                   </button>
@@ -550,7 +557,7 @@ export default function Stage2Page() {
                                     type="button"
                                     onClick={() => addToSignal(key)}
                                     disabled={signal.length >= maxBucketSize}
-                                    className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700 disabled:opacity-50"
+                                    className="text-xs font-semibold px-2 py-1 rounded-full bg-rose-100/80 text-rose-700 disabled:opacity-50 transition-all duration-300 ease-out"
                                   >
                                     {addToSignalLabel}
                                   </button>
@@ -568,8 +575,11 @@ export default function Stage2Page() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Anchor bucket */}
-              <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-6">
-                <h2 className="font-bold mb-4">{t('stage2Anchor')}</h2>
+              <div className="bg-sky-50/80 border border-sky-200/70 rounded-2xl p-6 shadow-sm backdrop-blur">
+                <div className="mb-4">
+                  <h2 className="font-bold">{t('stage2Anchor')}</h2>
+                  <p className="text-xs text-slate-600 mt-1">{t('stage2AnchorHelper')}</p>
+                </div>
                 <div className="space-y-2 min-h-[200px]">
                   {anchor.map((key) => {
                     const course = courseLookup.get(key);
@@ -579,7 +589,7 @@ export default function Stage2Page() {
                     return (
                       <div
                         key={key}
-                        className="bg-white p-3 rounded-lg border-2 border-blue-300 flex items-center justify-between gap-3"
+                        className="bg-white/80 p-3 rounded-xl border border-sky-200/70 flex items-center justify-between gap-3 transition-all duration-300 ease-out"
                       >
                         <div>
                           <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
@@ -590,7 +600,7 @@ export default function Stage2Page() {
                           <button
                             type="button"
                             onClick={() => removeSelection(key)}
-                            className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-blue-200 text-blue-700"
+                            className="text-xs font-semibold px-2 py-1 rounded-full bg-white/80 border border-sky-200/70 text-sky-700 transition-all duration-300 ease-out"
                           >
                             {removeLabel}
                           </button>
@@ -605,8 +615,11 @@ export default function Stage2Page() {
               </div>
 
               {/* Signal bucket */}
-              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6">
-                <h2 className="font-bold mb-4">{t('stage2Signal')}</h2>
+              <div className="bg-rose-50/80 border border-rose-200/70 rounded-2xl p-6 shadow-sm backdrop-blur">
+                <div className="mb-4">
+                  <h2 className="font-bold">{t('stage2Signal')}</h2>
+                  <p className="text-xs text-slate-600 mt-1">{t('stage2SignalHelper')}</p>
+                </div>
                 <div className="space-y-2 min-h-[200px]">
                   {signal.map((key) => {
                     const course = courseLookup.get(key);
@@ -616,7 +629,7 @@ export default function Stage2Page() {
                     return (
                       <div
                         key={key}
-                        className="bg-white p-3 rounded-lg border-2 border-yellow-300 flex items-center justify-between gap-3"
+                        className="bg-white/80 p-3 rounded-xl border border-rose-200/70 flex items-center justify-between gap-3 transition-all duration-300 ease-out"
                       >
                         <div>
                           <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
@@ -627,7 +640,7 @@ export default function Stage2Page() {
                           <button
                             type="button"
                             onClick={() => removeSelection(key)}
-                            className="text-xs font-semibold px-2 py-1 rounded-full bg-white border border-yellow-200 text-amber-700"
+                            className="text-xs font-semibold px-2 py-1 rounded-full bg-white/80 border border-rose-200/70 text-rose-700 transition-all duration-300 ease-out"
                           >
                             {removeLabel}
                           </button>
@@ -646,7 +659,7 @@ export default function Stage2Page() {
 
         <button
           onClick={handleSave}
-          className="mt-8 px-6 py-3 bg-green-600 text-white rounded-lg mx-auto block"
+          className="mt-8 px-6 py-3 bg-slate-900 text-white rounded-full mx-auto block shadow-sm transition-all duration-300 ease-out hover:bg-slate-800"
         >
           {t('stage2Save')}
         </button>
