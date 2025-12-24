@@ -3,14 +3,66 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --mirae-blue: #9BCBFF;
+  --mirae-lavender: #C7B9FF;
+  --mirae-pink: #F4A9C8;
+  --mirae-peach: #FFD1A8;
+  --mirae-mint: #BEEDE3;
+  --mirae-gradient: linear-gradient(
+    135deg,
+    #9BCBFF 0%,
+    #C7B9FF 25%,
+    #F4A9C8 50%,
+    #FFD1A8 75%,
+    #BEEDE3 100%
+  );
+  --foreground: #1f2430;
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-border: rgba(255, 255, 255, 0.4);
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--mirae-gradient);
+  font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+}
+
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow:
+    0 20px 60px rgba(156, 171, 198, 0.25),
+    0 4px 12px rgba(156, 171, 198, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.soft-button {
+  background: linear-gradient(135deg, #F4A9C8, #FFD1A8);
+  color: #1f2430;
+  border: none;
+  box-shadow: 0 10px 30px rgba(244, 169, 200, 0.35);
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+
+.soft-button:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 14px 36px rgba(244, 169, 200, 0.42);
+}
+
+.soft-button:active {
+  transform: translateY(0);
+}
+
+.floating {
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+
+.floating:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 30px rgba(156, 171, 198, 0.25),
+    0 6px 14px rgba(156, 171, 198, 0.2);
 }
 
 @layer utilities {
@@ -18,4 +70,3 @@ body {
     text-wrap: balance;
   }
 }
-

@@ -17,6 +17,7 @@ interface UserStore {
   setUserId: (id: string) => void;
   completeStage: (stage: number) => void;
   setCurrentStage: (stage: number) => void;
+  reset: () => void;
 }
 
 export const useUserStore = create<UserStore>()(
@@ -66,8 +67,21 @@ export const useUserStore = create<UserStore>()(
         set((state) => ({
           progress: { ...state.progress, currentStage: stage },
         })),
+
+      reset: () =>
+        set(() => ({
+          userId: null,
+          progress: {
+            stage0Complete: false,
+            stage1Complete: false,
+            stage2Complete: false,
+            stage3Complete: false,
+            stage4Complete: false,
+            stage5Complete: false,
+            currentStage: 0,
+          },
+        })),
     }),
     { name: 'scope-user' }
   )
 );
-

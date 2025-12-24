@@ -12,8 +12,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "next": "^14.2.35",
-    "@supabase/supabase-js": "^2.38.4",
-    "@supabase/auth-helpers-nextjs": "^0.8.7",
     "openai": "^4.20.1",
     "zustand": "^4.4.7",
     "framer-motion": "^10.16.16",

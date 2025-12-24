@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
+import { useI18n } from '@/lib/i18n';
 
 interface StoryboardPanel {
   scene: string;
@@ -19,15 +20,16 @@ export default function Stage5Page() {
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
   const router = useRouter();
   const { completeStage } = useUserStore();
+  const { t } = useI18n();
 
   const handleGenerate = async () => {
     // Placeholder for storyboard generation
     setStoryboard({
       timeline,
       panels: [
-        { scene: 'Morning: Working on design project', time: '8:00 AM' },
-        { scene: 'Class: Human-centered design', time: '10:00 AM' },
-        { scene: 'Team meeting: Social impact project', time: '2:00 PM' },
+        { scene: t('stage5Scene1'), time: t('stage5Scene1Time') },
+        { scene: t('stage5Scene2'), time: t('stage5Scene2Time') },
+        { scene: t('stage5Scene3'), time: t('stage5Scene3Time') },
       ],
     });
   };
@@ -40,15 +42,15 @@ export default function Stage5Page() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">스토리보드</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">{t('stage5Title')}</h1>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-          <h2 className="text-xl font-bold mb-4">언제를 보고 싶나요?</h2>
+          <h2 className="text-xl font-bold mb-4">{t('stage5When')}</h2>
           <div className="space-y-3">
             {[
-              { id: '1-year', label: '1년 후 (2학년)' },
-              { id: '3-years', label: '3년 후 (대학교)' },
-              { id: '5-years', label: '5년 후 (직장)' },
+              { id: '1-year', label: t('stage5Timeline1') },
+              { id: '3-years', label: t('stage5Timeline3') },
+              { id: '5-years', label: t('stage5Timeline5') },
             ].map((t) => (
               <button
                 key={t.id}
@@ -71,13 +73,13 @@ export default function Stage5Page() {
             onClick={handleGenerate}
             className="mt-6 w-full py-3 bg-pink-600 text-white rounded-lg font-medium hover:bg-pink-700 transition"
           >
-            스토리보드 생성하기
+            {t('stage5Generate')}
           </button>
         </div>
 
         {storyboard && (
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-            <h2 className="text-xl font-bold mb-4">당신의 미래 스토리</h2>
+            <h2 className="text-xl font-bold mb-4">{t('stage5StoryTitle')}</h2>
             <div className="grid grid-cols-3 gap-4">
               {storyboard.panels.map((panel, idx) => (
                 <div key={idx} className="bg-gray-100 rounded-xl p-4 h-48 flex flex-col justify-center items-center">
@@ -93,10 +95,9 @@ export default function Stage5Page() {
           onClick={handleComplete}
           className="w-full py-3 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition"
         >
-          완료하기
+          {t('stage5Finish')}
         </button>
       </div>
     </div>
   );
 }
-
