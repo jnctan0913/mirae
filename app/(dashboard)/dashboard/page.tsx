@@ -1,40 +1,55 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, Lock, Circle } from 'lucide-react';
-import { storage } from '@/lib/utils/storage';
+import { useI18n } from '@/lib/i18n';
 
 const stages = [
-  { id: 0, name: '자기이해', path: '/stage0', description: '당신에 대해 알아가기' },
-  { id: 1, name: 'Role Roulette', path: '/stage1', description: '역할 탐색하기' },
-  { id: 2, name: '코스 로드맵', path: '/stage2', description: '과목 설계하기' },
-  { id: 3, name: '스킬 번역', path: '/stage3', description: '성장 여정 그리기' },
-  { id: 4, name: '토너먼트', path: '/stage4', description: '전문화 좁히기' },
-  { id: 5, name: '스토리보드', path: '/stage5', description: '미래 시각화하기' },
+  { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0' },
+  { id: 1, nameKey: 'stage1Name', descriptionKey: 'stage1Description', path: '/stage1' },
+  { id: 2, nameKey: 'stage2Name', descriptionKey: 'stage2Description', path: '/stage2' },
+  { id: 3, nameKey: 'stage3Name', descriptionKey: 'stage3Description', path: '/stage3' },
+  { id: 4, nameKey: 'stage4Name', descriptionKey: 'stage4Description', path: '/stage4' },
+  { id: 5, nameKey: 'stage5Name', descriptionKey: 'stage5Description', path: '/stage5' },
 ];
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { progress, userId, setUserId } = useUserStore();
+  const { progress, userId, setUserId, reset } = useUserStore();
   const [userName, setUserName] = useState('');
+  const { t } = useI18n();
 
   useEffect(() => {
-    // Check if user is logged in
-    const isAuthenticated = storage.get<string>('isAuthenticated');
-    if (!isAuthenticated) {
+    const user = getUser();
+    if (!user) {
       router.push('/login');
       return;
     }
 
-    // Load user from localStorage
-    const user = storage.get<{ email: string; name?: string }>('user');
-    if (user) {
-      setUserId(user.email); // Use email as userId
-      setUserName(user.name || user.email?.split('@')[0] || '학생');
+    if (userId !== user.id) {
+      setUserId(user.id);
     }
-  }, [router, setUserId]);
+
+    const displayName = user.name || user.email?.split('@')[0] || t('studentFallback');
+    setUserName(displayName);
+
+    if (typeof window !== 'undefined') {
+      const onboardingKey = `user_${user.id}_onboardingDone`;
+      if (localStorage.getItem(onboardingKey) !== 'true') {
+        router.push('/onboarding');
+      }
+    }
+  }, [router, setUserId, t, userId]);
+
+  const handleSignOut = () => {
+    signOut();
+    reset();
+    router.push('/login');
+    router.refresh();
+  };
 
   const getStageStatus = (stageId: number) => {
     if (progress[`stage${stageId}Complete` as keyof typeof progress]) return 'complete';
@@ -46,9 +61,9 @@ export default function DashboardPage() {
   const getStageIcon = (status: string) => {
     switch (status) {
       case 'complete':
-        return <CheckCircle className="w-6 h-6 text-green-600" />;
+        return <CheckCircle className="w-6 h-6 text-[#73c8a9]" />;
       case 'current':
-        return <Circle className="w-6 h-6 text-blue-600 fill-blue-600" />;
+        return <Circle className="w-6 h-6 text-[#9BCBFF] fill-[#9BCBFF]" />;
       case 'locked':
         return <Lock className="w-6 h-6 text-gray-400" />;
       default:
@@ -62,23 +77,59 @@ export default function DashboardPage() {
   const totalProgress = (completedStages / 6) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <h1 className="text-3xl font-bold mb-2">안녕, {userName}! 👋</h1>
-          <p className="text-gray-600 mb-6">
-            당신은 지금 Stage {progress.currentStage}에 있어요
-          </p>
-
-          {/* Progress Bar */}
-          <div className="bg-gray-200 rounded-full h-4 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-blue-600 to-purple-600 h-full transition-all duration-500"
-              style={{ width: `${totalProgress}%` }}
+    <div
+      className="min-h-screen p-8 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/asset/Background.png')" }}
+    >
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Logo Header */}
+        <div className="flex items-center justify-between">
+          <div className="bg-white/80 backdrop-blur-sm border border-white/70 shadow-md rounded-full px-4 py-2">
+            <img
+              src="/asset/Mirae_Word_Only.png"
+              alt="Mirae"
+              className="h-10 object-contain"
             />
           </div>
-          <p className="text-sm text-gray-600 mt-2">{Math.round(totalProgress)}% 완료</p>
+        </div>
+
+        {/* Header */}
+        <div className="glass-card rounded-3xl p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-white/10 pointer-events-none" />
+          <div className="relative space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">{t('dashboard')}</p>
+                <h1 className="text-3xl font-bold mt-1">
+                  {t('greeting')}, {userName}! 👋
+                </h1>
+                <p className="text-slate-600 mt-1">
+                  {t('stagePosition', { stage: progress.currentStage })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SCOPE+ Journey */}
+        <div className="glass-card rounded-3xl p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-white/10 pointer-events-none" />
+          <div className="relative space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-700">
+                {t('progressLabel')}
+              </p>
+              <div className="px-4 py-2 rounded-full bg-white/80 border border-white/60 text-sm text-slate-700 shadow-sm">
+                {Math.round(totalProgress)}%
+              </div>
+            </div>
+            <div className="bg-white/70 border border-white/70 rounded-full h-4 overflow-hidden shadow-inner">
+              <div
+                className="h-full bg-gradient-to-r from-[#9BCBFF] via-[#F4A9C8] to-[#BEEDE3] transition-all duration-500"
+                style={{ width: `${totalProgress}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Stage Cards */}
@@ -92,31 +143,31 @@ export default function DashboardPage() {
                 key={stage.id}
                 onClick={() => isAccessible && router.push(stage.path)}
                 className={`
-                  bg-white rounded-xl shadow-lg p-6 transition-all
-                  ${isAccessible ? 'cursor-pointer hover:shadow-2xl hover:scale-105' : 'opacity-60 cursor-not-allowed'}
-                  ${status === 'current' ? 'ring-4 ring-blue-400' : ''}
+                  glass-card rounded-2xl p-6 floating transition-all
+                  ${isAccessible ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}
+                  ${status === 'current' ? 'ring-4 ring-[#C7B9FF]/70' : 'ring-1 ring-white/60'}
                 `}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold mb-1">{stage.name}</h3>
-                    <p className="text-sm text-gray-600">{stage.description}</p>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-bold text-slate-800">{t(stage.nameKey)}</h3>
+                    <p className="text-sm text-slate-600">{t(stage.descriptionKey)}</p>
                   </div>
                   {getStageIcon(status)}
                 </div>
 
                 {status === 'current' && (
-                  <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition">
-                    시작하기 →
+                  <button className="soft-button w-full py-2.5 rounded-full font-semibold">
+                    {t('start')}
                   </button>
                 )}
 
                 {status === 'complete' && (
-                  <p className="text-sm text-green-600 font-medium">✓ 완료됨</p>
+                  <p className="text-sm text-[#73c8a9] font-semibold">{t('complete')}</p>
                 )}
 
                 {status === 'locked' && (
-                  <p className="text-sm text-gray-400">🔒 이전 단계를 먼저 완료하세요</p>
+                  <p className="text-sm text-slate-500">{t('locked')}</p>
                 )}
               </div>
             );
@@ -126,4 +177,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

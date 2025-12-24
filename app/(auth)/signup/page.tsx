@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { signUp } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { storage } from '@/lib/utils/storage';
+import { useI18n } from '@/lib/i18n';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -11,46 +12,46 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { t } = useI18n();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Simple validation
-    if (!email || !password || !name) {
-      setError('모든 필드를 입력해주세요.');
+    const result = signUp(email, password, name);
+
+    if ('error' in result) {
+      setError(t(result.error));
       setLoading(false);
-      return;
+    } else {
+      router.push('/dashboard');
+      router.refresh();
     }
-
-    if (password.length < 6) {
-      setError('비밀번호는 최소 6자 이상이어야 합니다.');
-      setLoading(false);
-      return;
-    }
-
-    // Store user in localStorage
-    const userData = {
-      email,
-      name,
-      loggedInAt: new Date().toISOString(),
-    };
-
-    storage.set('user', userData);
-    storage.set('isAuthenticated', 'true');
-    
-    setLoading(false);
-    router.push('/dashboard');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-2">Mirae</h1>
-        <p className="text-gray-600 text-center mb-8">
-          새로운 여정을 시작하세요
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F4A9C8] via-[#FFD1A8] to-[#BEEDE3]">
+      <div className="bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/60">
+        <div className="flex justify-center mb-4">
+          <img
+            src="/asset/Mirae_word.webp"
+            alt="Mirae"
+            className="h-12 object-contain"
+          />
+        </div>
+        <p className="text-slate-600 text-center mb-8">
+          {t('signupHeroTitle')}
         </p>
+
+        {/* Info about disabled signup */}
+        <div className="mb-6 p-4 bg-gradient-to-br from-[#F4A9C8]/20 to-[#FFD1A8]/20 rounded-2xl text-sm border border-[#F4A9C8]/30">
+          <p className="font-semibold mb-2 text-slate-700">{t('signupDisabledTitle')}</p>
+          <p className="text-slate-600">{t('signupDisabledBody')}</p>
+          <p className="text-slate-600 mt-2">{t('loginEmailLabel')}: student1@test.com</p>
+          <p className="text-slate-600">{t('loginEmailLabel')}: student2@test.com</p>
+          <p className="text-slate-600 mt-1">{t('loginPasswordValue')}</p>
+        </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
@@ -60,74 +61,64 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-2">
-              이름
+            <label className="block text-sm font-medium mb-2 text-slate-700">
+              {t('signupNameLabel')}
             </label>
             <input
-              id="name"
-              name="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white/70 border-2 border-white/60 rounded-xl focus:border-[#F4A9C8] focus:outline-none transition-all"
               required
               disabled={loading}
-              autoComplete="name"
             />
           </div>
 
           <div>
-            <label htmlFor="signup-email" className="block text-sm font-medium mb-2">
-              이메일
+            <label className="block text-sm font-medium mb-2 text-slate-700">
+              {t('loginEmailLabel')}
             </label>
             <input
-              id="signup-email"
-              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white/70 border-2 border-white/60 rounded-xl focus:border-[#F4A9C8] focus:outline-none transition-all"
               required
               disabled={loading}
-              autoComplete="email"
             />
           </div>
 
           <div>
-            <label htmlFor="signup-password" className="block text-sm font-medium mb-2">
-              비밀번호
+            <label className="block text-sm font-medium mb-2 text-slate-700">
+              {t('loginPasswordLabel')}
             </label>
             <input
-              id="signup-password"
-              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white/70 border-2 border-white/60 rounded-xl focus:border-[#F4A9C8] focus:outline-none transition-all"
               required
               minLength={6}
               disabled={loading}
-              autoComplete="new-password"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-[#F4A9C8] to-[#FFD1A8] text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50"
           >
-            {loading ? '가입 중...' : '회원가입'}
+            {loading ? t('signupLoading') : t('signupButton')}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
-          이미 계정이 있나요?{' '}
-          <a href="/login" className="text-purple-600 hover:underline">
-            로그인
+        <p className="text-center text-sm text-slate-600 mt-4">
+          {t('signupExistingAccount')}{' '}
+          <a href="/login" className="text-[#F4A9C8] hover:text-[#FFD1A8] font-medium transition-colors">
+            {t('signupLogin')}
           </a>
         </p>
       </div>
     </div>
   );
 }
-

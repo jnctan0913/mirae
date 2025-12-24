@@ -97,7 +97,7 @@ export function signIn(email: string, password: string): { user: User } | { erro
 
 // Sign up (disabled - using hardcoded users only)
 export function signUp(email: string, password: string, name: string): { error: string } {
-  return { error: 'Sign up is disabled. Please use test accounts: student1@test.com or student2@test.com with password: password123' };
+  return { error: 'signupDisabledError' };
 }
 
 // Sign out

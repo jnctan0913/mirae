@@ -6,10 +6,10 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 
 const specializations = [
-  { id: 'ux-design', name: 'UX Design', alignment: 85 },
-  { id: 'data-science', name: 'Data Science', alignment: 60 },
-  { id: 'social-ent', name: 'Social Entrepreneurship', alignment: 88 },
-  { id: 'content', name: 'Content Creation', alignment: 75 },
+  { id: 'ux-design', nameKey: 'specializationUxDesign', alignment: 85 },
+  { id: 'data-science', nameKey: 'specializationDataScience', alignment: 60 },
+  { id: 'social-ent', nameKey: 'specializationSocialEntrepreneurship', alignment: 88 },
+  { id: 'content', nameKey: 'specializationContentCreation', alignment: 75 },
 ];
 
 export default function Stage4Page() {
@@ -54,7 +54,7 @@ export default function Stage4Page() {
                 `}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-xl font-bold">{spec.name}</h3>
+                  <h3 className="text-xl font-bold">{t(spec.nameKey)}</h3>
                   <span className="text-sm text-gray-500">{stars}</span>
                 </div>
                 <p className="text-sm text-gray-600">
