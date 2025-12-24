@@ -17,6 +17,8 @@ const messages: Record<Language, Messages> = {
     complete: '✓ 완료됨',
     locked: '🔒 이전 단계를 먼저 완료하세요',
     logout: '로그아웃',
+    back: '뒤로가기',
+    home: '홈',
     // Stage 0
     stage0Question: '당신은 어떤 것들을 잘하나요?',
     stage0OptionAnalytical: '분석적 사고',
@@ -88,6 +90,8 @@ const messages: Record<Language, Messages> = {
     complete: '✓ Completed',
     locked: '🔒 Finish the prior stage first',
     logout: 'Sign out',
+    back: 'Back',
+    home: 'Home',
     // Stage 0
     stage0Question: 'What are you good at?',
     stage0OptionAnalytical: 'Analytical thinking',

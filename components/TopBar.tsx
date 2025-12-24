@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Languages, LogOut } from 'lucide-react';
+import { ArrowLeft, Home, Languages, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { getUser, signOut } from '@/lib/auth';
@@ -44,6 +44,26 @@ export default function TopBar() {
   return (
     <div className="fixed top-4 right-4 z-50">
       <div className="glass-card rounded-full flex items-center gap-2 px-3 py-2">
+        {!isAuthPage && (
+          <>
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-1 px-2 py-2 rounded-full hover:bg-white/70 transition text-slate-700"
+              title={t('back')}
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="flex items-center gap-1 px-2 py-2 rounded-full hover:bg-white/70 transition text-slate-700"
+              title={t('home')}
+            >
+              <Home className="w-4 h-4" />
+            </button>
+            <div className="h-6 w-px bg-white/60" />
+          </>
+        )}
+
         <button
           onClick={toggleLanguage}
           className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/70 border border-white/60 text-sm font-semibold text-slate-700 floating"
