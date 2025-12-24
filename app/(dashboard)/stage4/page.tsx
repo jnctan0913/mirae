@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
+import { useI18n } from '@/lib/i18n';
 
 const specializations = [
   { id: 'ux-design', name: 'UX Design', alignment: 85 },
@@ -15,6 +16,7 @@ export default function Stage4Page() {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
   const { completeStage } = useUserStore();
+  const { t } = useI18n();
 
   const handleSelect = (id: string) => {
     if (selected.includes(id)) {
@@ -32,9 +34,9 @@ export default function Stage4Page() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">전문화 토너먼트</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">{t('stage4Title')}</h1>
         <p className="text-center text-gray-600 mb-8">
-          최대 3개의 전문화 영역을 선택하세요
+          {t('stage4Subtitle')}
         </p>
 
         <div className="grid grid-cols-2 gap-4">
@@ -56,10 +58,10 @@ export default function Stage4Page() {
                   <span className="text-sm text-gray-500">{stars}</span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {spec.alignment}% alignment
+                  {t('stage4Alignment', { value: spec.alignment.toString() })}
                 </p>
                 {isSelected && (
-                  <p className="text-sm text-amber-600 font-medium mt-2">✓ 선택됨</p>
+                  <p className="text-sm text-amber-600 font-medium mt-2">{t('stage4Selected')}</p>
                 )}
               </div>
             );
@@ -71,10 +73,9 @@ export default function Stage4Page() {
           disabled={selected.length === 0}
           className="mt-8 w-full py-3 bg-amber-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-amber-700 transition"
         >
-          선택 완료 ({selected.length}/3)
+          {t('stage4Complete')} ({selected.length}/3)
         </button>
       </div>
     </div>
   );
 }
-

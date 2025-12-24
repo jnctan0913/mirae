@@ -3,20 +3,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
-import { supabase } from '@/lib/supabase';
+import { useI18n } from '@/lib/i18n';
 
 // Placeholder roles - will be expanded to 50
 const roles = [
   {
     id: 'ux-designer',
-    title: 'UX 디자이너',
-    tagline: '사람들이 사랑하는 제품을 만들어요',
+    title: { ko: 'UX 디자이너', en: 'UX Designer' },
+    tagline: { ko: '사람들이 사랑하는 제품을 만들어요', en: 'Build products people love' },
     domain: 'creative',
   },
   {
     id: 'data-scientist',
-    title: '데이터 사이언티스트',
-    tagline: '데이터로 세상을 이해해요',
+    title: { ko: '데이터 사이언티스트', en: 'Data Scientist' },
+    tagline: { ko: '데이터로 세상을 이해해요', en: 'Understand the world through data' },
     domain: 'analytical',
   },
 ];
@@ -25,6 +25,7 @@ export default function Stage1Page() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
   const { userId, completeStage } = useUserStore();
+  const { language, t } = useI18n();
 
   const currentRole = roles[currentIndex];
   const progress = (currentIndex / roles.length) * 100;
@@ -38,7 +39,9 @@ export default function Stage1Page() {
       card_tap_count: 0,
     };
 
-    await supabase.from('role_swipes').insert(swipeData);
+    // Store swipe data in localStorage
+    const existingSwipes = JSON.parse(localStorage.getItem(`user_${userId}_swipes`) || '[]');
+    localStorage.setItem(`user_${userId}_swipes`, JSON.stringify([...existingSwipes, swipeData]));
 
     if (currentIndex < roles.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -66,8 +69,12 @@ export default function Stage1Page() {
         {currentRole && (
           <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 h-[500px] flex flex-col items-center justify-center">
             <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full mb-6" />
-            <h2 className="text-3xl font-bold text-center mb-4">{currentRole.title}</h2>
-            <p className="text-gray-600 text-center text-lg">{currentRole.tagline}</p>
+            <h2 className="text-3xl font-bold text-center mb-4">
+              {currentRole.title[language]}
+            </h2>
+            <p className="text-gray-600 text-center text-lg">
+              {currentRole.tagline[language]}
+            </p>
           </div>
         )}
 
@@ -95,10 +102,9 @@ export default function Stage1Page() {
         </div>
 
         <div className="text-center mt-6 space-y-2 text-sm text-gray-600">
-          <p>← 별로 | ⭐ 좋아요! | 흥미로워 →</p>
+          <p>{t('stage1Hint')}</p>
         </div>
       </div>
     </div>
   );
 }
-

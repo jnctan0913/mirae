@@ -41,6 +41,54 @@ Final Dashboard: Recommendations & Next Semester Plan
 
 ---
 
+## Brand-Aligned UI/UX System (Mirae Palette for SCOPE+)
+
+### Visual Language
+- **Mood**: Calm, friendly, slightly magical; avoid harsh contrast or sharp edges.
+- **Colors**: Use the soft gradient spectrum as the base surface and accent chips:
+  ```css
+  :root {
+    --mirae-blue: #9BCBFF;
+    --mirae-lavender: #C7B9FF;
+    --mirae-pink: #F4A9C8;
+    --mirae-peach: #FFD1A8;
+    --mirae-mint: #BEEDE3;
+    --mirae-gradient: linear-gradient(
+      135deg,
+      #9BCBFF 0%,
+      #C7B9FF 25%,
+      #F4A9C8 50%,
+      #FFD1A8 75%,
+      #BEEDE3 100%
+    );
+  }
+  ```
+- **Surfaces**: Soft card backgrounds with subtle blur/gradient overlays; generous padding to keep whitespace.
+- **Typography**: `Inter, Pretendard, -apple-system, BlinkMacSystemFont, sans-serif`; maintain friendly weights (400/500/600) and rounded letter spacing.
+- **Iconography**: Rounded shapes, no sharp corners; use pastel-accented strokes/fills.
+
+### Motion & Interaction
+- **Motion**: Everything floats; prefer `transition: all 0.3s ease-out` for hover/focus; staggered fade/slide with low amplitude (6–12px).
+- **Feedback**: Use glow/soft-shadow on focus/active states instead of hard outlines.
+- **Progression**: Calm unlock animations on stage cards (gentle scale/fade), not snappy pops.
+- **Voice/Chat**: Chat bubbles on a warm gradient backdrop with soft separators; mic/record buttons use mint or peach highlights.
+
+### Stage Surface Treatments
+- **Dashboard Hub**: Gradient header banner using `--mirae-gradient`, floating cards with light glassmorphism, mint chips for “Next stage” CTAs.
+- **Stage 0**: Question cards on pale blue surfaces; progress bar in lavender → pink gradient; chatbot bubble tails rounded and shadowed softly.
+- **Stage 1**: Role cards with pastel background per domain (creative = lavender/pink, analytical = blue, social = mint, technical = peach, entrepreneurial = blended); swipe affordances glow on hover/drag.
+- **Stage 2**: Anchor bucket tinted light blue; Signal bucket tinted peach; suggestion rail on mint with soft border; drag ghost has slight scale-up and shadow blur.
+- **Stage 3**: Skill map nodes as floating chips with gradient strokes; voice button as circular mint/peach pulse; report download card with subtle gradient frame.
+- **Stage 4**: Tournament brackets on blurred lavender glass; matchup cards lift on hover with faint glow; stars/icons use pink accents.
+- **Stage 5**: Storyboard panels on parchment-peach surfaces with mint captions; timeline pills use gradient strokes; regeneration buttons use lavender fill + soft shadow.
+- **Final Dashboard**: Summary hero uses full gradient; checklist cards on off-white with mint checkmarks; CTA buttons in pink→peach gradient with rounded-pill corners.
+
+### Accessibility & Tone
+- Maintain ≥4.5:1 contrast on text atop gradients by using dark navy/charcoal type on light backgrounds.
+- Keep copy reassuring and exploratory; avoid evaluative language in microcopy and empty states.
+
+---
+
 ## Core Components
 
 ### **Dashboard Hub**
@@ -1411,4 +1459,3 @@ Tone: Warm, curious, non-judgmental, empowering
 ## 24-Hour Development Plan
 
 Now I'll create the revised 24-hour plan in a separate document...
-

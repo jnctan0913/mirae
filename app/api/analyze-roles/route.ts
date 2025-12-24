@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
 import { analyzeRoleSwipes } from '@/lib/openai';
 
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await req.json();
 
-    // Get all swipes
-    const { data: swipes } = await supabaseAdmin
-      .from('role_swipes')
-      .select('*')
-      .eq('user_id', userId);
+    // Get swipes from localStorage (client will send them)
+    const swipes = req.headers.get('x-swipe-data');
 
-    if (!swipes || swipes.length === 0) {
+    if (!swipes) {
+      return NextResponse.json({ error: 'No swipe data found' }, { status: 400 });
+    }
+
+    const parsedSwipes = JSON.parse(swipes);
+
+    if (!parsedSwipes || parsedSwipes.length === 0) {
       return NextResponse.json({ error: 'No swipe data found' }, { status: 400 });
     }
 
     // Format for analysis
-    const swipeData = swipes.map((s) => ({
+    const swipeData = parsedSwipes.map((s: any) => ({
       roleId: s.role_id,
       swipeDirection: s.swipe_direction,
     }));
@@ -34,4 +36,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
+import { useI18n } from '@/lib/i18n';
 
 export default function Stage3Page() {
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
@@ -10,6 +11,7 @@ export default function Stage3Page() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { completeStage } = useUserStore();
+  const { t } = useI18n();
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -40,13 +42,13 @@ export default function Stage3Page() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">스킬 번역</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">{t('stage3Title')}</h1>
 
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 h-[500px] overflow-y-auto">
           <div className="space-y-4">
             {messages.length === 0 && (
               <div className="text-center text-gray-500 mt-20">
-                <p>안녕! 선택한 과목들을 통해 어떤 스킬을 키우고 싶은지 이야기해봐.</p>
+                <p>{t('stage3Empty')}</p>
               </div>
             )}
             {messages.map((msg, idx) => (
@@ -66,7 +68,7 @@ export default function Stage3Page() {
               </div>
             ))}
             {loading && (
-              <div className="text-gray-500 text-sm">AI가 입력 중...</div>
+              <div className="text-gray-500 text-sm">{t('stage3Loading')}</div>
             )}
           </div>
         </div>
@@ -77,7 +79,7 @@ export default function Stage3Page() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="당신의 생각을 자유롭게..."
+            placeholder={t('stage3Placeholder')}
             className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg"
           />
           <button
@@ -85,7 +87,7 @@ export default function Stage3Page() {
             disabled={loading || !input.trim()}
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium disabled:opacity-50"
           >
-            전송
+            {t('stage3Send')}
           </button>
         </div>
 
@@ -93,10 +95,9 @@ export default function Stage3Page() {
           onClick={handleComplete}
           className="mt-4 w-full py-3 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition"
         >
-          대화 마치기
+          {t('stage3Finish')}
         </button>
       </div>
     </div>
   );
 }
-

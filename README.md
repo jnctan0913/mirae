@@ -53,7 +53,7 @@ app/
 └── page.tsx             ✅ Home page (redirects to dashboard)
 
 lib/
-├── supabase.ts          ✅ Supabase client setup
+├── auth.ts              ✅ Hardcoded authentication (2 test users)
 ├── openai.ts            ✅ OpenAI service functions
 └── stores/
     └── userStore.ts     ✅ Zustand user state store
@@ -61,7 +61,11 @@ lib/
 components/              # To be expanded with UI components
 ```
 
-**Status**: Core application structure is in place. See `SETUP.md` for installation instructions.
+**Status**: Core application structure is in place.
+
+**Test Accounts**:
+- Email: student1@test.com, Password: password123 (김민수)
+- Email: student2@test.com, Password: password123 (이지은)
 
 ---
 
@@ -100,8 +104,8 @@ Synthesizes all stages into actionable course recommendations and next steps.
 - Zustand
 
 **Backend:**
-- Supabase (PostgreSQL)
-- Supabase Auth
+- Hardcoded Authentication (2 test users)
+- LocalStorage for data persistence
 - Next.js API Routes
 
 **AI Services:**
@@ -169,12 +173,12 @@ See `REVISED_APP_BLUEPRINT.md` for the complete product architecture, including:
 
 ## Getting Started
 
-This is a documentation repository. For implementation:
-
-1. Review `REVISED_24HR_PLAN.md` for development timeline
-2. Review `REVISED_APP_BLUEPRINT.md` for architecture details
-3. Follow the project structure outlined in the plan
-4. Set up environment as specified (Next.js, Supabase, OpenAI)
+1. Install dependencies: `npm install`
+2. Run development server: `npm run dev`
+3. Open http://localhost:3000
+4. Login with test accounts:
+   - student1@test.com / password123
+   - student2@test.com / password123
 
 ---
 
