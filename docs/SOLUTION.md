@@ -1,363 +1,364 @@
-# SOLUTION.MD 
+# SOLUTION.md
+**SCOPE+ - Dashboard-Based Career Exploration Solution**
+
+---
 
 ## The Solution in One Sentence
 
-**We give Korean students a private space to explore and reconsider their academic path
-within a course-based, credit system—at any point during high school,
-so they can navigate decisions with clarity instead of fear, whether choosing initially or questioning later.**
+**SCOPE+ is a dashboard-based, AI-powered career exploration platform that guides Korean high school students through 6 progressive stages—from initial self-understanding to final course selections—using gamified interactions and AI synthesis to translate exploration into actionable course roadmaps.**
 
 ---
 
 ## What We're Building
 
-> Note: In this document, “STEM” and “Humanities” do not refer to formal school tracks.  
-> They describe how students commonly perceive their academic orientation based on course combinations within the credit-based system.
+### Dashboard-Based, Multi-Stage Journey
 
-### Safe Exploration Throughout the Journey
+A platform that structures career exploration into 6 progressive stages, each building on the previous to create a comprehensive understanding that leads to concrete course recommendations.
 
-A tool that lets students (Year 1-3) privately explore different paths (STEM, Humanities, hybrid) and process uncertainty **whenever it arises**—before initial choice, during doubt, or when reconsidering.
+**Not:** One-time assessment, evaluative test, or simple chatbot  
+**Is:** Structured journey with gamified exploration, AI synthesis, and actionable outcomes
 
-**Not:** Career assessment, course recommender, or counselor replacement  
-**Is:** Private thinking space to reduce fear at every decision moment
+### Product Architecture
 
-### Product Direction
+**Core Innovation:** Gamified exploration (swipe mechanics, tournaments) + AI synthesis → Data-driven course roadmap
 
-**Core Product:** AI-powered chatbot for reflective conversation
-
-**Key Distinction:** The AI helps students *think*, not *decide*. It asks reflective questions rather than giving answers or assessments.
-
-| Existing Solutions | Our Approach |
-|-------------------|--------------|
-| Test you → give result | Help you reflect → you reach clarity |
-| Answer your questions | Ask you questions to think through |
-| One-time assessment | Ongoing exploration whenever needed |
-| Visible to school/parents | Private and unconnected |
-
-**Potential Supporting Features (for PRD discussion):**
-- Personal dashboard for students to track their own exploration journey
-- Ability to upload/store personal info (interests, concerns, reflections)
-- Progress visualization of their thinking over time
-- Resource library (optional, non-evaluative)
+**Experience Model:**
+- **Dashboard-centric:** Progress tracking, stage navigation, insights overview
+- **Progressive unlock:** Complete one stage to unlock next
+- **Multi-modal input:** Swipes, chat, voice, drag-drop, tournament selection
+- **AI synthesis:** Each stage produces insights that feed into next stage
 
 ---
 
-## Core Interaction Model
+## The 6-Stage Journey
 
-### Reflective Conversation, Not Q&A
+### Stage 0: Initial Questionnaire (Self-Understanding)
 
-The chatbot's role is to help students think clearly, not to tell them what to do.
+**Objective:** Build foundational user profile through conversational data collection
 
-**Example interactions:**
+**Interaction:**
+- 5-10 questions (multi-select and single-select)
+- AI chatbot asks follow-up questions
+- Captures: strengths, learning style, interests, fears, decision style
 
-| Student Says | Traditional Q&A Response | Our Reflective Approach |
-|--------------|-------------------------|------------------------|
-| "Should I switch to STEM?" | "Here are the pros and cons of STEM careers..." | "What's making you consider switching right now? Was there a specific moment?" |
-| "I think I chose wrong" | "Here's how to switch tracks..." | "When you say 'wrong'—do you mean it doesn't fit you, or that you're worried about outcomes?" |
-| "Everyone in STEM seems happier" | "STEM has good job prospects..." | "What does 'happier' look like to you? What are you noticing about them?" |
+**Output:**
+- User profile baseline
+- Personality insights
+- Ready for Stage 1 prompt
 
-**The mechanism:**
-- Questions that help students articulate what they're actually feeling
-- Distinguish between "wrong fit" vs "fear of outcomes"
-- No judgment on any path—exploring is the goal
-- Student reaches their own clarity
-
----
-
-## Core Outcome
-
-> **When students face path uncertainty—whether choosing, doubting, or reconsidering—they feel like they're exploring possibilities, not being judged for uncertainty.**
-
-### Success Looks Like:
-
-**Year 1 Students (choosing):**
-- Hold 2-4 plausible paths before committing
-- Understand what they're testing with each choice
-- Choose with less panic, more curiosity
-
-**Year 2 Students (doubting):**
-- Process "did I choose right?" privately
-- Explore changing academic direction without admitting "failure"
-- Decide to stay OR change direction with clarity
-
-**Year 3 Students (committed but uncertain):**
-- Understand their course path within CSAT constraints
-- Reduce regret by exploring "what's next"
-- Build conviction or plan post-CSAT pivot
-
-**All Students:**
-- Feel ownership over their journey
-- Make decisions with less fear, more honesty
-- May still choose conventional paths—but the psychological experience is different
-
-### Primary Success Metric
-
-> **Does this help students navigate path uncertainty with honest exploration instead of silent fear—whenever that uncertainty arises?**
-
-**Measured by:**
-- Reduced anxiety around path decisions (self-reported)
-- Increased clarity about reasons for current path (self-reported)
-- Engagement during key doubt moments (Year 2-3 retention)
-
-**NOT measured by:**
-- Number of students who switch tracks
-- Academic outcomes or CSAT scores
-- "Correct" path selection
-
+**Why It Works:**
+- Sets foundation for all subsequent stages
+- Chatbot makes it conversational, not form-like
+- Builds trust and engagement early
 
 ---
 
-## The Behavior Change
+### Stage 1: Role Roulette (Interest Exploration)
 
-### From → To (At Any Decision Point)
+**Objective:** Discover unexpected interests through rapid, judgment-free exploration
 
-| Before | After |
-|--------|-------|
-| Avoiding uncertainty | Engaging with uncertainty privately |
-| "I can't question this" | "I can reconsider safely" |
-| "Doubt = failure" | "Doubt = learning" |
-| Fear-driven persistence | Clarity-driven decisions |
-| Silent regret | Honest exploration |
+**Interaction:**
+- Tinder-style swipe interface for 50 career roles
+- Swipe right (❤️): "Interesting!"
+- Swipe left (👎): "Not for me"
+- Swipe up (⭐): "Love this!"
+- Tap for detailed role information
 
-**Critically:** Students don't need to become rebels or switch paths.  
-**They become more honest with themselves—whenever they need to be.**
+**Output:**
+- Interest clusters identified
+- Pattern recognition (e.g., "You loved creative roles despite marking analytical strengths")
+- Energy mapping (which roles took longer to decide)
 
----
-
-## When We Intervene
-
-### Throughout High School, At Key Moments
-
-**Year 1 (March - April):**
-- **Pain point:** Initial CSAT track decision
-- **Intervention:** Explore before choosing
-- **Outcome:** Choose with less fear
-
-**Year 2 (Ongoing):**
-- **Pain point:** "Did I choose right?" doubt
-- **Intervention:** Privately reconsider without judgment
-- **Outcome:** Stay with clarity OR switch with confidence
-
-**Year 3 (Until CSAT):**
-- **Pain point:** Committed to track, processing regret
-- **Intervention:** Explore post-CSAT possibilities
-- **Outcome:** Reduce regret, build forward plan
-
-**Anytime:**
-- **Pain point:** Uncertainty without safe outlet
-- **Intervention:** Private space to think honestly
-- **Outcome:** Reduced anxiety, increased agency
-
-### Year 2-3 Engagement Triggers
-
-Since Year 1 has a clear deadline (track selection), Year 2-3 engagement requires emotional triggers:
-
-| Trigger Moment | What Happens | Potential Engagement |
-|----------------|--------------|---------------------|
-| After mock exam results | Student compares with peers, doubts surface | Prompt: "성적표 받았을 때 드는 생각, 정리해볼래?" |
-| Course registration periods | Forced to confront track again | Contextual prompt based on school calendar |
-| Seeing peers succeed in other track | "What if I chose wrong?" | AI recognizes doubt patterns in conversation |
-| Late-night anxiety | Doom spiraling about future | Available 24/7 unlike counselors |
-| Before parent-teacher meetings | Anticipating pressure | Space to process before external conversations |
+**Why It Works:**
+- Gamified, engaging, feels like discovery
+- Rapid exploration reduces overthinking
+- Data captured per swipe enables AI analysis
+- Judgment-free environment encourages honest exploration
 
 ---
 
-## Discovery & Distribution
+### Stage 2: Anchor vs Signal Builder (Course Roadmap)
 
-### The Challenge
+**Objective:** Translate interest patterns into strategic course selections with AI-generated recommendations
 
-If the tool must feel safe and private, how do students discover it?
+**Interaction:**
+- Drag-drop interface with two buckets:
+  - **Anchor (⚓):** Safe choices, expectations, foundation
+  - **Signal (🎯):** Exploration, curiosity, specialization
+- AI suggests subjects based on Stage 0-1 data
+- Load balance warnings (workload management)
 
-### Recommended Approach: Peer-to-Peer Discovery
+**Output:**
+- 3 recommended course combinations
+- Alignment scores for each combination
+- Workload estimates
+- Rationale for recommendations
 
-**Why peer distribution works:**
-- Students trust recommendations from friends over institutions
-- Sharing feels like helping, not advertising
-- Natural fit with how students already share resources
-
-**Potential mechanics:**
-- Easy share functionality ("친구한테 보내기")
-- Position as "the thing you share with your stressed friend"
-- Tagline direction: "친구가 보내준 거 한번 해봐" (Try this thing my friend sent me)
-
-### Why NOT School/Institutional Distribution
-
-Even if technically invisible to teachers, students will **assume** it's monitored if discovered through school channels. This breaks the psychological safety promise.
-
-**Avoid:**
-- School announcements or counselor recommendations
-- Parent communication channels
-- Official education ministry partnerships (initially)
-
-### Alternative Discovery Channels (for discussion)
-
-- Student community seeding (Orbi, Naver cafés)
-- Social media presence (Instagram, TikTok) with relatable content
-- Influencer partnerships (education YouTubers, study accounts)
+**Why It Works:**
+- Makes abstract interests concrete
+- Framework (Anchor vs Signal) reduces decision paralysis
+- AI suggestions based on multi-stage data are more accurate
+- Visual drag-drop is engaging
 
 ---
 
-## Why This Works When Existing Solutions Don't
+### Stage 3: Skill Translation (Growth Character Report)
 
-### vs. Talking to Friends
+**Objective:** Transform course selections into narrative skills journey using AI chatbot
 
-| Friends | Our Tool |
-|---------|----------|
-| May judge you (even unintentionally) | Cannot judge you |
-| Compete with you (same CSAT, universities) | Not competing with you |
-| Give advice based on their own bias | No agenda about what you should choose |
-| Remember and may share what you said | Private, no accumulated record |
+**Interaction:**
+- Multi-modal conversation: Text chat + Voice input
+- AI guides conversation to extract skill insights
+- Maps courses to skills development
+- Asks "why" skills matter to student
 
-### vs. CareerNet / Career Assessments
+**Output:**
+- Growth Character Report (downloadable PDF)
+- Skills evolution path (current → near future → long-term)
+- Unique edge identification
+- Recommended next steps
 
-| Assessments | Our Tool |
-|-------------|----------|
-| Test you → label you | Help you think → you find clarity |
-| One-time result | Ongoing whenever you need |
-| Visible in school records | Completely private |
-| "Here's what you should be" | "Here's how to think about this" |
+**Why It Works:**
+- Voice input reduces typing friction for Korean students
+- Narrative format makes skills journey tangible
+- Helps students articulate "why" courses matter
+- Builds conviction in chosen path
+
+---
+
+### Stage 4: Tournament Bracket (Specialization Narrowing)
+
+**Objective:** Help students commit to 2-3 specialization areas through gamified decision-making
+
+**Interaction:**
+- March Madness-style elimination tournament
+- 8 specializations → 4 → 2 → final selection
+- Head-to-head comparison with AI confidence scores
+- Chatbot reflection prompts during matchups
+
+**Output:**
+- 2-3 final specializations with alignment scores
+- Rationale for each choice
+- Next steps for each specialization
+
+**Why It Works:**
+- Gamification makes narrowing fun, not stressful
+- Head-to-head comparisons reduce overwhelm
+- Can select both finalists (no forced choice)
+- AI confidence scores provide guidance without dictating
+
+---
+
+### Stage 5: Storyboard (Future Visualization)
+
+**Objective:** Create concrete, visual narrative of student's future path to make it feel real and achievable
+
+**Interaction:**
+- AI-assisted comic/storyboard generator
+- Timeline selection (1 year, 3 years, 5 years, 10 years)
+- Scene-by-scene co-creation with chatbot
+- AI generates images for each panel (or text-based for MVP)
+
+**Output:**
+- 6-panel storyboard showing "A Day in Your Future Life"
+- Pathway steps to achieve that future
+- Multiple timelines possible
+
+**Why It Works:**
+- Makes abstract future tangible and visual
+- Emotional anchoring (shows challenges + overcoming them)
+- Actionable pathway included
+- Students can create multiple timelines
+
+---
+
+### Final Dashboard: Recommendations & Next Semester Plan
+
+**Objective:** Synthesize all 5 stages into actionable, concrete next steps
+
+**Features:**
+- Journey summary at a glance
+- Specializations identified
+- Recommended courses for next semester
+- Growth Character Report download
+- Storyboard gallery
+- Next 6 months action plan
+- Counselor handoff document
+- Parent conversation prep guide
+
+**Why It Works:**
+- All exploration culminates in actionable outcomes
+- Students leave with concrete plan, not just insights
+- Documents support conversations with adults
+- Can revisit and update over time
+
+---
+
+## Core Differentiators
+
+### vs. Traditional Career Assessments
+
+| Traditional Assessments | SCOPE+ |
+|------------------------|--------|
+| One-time test → result | Progressive journey → recommendations |
+| Evaluative (tests you) | Exploratory (helps you discover) |
+| Static forms | Gamified, interactive |
+| No follow-up | Dashboard tracks progress |
+| Doesn't translate to courses | Directly outputs course selections |
+
+### vs. School Counselors
+
+| Counselors | SCOPE+ |
+|-----------|--------|
+| 1:400 ratio, limited time | Available 24/7, self-paced |
+| Brief sessions | Comprehensive journey |
+| No structured process | 6-stage progressive system |
+| Can't track over time | Dashboard with history |
 
 ### vs. Hagwon Counseling
 
-| Hagwon | Our Tool |
-|--------|----------|
+| Hagwon | SCOPE+ |
+|--------|--------|
 | Expensive (~$445/month) | Accessible |
-| Biased toward prestige paths | No path bias |
-| Parents often involved | Private from parents |
+| Biased toward prestige | No path bias |
+| Parents often involved | Private exploration |
 | Advice-giving | Exploration-supporting |
 
-### The Safety Mechanism
+---
 
-**Why digital can feel safer than human:**
-- **No memory pressure:** Conversations don't accumulate into a "record" of doubt
-- **No evaluation:** No "right answer" to find, no test to pass
-- **No agenda:** AI has no stake in which path you choose
-- **No relationship risk:** Can't disappoint the AI, can't damage relationship
+## Technical Architecture
+
+### Tech Stack
+
+**Frontend:**
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS + Shadcn/ui components
+- Framer Motion (animations)
+- Zustand (state management)
+- React Hook Form + Zod (forms)
+
+**Backend:**
+- Next.js API Routes
+- Supabase (PostgreSQL database)
+- Supabase Auth
+- Supabase Storage (for storyboard images)
+
+**AI Services:**
+- OpenAI GPT-4 Turbo (chatbot, text generation, analysis)
+- DALL-E 3 or Stable Diffusion (storyboard images)
+- OpenAI Whisper API (speech-to-text)
+- ElevenLabs or OpenAI TTS (text-to-speech)
+
+**Deployment:**
+- Vercel
+
+### Database Schema
+
+Key tables:
+- `users` - User accounts
+- `user_profiles` - Stage 0 data
+- `role_swipes` - Stage 1 data
+- `course_selections` - Stage 2 data
+- `growth_reports` - Stage 3 data
+- `tournament_results` - Stage 4 data
+- `storyboards` - Stage 5 data
+- `chat_messages` - Chatbot conversations
 
 ---
 
-## Addressing "Exploration Without Action"
+## Success Metrics
 
-### The Concern
+### MVP Success Criteria
 
-If a Year 2 student uses the tool, realizes they want to switch tracks, but faces real structural barriers (prerequisite gaps, counselor pushback)—have we actually helped them?
+- One complete user journey start-to-finish
+- Data persistence across stages
+- AI chatbot functional in at least 2 stages
+- Demo-ready presentation flow
+- All 6 stages accessible and functional
 
-### Our Answer: Clarity Is the Outcome
+### Post-MVP Metrics
 
-**The tool's job is clarity, not action.** We help students understand:
-
-1. **Why they're doubting** (fit vs fear)
-   - Fit problem: "This path doesn't match who I am"
-   - Fear problem: "I'm scared of outcomes, but the path might be right"
-
-2. **If it's a fit problem:**
-   - Help them see the switching path clearly (prerequisites, timeline)
-   - Identify specific conversations to have with counselors
-   - Prepare them for those conversations
-
-3. **If it's a fear problem:**
-   - Help them see they might be in the right place
-   - Reduce anxiety by distinguishing doubt from misalignment
-   - Build conviction in current path
-
-**Key reframe:** Staying on the same path after exploration is also a valid outcome—it becomes an *active choice* rather than passive surrender.
+- Stage completion rates
+- Time to complete full journey
+- User satisfaction with recommendations
+- Return rate to dashboard
+- Course selection confidence scores
+- Alignment between recommendations and final choices
 
 ---
 
-## Non-Negotiable: Psychological Safety
+## Why This Works
 
-Exploration only works if it's **non-judgmental and socially safe—at every point.**
+### 1. Structured Reduces Overwhelm
 
-This means:
-- ❌ No visibility to peers, parents, or teachers
-- ❌ No record that "Year 2 student questioned their path"
-- ❌ No implication that doubt = weakness
-- ❌ No forced conclusions or premature certainty
+Breaking exploration into 6 stages makes the process manageable. Students know where they are and what's next.
 
-**Privacy considerations:**
-- No login required (or minimal, not tied to school ID)
-- No data stored that could be accessed by others
-- Explicit messaging: "This is not connected to your school"
-- Option to clear conversation history anytime
-- Design for plausible deniability
+### 2. Gamification Increases Engagement
 
-**This applies whether student is:**
-- Choosing for the first time
-- Reconsidering their choice
-- Processing regret
-- Exploring "what next"
+Swipe mechanics, tournaments, and drag-drop interfaces make exploration feel like discovery, not homework.
 
-**Without this safety:** Students will hide uncertainty and perform conviction even when misaligned—defeating the entire purpose.
+### 3. AI Synthesis Adds Value
+
+Multi-stage data analysis produces better insights than single assessments. Patterns across stages reveal deeper fit.
+
+### 4. Actionable Outcomes Build Confidence
+
+Students leave with concrete course selections, not just insights. This reduces anxiety and builds conviction.
+
+### 5. Dashboard Provides Clarity
+
+Visual progress tracking helps students understand their journey and revisit discoveries.
 
 ---
 
-## What We're NOT Solving
+## Addressing Potential Concerns
 
-To stay focused, we do **not** aim to:
+### "What if students don't complete all stages?"
 
-- ❌ Change Korean culture or reduce external pressure
-- ❌ Replace counselors or parents
-- ❌ Make switching tracks structurally easier
-- ❌ Guarantee admission outcomes
-- ❌ Force students to switch or stay
-- ❌ Fix CSAT or university admissions
+- Dashboard shows progress, encouraging completion
+- Each stage unlocks next, creating momentum
+- Stages can be revisited
+- Even partial completion provides value
 
-**We accept:** Cultural pressure, CSAT constraints, and structural limitations exist.  
-**We solve for:** What students can control—their internal clarity at every decision point.
+### "What if AI recommendations are wrong?"
 
----
+- Recommendations include alignment scores and rationale
+- Students can customize combinations
+- Multiple options provided (3 combinations)
+- Framework (Anchor vs Signal) gives students control
 
-## Tradeoffs We Accept
+### "What if students still feel overwhelmed?"
 
-**We prioritize:**
-- Ongoing clarity > One-time decisions
-- Honest doubt > Performed certainty
-- Reduced regret > Conventional outcomes
-- Psychological safety > Institutional adoption
-
-**We assume:**
-- Students will face uncertainty multiple times
-- Cultural pressure won't disappear
-- Many students will stay on conventional paths (and that's okay)
-- Even small reductions in fear compound over time
+- Progressive unlock reduces overwhelm
+- Each stage is self-contained
+- Dashboard shows clear progress
+- Can pause and return anytime
 
 ---
 
-## Value Proposition
+## Future Enhancements (Post-MVP)
 
-### For Students:
-> "You can question your path privately, at any point, without judgment—whether you're choosing, doubting, or reconsidering."
-
-### For The System:
-- Students navigate high school with less fear and more agency
-- Reduced long-term misalignment and regret
-- Better mental health outcomes
-- No need for structural or cultural change
-
----
-
-## Open Questions for PRD
-
-1. **Platform specifics:** Which messaging platform(s) for chatbot deployment?
-2. **Dashboard scope:** What should students be able to upload/track?
-3. **Onboarding:** How much context do we need before first conversation?
-4. **Conversation memory:** How much should the AI remember between sessions?
-5. **Escalation paths:** When/how to suggest professional counseling?
-6. **Content moderation:** How to handle mental health crisis signals?
-7. **Monetization:** Free? Freemium? Subscription?
+- More role pool expansion (beyond 50)
+- Advanced AI analysis with more sophisticated pattern recognition
+- Integration with school course catalogs
+- Parent/counselor sharing features (optional)
+- Mobile app version
+- Community features (optional, privacy-preserving)
 
 ---
 
 ## Summary
 
-We're building a private, AI-powered exploration space for Korean high school students to process path uncertainty throughout their journey—from initial track selection to ongoing doubt to final year clarity.
+SCOPE+ solves the career exploration problem by providing:
 
-**Core differentiators:**
-- **Reflective, not evaluative:** Helps students think, not tells them answers
-- **Ongoing, not one-time:** Available whenever doubt arises
-- **Private, not visible:** No connection to school, parents, or records
-- **Exploration, not advice:** No agenda about which path is "right"
+1. **Structured journey** - 6 progressive stages that build toward decisions
+2. **Gamified exploration** - Engaging activities that feel like discovery
+3. **AI synthesis** - Multi-stage data analysis produces better insights
+4. **Actionable outcomes** - Direct translation to course selections
+5. **Progress tracking** - Dashboard shows journey and insights
 
-**The strategic direction is clear:** Support honest navigation of uncertainty throughout high school, not just at one decision point.
+**The strategic direction:** Support systematic, engaging exploration that builds toward concrete, data-driven course recommendations.
 
 ---
 
