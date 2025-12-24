@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
+import { storage } from '@/lib/utils/storage';
 import { useI18n } from '@/lib/i18n';
 
 // Placeholder questions - will be expanded
@@ -44,18 +45,22 @@ export default function Stage0Page() {
     }
   };
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
     const strengths = answers['q1'] || [];
 
-    // Store strengths in localStorage for now
-    localStorage.setItem(`user_${userId}_strengths`, JSON.stringify(strengths));
+    // Store in localStorage
+    const profileData = {
+      userId,
+      strengths,
+      completedAt: new Date().toISOString(),
+    };
+    storage.set('userProfile', profileData);
 
     completeStage(0);
     router.push('/dashboard');
   };
 
   const canProceed = answers[question.id]?.length > 0;
-  const canGoBack = currentQ > 0;
 
   const handleBack = () => {
     if (currentQ > 0) {

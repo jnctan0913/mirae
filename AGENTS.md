@@ -1,4 +1,4 @@
-﻿# Repository Guidelines
+# Repository Guidelines
 
 This repository is a documentation-only project for **SCOPE+** (Dashboard-Based Career Exploration Platform). Keep changes focused on clarity, structure, and correctness of the written guidance.
 
@@ -89,3 +89,4 @@ Ensure all documentation:
 ---
 
 **End of AGENTS.md**
+

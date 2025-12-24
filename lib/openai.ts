@@ -1,14 +1,52 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI | null {
+  // Skip initialization during build time
+  // NEXT_PHASE is set during Next.js build process
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return null;
+  }
+
+  if (openai === null) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      // Only warn in non-build contexts
+      if (process.env.NEXT_PHASE !== 'phase-production-build') {
+        console.warn(
+          '⚠️ OPENAI_API_KEY environment variable is missing. OpenAI features will not work.'
+        );
+      }
+      return null;
+    }
+
+    try {
+      openai = new OpenAI({
+        apiKey,
+      });
+    } catch (error) {
+      // Handle any initialization errors gracefully
+      console.warn('⚠️ Failed to initialize OpenAI client:', error);
+      return null;
+    }
+  }
+
+  return openai;
+}
 
 export async function generateFollowUp(
   questionContext: string,
   userAnswer: string
 ): Promise<string> {
-  const response = await openai.chat.completions.create({
+  const client = getOpenAIClient();
+  if (!client) {
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  const response = await client.chat.completions.create({
     model: 'gpt-4-turbo-preview',
     messages: [
       {
@@ -35,11 +73,16 @@ DO NOT give advice or recommendations.`,
 export async function analyzeRoleSwipes(
   swipeData: Array<{ roleId: string; swipeDirection: string }>
 ): Promise<string> {
+  const client = getOpenAIClient();
+  if (!client) {
+    throw new Error('OpenAI API key is not configured');
+  }
+
   const swipeSummary = swipeData
     .map((s) => `${s.roleId}: ${s.swipeDirection}`)
     .join('\n');
 
-  const response = await openai.chat.completions.create({
+  const response = await client.chat.completions.create({
     model: 'gpt-4-turbo-preview',
     messages: [
       {
@@ -58,5 +101,11 @@ export async function analyzeRoleSwipes(
   return response.choices[0].message.content || '';
 }
 
-export default openai;
+// Export a getter function instead of the client directly
+export default getOpenAIClient;
+
+// Type guard to check if OpenAI is initialized
+export function isOpenAIConfigured(): boolean {
+  return getOpenAIClient() !== null;
+}
 

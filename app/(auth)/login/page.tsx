@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { signIn } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
@@ -38,10 +39,12 @@ export default function LoginPage() {
     >
       <div className="bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/60">
         <div className="flex justify-center mb-4">
-          <img
+          <Image
             src="/asset/Mirae_Icon1.png"
             alt="Mirae"
-            className="h-20 object-contain"
+            width={80}
+            height={80}
+            className="h-20 w-auto object-contain"
           />
         </div>
         <p className="text-slate-600 text-center mb-8">

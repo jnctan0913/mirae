@@ -37,13 +37,31 @@ export const useUserStore = create<UserStore>()(
       setUserId: (id) => set({ userId: id }),
 
       completeStage: (stage) =>
-        set((state) => ({
-          progress: {
-            ...state.progress,
-            [`stage${stage}Complete`]: true as any,
-            currentStage: Math.max(state.progress.currentStage, stage + 1),
-          },
-        })),
+        set((state) => {
+          const updatedProgress: UserProgress = { ...state.progress };
+          switch (stage) {
+            case 0:
+              updatedProgress.stage0Complete = true;
+              break;
+            case 1:
+              updatedProgress.stage1Complete = true;
+              break;
+            case 2:
+              updatedProgress.stage2Complete = true;
+              break;
+            case 3:
+              updatedProgress.stage3Complete = true;
+              break;
+            case 4:
+              updatedProgress.stage4Complete = true;
+              break;
+            case 5:
+              updatedProgress.stage5Complete = true;
+              break;
+          }
+          updatedProgress.currentStage = Math.max(state.progress.currentStage, stage + 1);
+          return { progress: updatedProgress };
+        }),
 
       setCurrentStage: (stage) =>
         set((state) => ({

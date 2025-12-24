@@ -2,34 +2,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  const session = req.cookies.get('auth_session')?.value;
-
-  // Protect dashboard routes
-  if (req.nextUrl.pathname.startsWith('/dashboard') && !session) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  // Protect stage routes
-  if (
-    req.nextUrl.pathname.match(/^\/stage\d+/) &&
-    !session
-  ) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  // Redirect logged-in users from auth pages
-  if (
-    (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup') &&
-    session
-  ) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
+  // Simple middleware - just allow all routes through
+  // Authentication is handled client-side with localStorage
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
+    '/',
     '/dashboard/:path*',
     '/login',
     '/signup',
@@ -41,3 +21,4 @@ export const config = {
     '/stage5/:path*',
   ],
 };
+

@@ -5,9 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 
+interface StoryboardPanel {
+  scene: string;
+  time: string;
+}
+
+interface Storyboard {
+  timeline: string;
+  panels: StoryboardPanel[];
+}
+
 export default function Stage5Page() {
   const [timeline, setTimeline] = useState('3-years');
-  const [storyboard, setStoryboard] = useState<any>(null);
+  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
   const router = useRouter();
   const { completeStage } = useUserStore();
   const { t } = useI18n();
@@ -71,7 +81,7 @@ export default function Stage5Page() {
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
             <h2 className="text-xl font-bold mb-4">{t('stage5StoryTitle')}</h2>
             <div className="grid grid-cols-3 gap-4">
-              {storyboard.panels.map((panel: any, idx: number) => (
+              {storyboard.panels.map((panel, idx) => (
                 <div key={idx} className="bg-gray-100 rounded-xl p-4 h-48 flex flex-col justify-center items-center">
                   <p className="text-sm text-gray-500 mb-2">{panel.time}</p>
                   <p className="text-center text-sm">{panel.scene}</p>
