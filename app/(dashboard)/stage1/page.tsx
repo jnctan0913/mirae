@@ -138,7 +138,7 @@ export default function Stage1Page() {
   const [shimmerDirection, setShimmerDirection] = useState<'left' | 'right' | null>(null);
   const [shimmerKey, setShimmerKey] = useState(0);
   const router = useRouter();
-  const { userId, completeStage } = useUserStore();
+  const { userId, completeStage, progress } = useUserStore();
   const { language } = useI18n();
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const dragActive = useRef(false);
@@ -183,7 +183,8 @@ export default function Stage1Page() {
     language === 'ko'
       ? '버튼을 누르거나 카드에서 스와이프해 보세요. 더 알고 싶다면 뒤집기.'
       : 'Tap the buttons, swipe the card, or flip for more.';
-  const progress = (currentIndex / roles.length) * 100;
+  const viewSummaryLabel = language === 'ko' ? '요약 보기' : 'View summary';
+  const progressPercent = (currentIndex / roles.length) * 100;
   const dragDistance = Math.hypot(dragOffset.x, dragOffset.y);
   const dragIntensity = Math.min(dragDistance / 140, 1);
   const likeOpacity =
@@ -354,26 +355,25 @@ export default function Stage1Page() {
               <span>
                 {currentIndex + 1} / {roles.length}
               </span>
-              <span>{Math.round(progress)}% complete</span>
+              <span>{Math.round(progressPercent)}% complete</span>
             </div>
             <div className="mt-3 h-2 rounded-full bg-white/70">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-sky-400 via-rose-300 to-amber-200 transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 text-xs text-slate-600">
-            <span className="rounded-full border border-white/70 bg-white/70 px-3 py-1">
-              {hintLeft}
-            </span>
-            <span className="rounded-full border border-white/70 bg-white/70 px-3 py-1">
-              {hintFlip}
-            </span>
-            <span className="rounded-full border border-white/70 bg-white/70 px-3 py-1">
-              {hintRight}
-            </span>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => router.push('/stage1/summary')}
+              disabled={!progress.stage1Complete}
+              className="px-8 py-3 rounded-full bg-slate-300 text-slate-800 shadow-sm transition-all duration-300 ease-out hover:bg-slate-400 disabled:opacity-50"
+            >
+              {viewSummaryLabel}
+            </button>
           </div>
         </div>
 

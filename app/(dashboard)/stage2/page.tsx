@@ -195,7 +195,7 @@ export default function Stage2Page() {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [savedSlots, setSavedSlots] = useState<SelectionSlot[]>([null, null, null]);
   const router = useRouter();
-  const { completeStage, userId } = useUserStore();
+  const { completeStage, userId, progress } = useUserStore();
   const { language, t } = useI18n();
   const selectedKeys = useMemo(() => new Set([...anchor, ...signal]), [anchor, signal]);
   const normalizedSearch = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
@@ -479,6 +479,7 @@ export default function Stage2Page() {
   const suggestionSubtitle = language === 'ko'
     ? 'AI ??? Stage 0/1 ???? ?? ??? ???? ?????.'
     : 'Suggestions are based on Stages 0/1, your uploads, and your current selections.';
+  const viewSummaryLabel = language === 'ko' ? '요약 보기' : 'View summary';
 
   const getDescription = (course: CourseLabel) => {
     const description = language === 'ko' ? course.description?.kr : course.description?.en;
@@ -558,7 +559,19 @@ export default function Stage2Page() {
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">{t('stage2Title')}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-bold text-center w-full md:w-auto">
+            {t('stage2Title')}
+          </h1>
+          <button
+            type="button"
+            onClick={() => router.push('/stage2/summary')}
+            disabled={!progress.stage2Complete}
+            className="rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-300 ease-out hover:bg-white disabled:opacity-50"
+          >
+            {viewSummaryLabel}
+          </button>
+        </div>
 
         <div className="bg-white/80 rounded-2xl p-6 mb-6 shadow-sm backdrop-blur border border-white/60">
           <div className="flex items-center justify-between gap-3">
@@ -941,12 +954,22 @@ export default function Stage2Page() {
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          className="mt-8 px-6 py-3 bg-slate-900 text-white rounded-full mx-auto block shadow-sm transition-all duration-300 ease-out hover:bg-slate-800"
-        >
-          {t('stage2Save')}
-        </button>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={handleSave}
+            className="px-6 py-3 bg-slate-900 text-white rounded-full shadow-sm transition-all duration-300 ease-out hover:bg-slate-800"
+          >
+            {t('stage2Save')}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/stage2/summary')}
+            disabled={!progress.stage2Complete}
+            className="px-8 py-3 rounded-full bg-slate-300 text-slate-800 shadow-sm transition-all duration-300 ease-out hover:bg-slate-400 disabled:opacity-50"
+          >
+            {viewSummaryLabel}
+          </button>
+        </div>
       </div>
     </div>
   );

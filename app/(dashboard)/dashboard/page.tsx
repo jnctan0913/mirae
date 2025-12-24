@@ -8,6 +8,7 @@ import { CheckCircle, Lock, Circle } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { storage } from '@/lib/utils/storage';
 import rolesData from '@/lib/data/roles.json';
+import coursesData from '@/lib/data/courses-descriptions.json';
 
 type RoleLocale = { en: string; ko: string };
 type RoleListLocale = { en: string[]; ko: string[] };
@@ -28,7 +29,111 @@ interface RoleSwipe {
   swipeDirection: 'left' | 'right' | 'up';
 }
 
+type CourseCategory = 'general' | 'career' | 'interdisciplinary';
+
+interface CourseLabel {
+  en: string;
+  kr: string;
+  description?: {
+    en: string | null;
+    kr: string | null;
+  };
+}
+
+interface CourseSubject {
+  id: number;
+  subject_en: string;
+  subject_kr: string;
+  electives: Record<CourseCategory, CourseLabel[]>;
+}
+
+interface CourseLookupItem extends CourseLabel {
+  subjectEn: string;
+  subjectKr: string;
+  category: CourseCategory;
+}
+
+type Stage2Selection = {
+  anchor: string[];
+  signal: string[];
+  savedAt: string;
+} | null;
+
 const roles = rolesData as RoleData[];
+const courses = coursesData as CourseSubject[];
+const categories: CourseCategory[] = ['general', 'career', 'interdisciplinary'];
+
+const createCourseKey = (
+  subjectEn: string,
+  category: CourseCategory,
+  courseEn: string
+) => `${subjectEn}::${category}::${courseEn}`;
+
+const strengthSignals: Record<
+  string,
+  { keywords: string[] }
+> = {
+  analytical: {
+    keywords: ['math', 'statistics', 'data', 'science', 'physics', 'chemistry', 'algebra', 'calculus'],
+  },
+  creative: {
+    keywords: ['art', 'music', 'theater', 'literature', 'media', 'writing', 'film'],
+  },
+  empathy: {
+    keywords: ['ethics', 'culture', 'psychology', 'human', 'society', 'social', 'law', 'politics', 'communication'],
+  },
+  organization: {
+    keywords: ['economics', 'law', 'politics', 'workplace', 'communication', 'planning'],
+  },
+};
+
+const roleSignals: Record<string, { keywords: string[] }> = {
+  'ux-designer': {
+    keywords: ['design', 'media', 'art', 'writing', 'communication'],
+  },
+  'data-scientist': {
+    keywords: ['data', 'statistics', 'math', 'informatics', 'science', 'ai'],
+  },
+  'product-manager': {
+    keywords: ['product', 'strategy', 'roadmap', 'business', 'user', 'market', 'growth'],
+  },
+  'software-engineer': {
+    keywords: ['software', 'computer', 'programming', 'coding', 'engineering', 'systems'],
+  },
+  'robotics-engineer': {
+    keywords: ['robot', 'robotics', 'automation', 'hardware', 'mechatronics', 'control'],
+  },
+  'environmental-scientist': {
+    keywords: ['environment', 'ecology', 'climate', 'sustainability', 'earth', 'biology'],
+  },
+  'biomedical-researcher': {
+    keywords: ['biomedical', 'biology', 'medicine', 'health', 'genetics', 'laboratory'],
+  },
+  'clinical-psychologist': {
+    keywords: ['psychology', 'mental', 'therapy', 'counseling', 'behavior', 'wellbeing'],
+  },
+  'social-entrepreneur': {
+    keywords: ['social', 'community', 'impact', 'entrepreneur', 'nonprofit', 'sustainability'],
+  },
+  'teacher-educator': {
+    keywords: ['education', 'teaching', 'learning', 'pedagogy', 'curriculum', 'school'],
+  },
+  journalist: {
+    keywords: ['journalism', 'media', 'reporting', 'writing', 'news', 'communication'],
+  },
+  'policy-analyst': {
+    keywords: ['policy', 'government', 'public', 'economics', 'regulation', 'civic'],
+  },
+  'brand-strategist': {
+    keywords: ['brand', 'marketing', 'strategy', 'advertising', 'storytelling', 'identity'],
+  },
+  'financial-analyst': {
+    keywords: ['finance', 'investment', 'accounting', 'economics', 'markets', 'business'],
+  },
+  'urban-planner': {
+    keywords: ['urban', 'city', 'planning', 'architecture', 'infrastructure', 'transportation'],
+  },
+};
 
 const stages = [
   { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0' },
@@ -44,6 +149,9 @@ export default function DashboardPage() {
   const { progress, userId, setUserId, reset } = useUserStore();
   const [userName, setUserName] = useState('');
   const [likedRoleIds, setLikedRoleIds] = useState<string[]>([]);
+  const [stage2Selection, setStage2Selection] = useState<Stage2Selection>(null);
+  const [strengths, setStrengths] = useState<string[]>([]);
+  const [docKeywords, setDocKeywords] = useState<string[]>([]);
   const { t, language } = useI18n();
 
   useEffect(() => {
@@ -74,6 +182,21 @@ export default function DashboardPage() {
       .filter((swipe) => swipe.swipeDirection === 'right')
       .map((swipe) => swipe.roleId);
     setLikedRoleIds(Array.from(new Set(liked)));
+  }, []);
+
+  useEffect(() => {
+    const selectionKey = `stage2Selection_${userId ?? 'guest'}`;
+    const savedSelection = storage.get<Stage2Selection>(selectionKey, null);
+    setStage2Selection(savedSelection);
+  }, [userId]);
+
+  useEffect(() => {
+    const profile = storage.get<{
+      strengths?: string[];
+      docKeywords?: string[];
+    }>('userProfile');
+    setStrengths(profile?.strengths ?? []);
+    setDocKeywords(profile?.docKeywords ?? []);
   }, []);
 
   const handleSignOut = () => {
@@ -111,6 +234,60 @@ export default function DashboardPage() {
     () => roles.filter((role) => likedRoleIds.includes(role.id)),
     [likedRoleIds]
   );
+  const courseLookup = useMemo(() => {
+    const lookup = new Map<string, CourseLookupItem>();
+    courses.forEach((subject) => {
+      categories.forEach((category) => {
+        subject.electives[category].forEach((course) => {
+          const key = createCourseKey(subject.subject_en, category, course.en);
+          lookup.set(key, {
+            ...course,
+            subjectEn: subject.subject_en,
+            subjectKr: subject.subject_kr,
+            category,
+          });
+        });
+      });
+    });
+    return lookup;
+  }, []);
+
+  const stage2Alignment = useMemo(() => {
+    if (!stage2Selection) {
+      return { score: 0, strengthCount: 0, roleCount: 0, docCount: 0, total: 0 };
+    }
+    const selectedKeys = [...stage2Selection.anchor, ...stage2Selection.signal];
+    const selected = selectedKeys
+      .map((key) => courseLookup.get(key))
+      .filter((course): course is CourseLookupItem => Boolean(course));
+
+    const roleKeywords = likedRoleIds
+      .map((roleId) => roleSignals[roleId]?.keywords ?? [])
+      .flat();
+    const strengthKeywords = strengths
+      .map((strength) => strengthSignals[strength]?.keywords ?? [])
+      .flat();
+    const docTokens = docKeywords.map((token) => token.toLowerCase());
+
+    const matches = selected.map((course) => {
+      const courseEn = course.en.toLowerCase();
+      const courseKr = course.kr.toLowerCase();
+      const hasStrength = strengthKeywords.some((keyword) => courseEn.includes(keyword));
+      const hasRole = roleKeywords.some((keyword) => courseEn.includes(keyword));
+      const hasDocs = docTokens.some(
+        (token) => courseEn.includes(token) || courseKr.includes(token)
+      );
+      return { hasStrength, hasRole, hasDocs };
+    });
+
+    const total = selected.length;
+    const strengthCount = matches.filter((m) => m.hasStrength).length;
+    const roleCount = matches.filter((m) => m.hasRole).length;
+    const docCount = matches.filter((m) => m.hasDocs).length;
+    const anyCount = matches.filter((m) => m.hasStrength || m.hasRole || m.hasDocs).length;
+    const score = total === 0 ? 0 : Math.round((anyCount / total) * 100);
+    return { score, strengthCount, roleCount, docCount, total };
+  }, [stage2Selection, courseLookup, likedRoleIds, strengths, docKeywords]);
 
   return (
     <div
@@ -218,6 +395,43 @@ export default function DashboardPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {stage2Selection && stage2Alignment.total > 0 && (
+          <div className="glass-card rounded-3xl p-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-white/10 pointer-events-none" />
+            <div className="relative space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm text-slate-600">Stage 2 summary</p>
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Course selections
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/stage2/summary')}
+                  className="rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-300 ease-out hover:bg-white"
+                >
+                  View summary
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-3 text-xs text-slate-600">
+                <span className="rounded-full border border-white/70 bg-white/80 px-3 py-1">
+                  Fit score: {stage2Alignment.score}%
+                </span>
+                <span className="rounded-full border border-white/70 bg-white/80 px-3 py-1">
+                  Strengths: {stage2Alignment.strengthCount}
+                </span>
+                <span className="rounded-full border border-white/70 bg-white/80 px-3 py-1">
+                  Roles: {stage2Alignment.roleCount}
+                </span>
+                <span className="rounded-full border border-white/70 bg-white/80 px-3 py-1">
+                  Uploads: {stage2Alignment.docCount}
+                </span>
               </div>
             </div>
           </div>
