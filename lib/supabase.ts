@@ -2,10 +2,8 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { createClient } from '@supabase/supabase-js';
 
 // Client-side Supabase client
-export const supabase = createClientComponentClient({
-  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-});
+// createClientComponentClient automatically reads from NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+export const supabase = createClientComponentClient();
 
 // Server-side/admin client (for API routes)
 export const supabaseAdmin = createClient(
