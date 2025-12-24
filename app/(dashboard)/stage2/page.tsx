@@ -245,6 +245,7 @@ export default function Stage2Page() {
       likedRoles?: string[];
       onboardingKeywords?: string[];
       uploadedDocs?: string[];
+      docKeywords?: string[];
     }>('userProfile');
     if (profile?.strengths) {
       setStrengths(profile.strengths);
@@ -281,6 +282,7 @@ export default function Stage2Page() {
     const keywordSource = [
       ...(profile?.onboardingKeywords ?? []),
       ...(profile?.uploadedDocs ?? []),
+      ...(profile?.docKeywords ?? []),
     ];
     if (keywordSource.length > 0) {
       const tokens = Array.from(new Set(keywordSource.flatMap((item) => tokenize(item))));

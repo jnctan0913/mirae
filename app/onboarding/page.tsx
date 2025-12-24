@@ -68,6 +68,58 @@ export default function OnboardingPage() {
     });
   };
 
+  const extractKeywords = (text: string) =>
+    text
+      .toLowerCase()
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter((token) => token.length >= 2);
+
+  const readPdfText = async (file: File) => {
+    const pdfjsLib = await import('pdfjs-dist/build/pdf');
+    const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      (pdfjsWorker as { default?: string }).default ?? (pdfjsWorker as string);
+    const data = new Uint8Array(await file.arrayBuffer());
+    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    let text = '';
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      const page = await pdf.getPage(pageNumber);
+      const content = await page.getTextContent();
+      const pageText = (content.items as Array<{ str?: string }>)
+        .map((item) => item.str ?? '')
+        .join(' ');
+      text = `${text} ${pageText}`;
+    }
+    return text;
+  };
+
+  const readTextFile = (file: File) =>
+    new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ''));
+      reader.onerror = () => resolve('');
+      reader.readAsText(file);
+    });
+
+  const extractKeywordsFromFile = async (file: File) => {
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if (isPdf) {
+      try {
+        const text = await readPdfText(file);
+        return extractKeywords(text);
+      } catch (error) {
+        console.error('Failed to extract PDF text:', error);
+        return [];
+      }
+    }
+    const textLike =
+      file.type.startsWith('text/') ||
+      /\.(txt|md|csv|tsv|log)$/i.test(file.name);
+    if (!textLike) return [];
+    const text = await readTextFile(file);
+    return extractKeywords(text);
+  };
+
   const handleOptionClick = (optionKey: string) => {
     appendMessage({ role: 'user', text: optionKey });
     appendMessage({
@@ -95,13 +147,22 @@ export default function OnboardingPage() {
     appendMessage({ role: 'bot', text: 'onboardingThanks' });
   };
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     const names = files.map((f) => f.name);
+    const keywordSets = await Promise.all(files.map((file) => extractKeywordsFromFile(file)));
+    const extractedDocKeywords = Array.from(new Set(keywordSets.flat()));
     setUploads((prev) => {
       const next = [...prev, ...names];
-      persistProfile({ uploadedDocs: next });
+      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+      const existingKeywords = Array.isArray(profile.docKeywords)
+        ? (profile.docKeywords as string[])
+        : [];
+      const mergedKeywords = Array.from(
+        new Set([...existingKeywords, ...extractedDocKeywords])
+      );
+      persistProfile({ uploadedDocs: next, docKeywords: mergedKeywords });
       return next;
     });
     appendMessage({ role: 'bot', text: 'onboardingUploadConfirm' });
