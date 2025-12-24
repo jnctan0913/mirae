@@ -103,12 +103,77 @@ const roleSignals: Record<
   'ux-designer': {
     keywords: ['design', 'media', 'art', 'writing', 'communication'],
     reasonEn: 'Related to roles you liked (UX)',
-    reasonKo: '?? ??(UX)? ????',
+    reasonKo: 'Related to roles you liked (UX)',
   },
   'data-scientist': {
     keywords: ['data', 'statistics', 'math', 'informatics', 'science', 'ai'],
     reasonEn: 'Related to roles you liked (data/AI)',
-    reasonKo: '?? ??(???/AI)? ????',
+    reasonKo: 'Related to roles you liked (data/AI)',
+  },
+  'product-manager': {
+    keywords: ['product', 'strategy', 'roadmap', 'business', 'user', 'market', 'growth'],
+    reasonEn: 'Related to roles you liked (product)',
+    reasonKo: 'Related to roles you liked (product)',
+  },
+  'software-engineer': {
+    keywords: ['software', 'computer', 'programming', 'coding', 'engineering', 'systems'],
+    reasonEn: 'Related to roles you liked (engineering)',
+    reasonKo: 'Related to roles you liked (engineering)',
+  },
+  'robotics-engineer': {
+    keywords: ['robot', 'robotics', 'automation', 'hardware', 'mechatronics', 'control'],
+    reasonEn: 'Related to roles you liked (robotics)',
+    reasonKo: 'Related to roles you liked (robotics)',
+  },
+  'environmental-scientist': {
+    keywords: ['environment', 'ecology', 'climate', 'sustainability', 'earth', 'biology'],
+    reasonEn: 'Related to roles you liked (environment)',
+    reasonKo: 'Related to roles you liked (environment)',
+  },
+  'biomedical-researcher': {
+    keywords: ['biomedical', 'biology', 'medicine', 'health', 'genetics', 'laboratory'],
+    reasonEn: 'Related to roles you liked (biomedical)',
+    reasonKo: 'Related to roles you liked (biomedical)',
+  },
+  'clinical-psychologist': {
+    keywords: ['psychology', 'mental', 'therapy', 'counseling', 'behavior', 'wellbeing'],
+    reasonEn: 'Related to roles you liked (psychology)',
+    reasonKo: 'Related to roles you liked (psychology)',
+  },
+  'social-entrepreneur': {
+    keywords: ['social', 'community', 'impact', 'entrepreneur', 'nonprofit', 'sustainability'],
+    reasonEn: 'Related to roles you liked (social impact)',
+    reasonKo: 'Related to roles you liked (social impact)',
+  },
+  'teacher-educator': {
+    keywords: ['education', 'teaching', 'learning', 'pedagogy', 'curriculum', 'school'],
+    reasonEn: 'Related to roles you liked (education)',
+    reasonKo: 'Related to roles you liked (education)',
+  },
+  journalist: {
+    keywords: ['journalism', 'media', 'reporting', 'writing', 'news', 'communication'],
+    reasonEn: 'Related to roles you liked (journalism)',
+    reasonKo: 'Related to roles you liked (journalism)',
+  },
+  'policy-analyst': {
+    keywords: ['policy', 'government', 'public', 'economics', 'regulation', 'civic'],
+    reasonEn: 'Related to roles you liked (policy)',
+    reasonKo: 'Related to roles you liked (policy)',
+  },
+  'brand-strategist': {
+    keywords: ['brand', 'marketing', 'strategy', 'advertising', 'storytelling', 'identity'],
+    reasonEn: 'Related to roles you liked (brand)',
+    reasonKo: 'Related to roles you liked (brand)',
+  },
+  'financial-analyst': {
+    keywords: ['finance', 'investment', 'accounting', 'economics', 'markets', 'business'],
+    reasonEn: 'Related to roles you liked (finance)',
+    reasonKo: 'Related to roles you liked (finance)',
+  },
+  'urban-planner': {
+    keywords: ['urban', 'city', 'planning', 'architecture', 'infrastructure', 'transportation'],
+    reasonEn: 'Related to roles you liked (urban planning)',
+    reasonKo: 'Related to roles you liked (urban planning)',
   },
 };
 
@@ -120,6 +185,7 @@ export default function Stage2Page() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<number>(courses[0]?.id ?? 0);
   const [strengths, setStrengths] = useState<string[]>([]);
   const [likedRoles, setLikedRoles] = useState<string[]>([]);
+  const [docKeywords, setDocKeywords] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const router = useRouter();
   const { completeStage } = useUserStore();
@@ -174,9 +240,53 @@ export default function Stage2Page() {
   }, []);
 
   useEffect(() => {
-    const profile = storage.get<{ strengths?: string[]; likedRoles?: string[] }>('userProfile');
+    const profile = storage.get<{
+      strengths?: string[];
+      likedRoles?: string[];
+      onboardingKeywords?: string[];
+      uploadedDocs?: string[];
+    }>('userProfile');
     if (profile?.strengths) {
       setStrengths(profile.strengths);
+    }
+
+    const docStopWords = new Set([
+      'pdf',
+      'doc',
+      'docx',
+      'hwp',
+      'txt',
+      'png',
+      'jpg',
+      'jpeg',
+      'zip',
+      'ppt',
+      'pptx',
+      'xls',
+      'xlsx',
+      'final',
+      'draft',
+      'copy',
+      'portfolio',
+      'resume',
+      'certificate',
+      'certificates',
+      '생기부',
+    ]);
+    const tokenize = (value: string) =>
+      value
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((token) => token.length >= 2 && !docStopWords.has(token));
+    const keywordSource = [
+      ...(profile?.onboardingKeywords ?? []),
+      ...(profile?.uploadedDocs ?? []),
+    ];
+    if (keywordSource.length > 0) {
+      const tokens = Array.from(new Set(keywordSource.flatMap((item) => tokenize(item))));
+      setDocKeywords(tokens);
+    } else {
+      setDocKeywords([]);
     }
 
     const storedLiked = profile?.likedRoles ?? [];
@@ -244,6 +354,22 @@ export default function Stage2Page() {
             }
           });
 
+          if (docKeywords.length > 0) {
+            const courseLabelLowerKr = course.kr.toLowerCase();
+            const matches = docKeywords.filter(
+              (keyword) =>
+                courseLabelLower.includes(keyword) || courseLabelLowerKr.includes(keyword)
+            );
+            if (matches.length > 0) {
+              score += Math.min(2, matches.length);
+              reasons.add(
+                language === 'ko'
+                  ? 'Based on your uploaded docs'
+                  : 'Based on your uploaded docs'
+              );
+            }
+          }
+
           likedRoles.forEach((roleId) => {
             const signal = roleSignals[roleId];
             if (!signal) return;
@@ -279,7 +405,7 @@ export default function Stage2Page() {
         key,
         ...value,
       }));
-  }, [likedRoles, strengths, selectedKeys, language]);
+  }, [likedRoles, strengths, selectedKeys, language, docKeywords]);
 
   const getRecommendedBucket = (category: CourseCategory, score: number) => {
     if (category === 'general' || score >= 4) return 'anchor';
@@ -324,7 +450,7 @@ export default function Stage2Page() {
   const infoLabel = language === 'ko' ? '?? ??' : 'View description';
   const suggestionSubtitle = language === 'ko'
     ? 'AI ??? Stage 0/1 ???? ?? ??? ???? ?????.'
-    : 'Suggestions are based on Stages 0/1 and your current selections.';
+    : 'Suggestions are based on Stages 0/1, your uploads, and your current selections.';
 
   const getDescription = (course: CourseLabel) => {
     const description = language === 'ko' ? course.description?.kr : course.description?.en;

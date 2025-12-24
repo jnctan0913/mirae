@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getUser } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
+import { storage } from '@/lib/utils/storage';
 
 interface Message {
   role: 'bot' | 'user';
@@ -59,6 +60,14 @@ export default function OnboardingPage() {
     setMessages((prev) => [...prev, message]);
   };
 
+  const persistProfile = (patch: Record<string, unknown>) => {
+    const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+    storage.set('userProfile', {
+      ...profile,
+      ...patch,
+    });
+  };
+
   const handleOptionClick = (optionKey: string) => {
     appendMessage({ role: 'user', text: optionKey });
     appendMessage({
@@ -72,7 +81,11 @@ export default function OnboardingPage() {
         : optionKey === 'onboardingAnswerCreating'
           ? 'Maker mindset'
           : 'Open to explore';
-    setKeywords((prev) => Array.from(new Set([...prev, keyword])));
+    setKeywords((prev) => {
+      const next = Array.from(new Set([...prev, keyword]));
+      persistProfile({ onboardingKeywords: next });
+      return next;
+    });
   };
 
   const handleSend = () => {
@@ -86,7 +99,11 @@ export default function OnboardingPage() {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     const names = files.map((f) => f.name);
-    setUploads((prev) => [...prev, ...names]);
+    setUploads((prev) => {
+      const next = [...prev, ...names];
+      persistProfile({ uploadedDocs: next });
+      return next;
+    });
     appendMessage({ role: 'bot', text: 'onboardingUploadConfirm' });
   };
 
