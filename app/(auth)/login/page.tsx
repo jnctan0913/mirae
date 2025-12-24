@@ -12,7 +12,6 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
     // Check if user is already logged in
     const user = storage.get('user');
     if (user) {
