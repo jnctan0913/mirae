@@ -1303,6 +1303,11 @@ export default function MiraePlusStatement() {
   const handleAccessoryChange = (newAccessories: EquippedAccessories) => {
     setEquippedAccessories(newAccessories);
     localStorage.setItem('miraePlus_accessories', JSON.stringify(newAccessories));
+    
+    // Dispatch custom event to notify other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('miraeAccessoriesUpdated'));
+    }
   };
 
   const handleUpdateCard = (cardId: string, updates: { title?: string; description?: string }) => {

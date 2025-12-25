@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, Lock, Circle, ChevronLeft, ChevronRight, Sprout } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
+import { MiraeCharacter, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
 
 const stages = [
   { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0', letter: 'S', promptKey: 'journeyPromptStrengths' },
@@ -21,6 +22,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { progress, userId, setUserId, reset } = useUserStore();
   const [userName, setUserName] = useState('');
+  const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
+  const [cardCount, setCardCount] = useState(0);
   const { t } = useI18n();
 
   useEffect(() => {
@@ -42,8 +45,51 @@ export default function DashboardPage() {
       if (localStorage.getItem(onboardingKey) !== 'true') {
         router.push('/onboarding');
       }
+
+      // Load accessories and card count from localStorage
+      const savedAccessories = localStorage.getItem('miraePlus_accessories');
+      const savedCards = localStorage.getItem('miraePlus_cards');
+      
+      if (savedAccessories) {
+        setEquippedAccessories(JSON.parse(savedAccessories));
+      }
+      
+      if (savedCards) {
+        const cards = JSON.parse(savedCards);
+        const unlockedCount = cards.filter((c: any) => c.unlocked).length;
+        setCardCount(unlockedCount);
+      }
     }
   }, [router, setUserId, t, userId]);
+
+  // Listen for storage changes to update accessories in real-time
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedAccessories = localStorage.getItem('miraePlus_accessories');
+      const savedCards = localStorage.getItem('miraePlus_cards');
+      
+      if (savedAccessories) {
+        setEquippedAccessories(JSON.parse(savedAccessories));
+      }
+      
+      if (savedCards) {
+        const cards = JSON.parse(savedCards);
+        const unlockedCount = cards.filter((c: any) => c.unlocked).length;
+        setCardCount(unlockedCount);
+      }
+    };
+
+    // Listen for storage events (cross-tab updates)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom events (same-tab updates)
+    window.addEventListener('miraeAccessoriesUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('miraeAccessoriesUpdated', handleStorageChange);
+    };
+  }, []);
 
   const handleSignOut = () => {
     signOut();
@@ -137,13 +183,15 @@ export default function DashboardPage() {
             className="absolute -top-8 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
             title="View your collection"
           >
-            <Image
-              src="/asset/Mirae_Icon1.png"
-              alt="Mirae"
-              width={150}
-              height={150}
-              className="object-contain floating"
-            />
+            <div className="floating">
+              <MiraeCharacter
+                key={JSON.stringify(equippedAccessories)}
+                cardCount={cardCount}
+                recentCardTypes={[]}
+                size={150}
+                equippedAccessories={equippedAccessories}
+              />
+            </div>
             <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors" />
           </button>
 
