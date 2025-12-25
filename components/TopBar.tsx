@@ -7,6 +7,7 @@ import { useI18n } from '@/lib/i18n';
 import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
 import { ensureUserProfile, getUserProfile, resetUserProfile } from '@/lib/userProfile';
+import { withBasePath } from '@/lib/basePath';
 
 export default function TopBar() {
   const router = useRouter();
@@ -74,7 +75,7 @@ export default function TopBar() {
   const handleSignOut = () => {
     signOut();
     reset();
-    router.push('/login');
+    router.push(withBasePath('/login'));
     router.refresh();
   };
 
@@ -82,7 +83,7 @@ export default function TopBar() {
     resetUserProfile();
     reset();
     handleCloseSettings();
-    router.replace('/onboarding');
+    router.replace(withBasePath('/onboarding'));
   };
 
   const handleCloseSettings = () => {
@@ -105,7 +106,7 @@ export default function TopBar() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push(withBasePath('/dashboard'))}
                 className="flex items-center gap-1 px-2 py-2 rounded-full hover:bg-white/70 transition text-slate-700"
                 title={t('home')}
               >

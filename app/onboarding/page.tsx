@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { Sprout } from 'lucide-react';
 import { SmartOnboardingChat } from '@/components/onboarding/SmartOnboardingChat';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
+import { withBasePath } from '@/lib/basePath';
 import { getUserProfile, resetUserProfile, updateProfileFromOnboarding, updateUserProfile } from '@/lib/userProfile';
 
 export default function OnboardingPage() {
@@ -22,7 +23,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     const user = getUser();
     if (!user) {
-      router.push('/login');
+      router.push(withBasePath('/login'));
       return;
     }
     setUserId(user.id);
@@ -39,11 +40,11 @@ export default function OnboardingPage() {
         } else {
           updateUserProfile({ onboardingCompleted: false });
         }
-        router.replace('/onboarding');
+        router.replace(withBasePath('/onboarding'));
         return;
       }
       if (profile.onboardingCompleted) {
-        router.push('/dashboard');
+        router.push(withBasePath('/dashboard'));
       }
     }
   }, [router, setUserId]);
@@ -51,7 +52,7 @@ export default function OnboardingPage() {
   const handleFinish = () => {
     const user = getUser();
     if (!user) {
-      router.push('/login');
+      router.push(withBasePath('/login'));
       return;
     }
     const profile = getUserProfile();
@@ -111,7 +112,7 @@ export default function OnboardingPage() {
       });
     }
     updateUserProfile({ onboardingCompleted: true });
-    router.push('/dashboard');
+    router.push(withBasePath('/dashboard'));
   };
 
   const displayKeywords = state.extractedKeywords.filter(k => !k.isRemoved).map(k => k.text);

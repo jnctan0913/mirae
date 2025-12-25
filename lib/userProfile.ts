@@ -69,6 +69,14 @@ export type UserProfile = {
     flexibility?: string;
   };
   reflections?: Record<string, string>;
+  reflectionSessions?: Array<{
+    id: string;
+    createdAt: string;
+    summary: string;
+    insights: string[];
+    keywords: string[];
+    transcript: string;
+  }>;
   customCardTags?: Record<string, string[]>;
   reportSources?: {
     executiveText?: string;
@@ -139,6 +147,16 @@ export type UserProfile = {
     valuesSignals?: string[];
   };
   likedRoles?: string[];
+  aiGeneratedRoles?: Array<{
+    id: string;
+    title: { en: string; ko: string };
+    tagline: { en: string; ko: string };
+    domain: { en: string; ko: string };
+    roleModels: { en: string[]; ko: string[] };
+    companies: { en: string[]; ko: string[] };
+    details: { en: string; ko: string };
+    resources: { en: string[]; ko: string[] };
+  }>;
   onboardingCompleted?: boolean;
   activityLogs?: ActivityLogEntry[];
   analytics: {
@@ -167,6 +185,8 @@ const DEFAULT_PROFILE: UserProfile = {
   },
   strengthTags: [],
   interests: [],
+  reflections: {},
+  reflectionSessions: [],
   onboarding: {},
   avatar: {
     collectedCards: [],
@@ -326,7 +346,7 @@ export const updateProfileFromOnboarding = (context: Partial<OnboardingContext>)
   return updateUserProfile(updates);
 };
 
-export const updateProfileAnalytics = (logs: ActivityLog[]) => {
+export const updateProfileAnalytics = (logs: ActivityLogEntry[]) => {
   if (!Array.isArray(logs)) return;
   const dates = logs.map((log) => log.date).sort();
   updateUserProfile({

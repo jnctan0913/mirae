@@ -37,12 +37,13 @@ export async function POST(request: NextRequest) {
       filename: filename
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error saving conversation:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        error: errorMessage,
         message: 'Failed to save conversation'
       },
       { status: 500 }

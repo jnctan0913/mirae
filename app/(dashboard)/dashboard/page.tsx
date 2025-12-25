@@ -9,6 +9,7 @@ import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
 import { MiraeCharacter, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
 import { getUserProfile } from '@/lib/userProfile';
+import { withBasePath } from '@/lib/basePath';
 
 const stages = [
   { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0', letter: 'S', promptKey: 'journeyPromptStrengths' },
@@ -50,7 +51,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const user = getUser();
     if (!user) {
-      router.push('/login');
+      router.push(withBasePath('/login'));
       return;
     }
 
@@ -61,7 +62,7 @@ export default function DashboardPage() {
     const profile = getUserProfile();
 
     if (!profile.onboardingCompleted) {
-      router.push('/onboarding');
+      router.push(withBasePath('/onboarding'));
     }
 
     if (profile.avatar?.equippedAccessories) {
@@ -186,7 +187,7 @@ export default function DashboardPage() {
         <div className="relative flex-shrink-0">
           {/* Mirae Character */}
           <button
-            onClick={() => router.push('/collection')}
+            onClick={() => router.push(withBasePath('/collection'))}
             className="absolute -top-12 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
             title="View your collection"
             type="button"
@@ -342,10 +343,8 @@ export default function DashboardPage() {
                           <button
                             onClick={() => {
                               if (viewingStage && !isViewingStageLocked) {
-                                console.log('Navigating to stage:', viewingStage.path);
-                                router.push(viewingStage.path);
+                                router.push(withBasePath(viewingStage.path));
                               } else {
-                                console.log('Cannot navigate - locked or no stage:', { isViewingStageLocked, viewingStage });
                               }
                             }}
                             disabled={isViewingStageLocked}
@@ -413,10 +412,8 @@ export default function DashboardPage() {
                           <button
                             onClick={() => {
                               if (viewingStage && !isViewingStageLocked) {
-                                console.log('Navigating to stage:', viewingStage.path);
-                                router.push(viewingStage.path);
+                                router.push(withBasePath(viewingStage.path));
                               } else {
-                                console.log('Cannot navigate - locked or no stage:', { isViewingStageLocked, viewingStage });
                               }
                             }}
                             disabled={isViewingStageLocked}

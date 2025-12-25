@@ -2,10 +2,10 @@
 import OpenAI from 'openai';
 
 interface UserProfile {
-  questionnaireAnswers: Record<string, any[]>;
+  questionnaireAnswers: Record<string, string[]>;
   keywords: string[];
   documents?: { text: string; type: string }[];
-  personalityIndicators?: Record<string, any>;
+  personalityIndicators?: Record<string, string | number | boolean>;
 }
 
 interface CareerDetails {
@@ -202,7 +202,8 @@ JSON Structure:
 Only populate the language you're generating for. Leave other language arrays empty.
 `;
   }
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private getFallbackData(roleId: string, language: 'en' | 'ko'): AICareerData {
     // Fallback data if AI fails
     const fallbacks: Record<string, CareerDetails> = {
@@ -243,7 +244,7 @@ Only populate the language you're generating for. Leave other language arrays em
       // Add more fallbacks as needed
     };
     
-    const fallback = fallbacks[roleId] || this.getGenericFallback(language);
+    const fallback = fallbacks[roleId] || this.getGenericFallback();
     
     return {
       ...fallback,
@@ -252,7 +253,7 @@ Only populate the language you're generating for. Leave other language arrays em
     };
   }
   
-  private getGenericFallback(language: 'en' | 'ko'): CareerDetails {
+  private getGenericFallback(): CareerDetails {
     return {
       roleModels: {
         en: ['Industry Leader 1', 'Innovator 2', 'Expert 3'],

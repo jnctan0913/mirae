@@ -6,7 +6,8 @@ import { useI18n } from '@/lib/i18n';
 import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 import coursesData from '@/lib/data/courses-descriptions.json';
 import rolesData from '@/lib/data/roles.json';
-import { Zap, Heart, Sparkles, FileText } from 'lucide-react';
+import { Zap, Heart, FileText } from 'lucide-react';
+import { withBasePath } from '@/lib/basePath';
 
 type CourseCategory = 'general' | 'career' | 'interdisciplinary';
 
@@ -182,7 +183,6 @@ export default function Stage2SummaryPage() {
   const [selection, setSelection] = useState<SavedSelection>(null);
   const [strengths, setStrengths] = useState<string[]>([]);
   const [likedRoles, setLikedRoles] = useState<string[]>([]);
-  const [stage0Roles, setStage0Roles] = useState<string[]>([]);
   const [docKeywords, setDocKeywords] = useState<string[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -203,7 +203,6 @@ export default function Stage2SummaryPage() {
         );
     setStrengths(derivedStrengths);
     setLikedRoles(profile?.likedRoles ?? []);
-    setStage0Roles(profile.stage0Summary?.recommendedRoles ?? []);
     const docStopWords = new Set([
       'pdf',
       'doc',
@@ -290,12 +289,6 @@ export default function Stage2SummaryPage() {
     .map((roleId) => roles.find((role) => role.id === roleId))
     .map((role) => (role ? (language === 'ko' ? role.title.ko : role.title.en) : null))
     .filter((label): label is string => Boolean(label));
-  const stage0RoleLabels = stage0Roles
-    .filter((roleId) => !likedRoles.includes(roleId))
-    .map((roleId) => roles.find((role) => role.id === roleId))
-    .map((role) => (role ? (language === 'ko' ? role.title.ko : role.title.en) : null))
-    .filter((label): label is string => Boolean(label));
-
   const selectedCourses = useMemo(() => {
     if (!selection) return { required: [], electives: [] };
     const required = selection.anchor
@@ -417,7 +410,7 @@ export default function Stage2SummaryPage() {
   const handleRedo = () => {
     updateUserProfile({ stage2Selection: undefined });
     setSelection(null);
-    router.push('/stage2');
+    router.push(withBasePath('/stage2'));
   };
 
   if (!selection) {
@@ -432,7 +425,7 @@ export default function Stage2SummaryPage() {
             <p className="mt-2 text-sm text-slate-600">{emptyLabel}</p>
             <button
               type="button"
-              onClick={() => router.push('/stage2')}
+              onClick={() => router.push(withBasePath('/stage2'))}
               className="mt-6 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-300 ease-out hover:bg-slate-800"
             >
               {backLabel}
@@ -478,7 +471,6 @@ export default function Stage2SummaryPage() {
                 <div className="space-y-2 max-h-[220px] overflow-y-auto">
                   {selectedCourses.required.map((course) => {
                     const courseLabel = language === 'ko' ? course.kr : course.en;
-                    const subjectLabel = language === 'ko' ? course.subjectKr : course.subjectEn;
                     return (
                       <div
                         key={`${course.subjectEn}-${course.category}-${course.en}`}
@@ -502,7 +494,6 @@ export default function Stage2SummaryPage() {
                 <div className="space-y-2 max-h-[220px] overflow-y-auto">
                   {selectedCourses.electives.map((course) => {
                     const courseLabel = language === 'ko' ? course.kr : course.en;
-                    const subjectLabel = language === 'ko' ? course.subjectKr : course.subjectEn;
                     return (
                       <div
                         key={`${course.subjectEn}-${course.category}-${course.en}`}
@@ -662,7 +653,7 @@ export default function Stage2SummaryPage() {
             <div className="flex flex-wrap items-center justify-center gap-3 mt-3">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push(withBasePath('/dashboard'))}
                 className="rounded-full border border-white/70 bg-white/80 px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 ease-out hover:bg-white"
               >
                 {dashboardLabel}
@@ -676,7 +667,7 @@ export default function Stage2SummaryPage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push('/stage3')}
+                onClick={() => router.push(withBasePath('/stage3'))}
                 className="rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 ease-out hover:bg-slate-800"
               >
                 {nextStageLabel}

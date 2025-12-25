@@ -5,6 +5,7 @@ import { signIn } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { getUserProfile } from '@/lib/userProfile';
+import { withBasePath } from '@/lib/basePath';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -27,7 +28,7 @@ export default function LoginPage() {
     } else {
       const profile = getUserProfile();
       const shouldOnboard = !profile.onboardingCompleted;
-      router.push(shouldOnboard ? '/onboarding' : '/dashboard');
+      router.push(withBasePath(shouldOnboard ? '/onboarding' : '/dashboard'));
       router.refresh();
     }
   };
@@ -103,7 +104,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-slate-600 mt-4">
           {t('loginNoAccount')}{' '}
-          <a href="/signup" className="text-[#9BCBFF] hover:text-[#C7B9FF] font-medium transition-colors">
+          <a
+            href={withBasePath('/signup')}
+            className="text-[#9BCBFF] hover:text-[#C7B9FF] font-medium transition-colors"
+          >
             {t('loginSignup')}
           </a>
         </p>

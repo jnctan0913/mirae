@@ -1,9 +1,17 @@
 // lib/aiCareerRecommender.ts
+import OpenAI from 'openai';
 import rolesData from '@/lib/data/roles.json';
 import { getAICareerGenerator } from './aiCareerGenerator';
 
+interface RoleData {
+  id: string;
+  title: { en: string; ko: string };
+  domain: { en: string; ko: string };
+  tagline: { en: string; ko: string };
+}
+
 interface UserProfile {
-  questionnaireAnswers: Record<string, any[]>;
+  questionnaireAnswers: Record<string, string[]>;
   keywords: string[];
   documents?: { text: string; type: string }[];
 }
@@ -13,11 +21,11 @@ interface AIRecommendation {
   score: number;
   explanation: { en: string; ko: string };
   matchingKeywords: string[];
-  roleData: any;
+  roleData: RoleData;
 }
 
 class AICareerRecommender {
-  private roles: any[];
+  private roles: RoleData[];
   private careerGenerator: ReturnType<typeof getAICareerGenerator>;
   
   constructor() {
@@ -53,13 +61,13 @@ class AICareerRecommender {
   private prepareUserDataForAI(userProfile: UserProfile): string {
     const answers = userProfile.questionnaireAnswers || {};
     const keywords = userProfile.keywords || [];
-    
+
     return `
 USER PROFILE ANALYSIS:
 
 Questionnaire Summary:
 ${Object.entries(answers)
-  .map(([qId, ans]) => `- ${qId}: ${ans.map(a => a.label || a.id).join(', ')}`)
+  .map(([qId, ans]) => `- ${qId}: ${ans.join(', ')}`)
   .join('\n')}
 
 Keywords & Interests:
@@ -128,9 +136,9 @@ Return as JSON with this structure:
       
       // Enrich with role data
       if (result.recommendations) {
-        result.recommendations = result.recommendations.map((rec: any) => ({
+        result.recommendations = result.recommendations.map((rec: AIRecommendation) => ({
           ...rec,
-          roleData: this.roles.find(r => r.id === rec.roleId)
+          roleData: this.roles.find(r => r.id === rec.roleId) as RoleData
         }));
       }
       

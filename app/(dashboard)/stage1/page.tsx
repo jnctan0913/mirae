@@ -7,6 +7,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 import rolesData from '@/lib/data/roles.json';
+import { withBasePath } from '@/lib/basePath';
 
 type RoleLocale = { en: string; ko: string };
 type RoleListLocale = { en: string[]; ko: string[] };
@@ -145,31 +146,83 @@ export default function Stage1Page() {
   const shimmerTimer = useRef<number | null>(null);
   const swipeTimer = useRef<number | null>(null);
 
-  const profile = getUserProfile();
-  const stage0Summary = profile.stage0Summary as { recommendedRoles?: string[] } | undefined;
-  const recommendedIds = stage0Summary?.recommendedRoles ?? [];
-  const recommendedRoles = recommendedIds.length
-    ? roles.filter((role) => recommendedIds.includes(role.id))
-    : [];
-  const rolesToShow = recommendedRoles.length >= 5
-    ? recommendedRoles.slice(0, 5)
-    : recommendedRoles.length > 0
-      ? recommendedRoles
-      : roles;
+  // AI-based role recommendations
+  const [aiRecommendedRoles, setAiRecommendedRoles] = useState<typeof roles>([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
+  const [loadingError, setLoadingError] = useState(false);
 
+  useEffect(() => {
+    const fetchAIRecommendations = async () => {
+      setIsLoadingRecommendations(true);
+      setLoadingError(false);
+
+      try {
+        const currentProfile = getUserProfile();
+
+        // Get onboarding keywords
+        const onboardingKeywords = [
+          ...(currentProfile?.keywords ?? []),
+          ...(currentProfile?.onboarding?.keywords ?? []),
+          ...(currentProfile?.onboardingKeywords ?? []),
+        ];
+
+        // Get questionnaire answers from profile
+        const questionnaireAnswers = currentProfile?.questionnaireAnswers ?? {};
+
+        // Call AI recommendation API
+        const response = await fetch('/api/recommend-roles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questionnaireAnswers,
+            keywords: onboardingKeywords,
+            language,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.recommendations && data.recommendations.length > 0) {
+          // Extract AI-generated roles directly from roleData
+          const aiRoles = data.recommendations
+            .map((rec: { roleData: typeof roles[0] }) => rec.roleData)
+            .filter(Boolean);
+
+          setAiRecommendedRoles(aiRoles.length > 0 ? aiRoles : roles.slice(0, 5));
+        } else {
+          // Fallback to all roles
+          setAiRecommendedRoles(roles.slice(0, 5));
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI recommendations:', error);
+        setLoadingError(true);
+        // Fallback to all roles on error
+        setAiRecommendedRoles(roles.slice(0, 5));
+      } finally {
+        setIsLoadingRecommendations(false);
+      }
+    };
+
+    void fetchAIRecommendations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
+
+  const rolesToShow = aiRecommendedRoles.length > 0 ? aiRecommendedRoles : roles.slice(0, 5);
   const currentRole = rolesToShow[currentIndex];
-  const roleTitle = language === 'ko' ? currentRole.title.ko : currentRole.title.en;
-  const roleTagline = language === 'ko' ? currentRole.tagline.ko : currentRole.tagline.en;
-  const roleDomain = language === 'ko' ? currentRole.domain.ko : currentRole.domain.en;
-  const roleModels = language === 'ko' ? currentRole.roleModels.ko : currentRole.roleModels.en;
-  const roleCompanies = language === 'ko' ? currentRole.companies.ko : currentRole.companies.en;
-  const roleDetails = language === 'ko' ? currentRole.details.ko : currentRole.details.en;
-  const roleResources = language === 'ko' ? currentRole.resources.ko : currentRole.resources.en;
+
+
+  const roleTitle = currentRole ? (language === 'ko' ? currentRole.title.ko : currentRole.title.en) : '';
+  const roleTagline = currentRole ? (language === 'ko' ? currentRole.tagline.ko : currentRole.tagline.en) : '';
+  const roleDomain = currentRole ? (language === 'ko' ? currentRole.domain.ko : currentRole.domain.en) : '';
+  const roleModels = currentRole ? (language === 'ko' ? currentRole.roleModels.ko : currentRole.roleModels.en) : [];
+  const roleCompanies = currentRole ? (language === 'ko' ? currentRole.companies.ko : currentRole.companies.en) : [];
+  const roleDetails = currentRole ? (language === 'ko' ? currentRole.details.ko : currentRole.details.en) : '';
+  const roleResources = currentRole ? (language === 'ko' ? currentRole.resources.ko : currentRole.resources.en) : [];
   const roleModelsLabel = language === 'ko' ? '롤모델' : 'Role models';
   const roleCompaniesLabel = language === 'ko' ? '함께할 수 있는 곳' : 'Where you could work';
   const roleDetailsLabel = language === 'ko' ? '이 역할은 이런 일을 해요' : 'What they do';
   const roleResourcesLabel = language === 'ko' ? '더 알아보기' : 'Explore resources';
-  const roleIcon = roleIcons[currentRole.id] ?? (
+  const roleIcon = (currentRole && roleIcons[currentRole.id]) ?? (
     <text x="12" y="16" textAnchor="middle" fontSize="10" fontFamily="inherit">
       {roleTitle.slice(0, 2)}
     </text>
@@ -188,10 +241,13 @@ export default function Stage1Page() {
     language === 'ko'
       ? '미래를 확정하는 것이 아니라, 흥미가 어디로 향하는지 살펴보는 단계예요.'
       : 'Follow your gut. You are not choosing a future yet, just noticing what feels interesting.';
-  const noticeText =
-    language === 'ko'
-      ? '\uC774 5\uAC1C \uC5ED\uD560 \uCE74\uB4DC\uB294 Stage 0 \uC9C4\uB2E8\uACFC \uC628\uBCF4\uB529 \uB3C4\uD0AC\uC744 \uBC14\uD0D5\uC73C\uB85C \uCD94\uCC9C\uB41C \uACB0\uACFC\uC5D0\uC694.'
-      : 'These 5 role cards are suggested based on your Stage 0 answers and onboarding documents.';
+  const noticeText = isLoadingRecommendations
+    ? (language === 'ko'
+        ? 'AI가 당신에게 맞는 역할을 분석하고 있어요...'
+        : 'AI is analyzing the best roles for you...')
+    : (language === 'ko'
+        ? '이 5개 역할 카드는 AI가 당신의 답변과 관심사를 분석해 추천한 결과예요.'
+        : 'These 5 role cards are AI-curated based on your questionnaire answers and interests.');
   const hintTap =
     language === 'ko'
       ? '버튼을 누르거나 카드에서 스와이프해 보세요. 더 알고 싶다면 뒤집기.'
@@ -222,8 +278,8 @@ export default function Stage1Page() {
     }, 650);
   }, []);
 
-  const commitStage1Results = useCallback((liked: string[]) => {
-    if (liked.length === 0) return;
+  const commitStage1Results = useCallback((likedRoles: typeof roles) => {
+    if (likedRoles.length === 0) return;
     const profile = getUserProfile();
     const existingCards = (profile.collection?.cards as Record<string, unknown>[]) ?? [];
     const existingIds = new Set(
@@ -231,25 +287,25 @@ export default function Stage1Page() {
     );
     const nextCards = [
       ...existingCards,
-      ...liked
-        .filter((roleId) => !existingIds.has(`stage1-role-${roleId}`))
-        .map((roleId) => {
-          const role = roles.find((item) => item.id === roleId);
-          const title = role ? role.title.en : roleId;
-          const description = role ? role.tagline.en : 'Role Roulette favorite';
+      ...likedRoles
+        .filter((role) => !existingIds.has(`stage1-role-${role.id}`))
+        .map((role) => {
           return {
-            id: `stage1-role-${roleId}`,
+            id: `stage1-role-${role.id}`,
             stage: 'C',
             type: 'CuriosityThread',
-            title,
-            description,
+            title: role.title.en,
+            description: role.tagline.en,
             rarity: 'Common',
             unlocked: true,
-            tags: [roleId],
+            tags: [role.id],
             createdFrom: 'Stage 1: Role Roulette',
           };
         }),
     ];
+
+    const likedTitles = likedRoles.map((role) => role.title.en);
+    const likedIds = likedRoles.map((role) => role.id);
 
     const existingLogs = profile.activityLogs ?? [];
     const hasStage1Log = existingLogs.some((log) => log.id === 'stage1-complete');
@@ -262,10 +318,10 @@ export default function Stage1Page() {
             id: 'stage1-complete',
             date: today,
             title: 'Completed Stage 1 role roulette',
-            scopeStage: 'C',
-            activityType: 'MiraeActivity',
-            source: 'Mirae',
-            shortReflection: liked.slice(0, 3).join(', '),
+            scopeStage: 'C' as const,
+            activityType: 'MiraeActivity' as const,
+            source: 'Mirae' as const,
+            shortReflection: likedTitles.slice(0, 3).join(', '),
           },
         ];
 
@@ -273,19 +329,20 @@ export default function Stage1Page() {
     const nextGrowth =
       nextReport.growthText && nextReport.growthText.length > 0
         ? nextReport.growthText
-        : liked.length > 0
-          ? `Role Roulette favorites: ${liked.slice(0, 3).join(', ')}.`
+        : likedTitles.length > 0
+          ? `Role Roulette favorites: ${likedTitles.slice(0, 3).join(', ')}.`
           : '';
 
     updateUserProfile({
-      likedRoles: liked,
+      likedRoles: likedIds,
+      aiGeneratedRoles: likedRoles, // Store the actual AI-generated role objects
       collection: {
         ...profile.collection,
         cards: nextCards,
       },
       customCardTags: {
         ...profile.customCardTags,
-        ...Object.fromEntries(liked.map((roleId) => [`stage1-role-${roleId}`, [roleId]])),
+        ...Object.fromEntries(likedIds.map((roleId) => [`stage1-role-${roleId}`, [roleId]])),
       },
       activityLogs: nextLogs,
       report: {
@@ -315,25 +372,27 @@ export default function Stage1Page() {
     const persistSwipe = () => {
       const profile = getUserProfile();
       const nextSwipes = [...(profile.roleSwipes ?? []), swipeData];
-      const liked = nextSwipes
+      const likedIds = nextSwipes
         .filter((swipe) => swipe.swipeDirection === 'right')
         .map((swipe) => swipe.roleId);
       updateUserProfile({
         roleSwipes: nextSwipes,
-        likedRoles: Array.from(new Set(liked)),
+        likedRoles: Array.from(new Set(likedIds)),
       });
-      return Array.from(new Set(liked));
+      // Return the actual role objects that were liked
+      const likedRoleObjects = rolesToShow.filter((role) => likedIds.includes(role.id));
+      return likedRoleObjects;
     };
 
     const finalizeSwipe = () => {
-      const liked = persistSwipe();
+      const likedRoles = persistSwipe();
 
       if (currentIndex < rolesToShow.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
         completeStage(1);
-        commitStage1Results(liked);
-        router.push('/stage1/summary');
+        commitStage1Results(likedRoles);
+        router.push(withBasePath('/stage1/summary'));
       }
 
       setIsSettling(false);
@@ -476,7 +535,7 @@ export default function Stage1Page() {
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => router.push('/stage1/summary')}
+              onClick={() => router.push(withBasePath('/stage1/summary'))}
               disabled={!progress.stage1Complete}
               className="px-8 py-3 rounded-full bg-slate-300 text-slate-800 shadow-sm transition-all duration-300 ease-out hover:bg-slate-400 disabled:opacity-50"
             >
@@ -486,7 +545,14 @@ export default function Stage1Page() {
         </div>
 
         <div className="space-y-6">
-        {currentRole && (
+        {isLoadingRecommendations ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-slate-700 mb-4"></div>
+            <p className="text-slate-600 text-sm">
+              {language === 'ko' ? 'AI가 역할을 분석하는 중...' : 'AI is analyzing roles...'}
+            </p>
+          </div>
+        ) : currentRole && (
             <div className="relative card-perspective">
               <div
                 className="absolute -inset-3 rounded-[36px] bg-white/30 blur-xl"

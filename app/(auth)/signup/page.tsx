@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signUp } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
+import { withBasePath } from '@/lib/basePath';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ export default function SignupPage() {
       setError(t(result.error));
       setLoading(false);
     } else {
-      router.push('/dashboard');
+      router.push(withBasePath('/dashboard'));
       router.refresh();
     }
   };
@@ -118,7 +119,10 @@ export default function SignupPage() {
 
         <p className="text-center text-sm text-slate-600 mt-4">
           {t('signupExistingAccount')}{' '}
-          <a href="/login" className="text-[#F4A9C8] hover:text-[#FFD1A8] font-medium transition-colors">
+          <a
+            href={withBasePath('/login')}
+            className="text-[#F4A9C8] hover:text-[#FFD1A8] font-medium transition-colors"
+          >
             {t('signupLogin')}
           </a>
         </p>

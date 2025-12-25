@@ -6,6 +6,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import questionnaire from '@/lib/data/questionnaire.json';
 import { updateUserProfile } from '@/lib/userProfile';
+import { withBasePath } from '@/lib/basePath';
 
 type Language = 'ko' | 'en';
 type QuestionnaireOption = {
@@ -87,12 +88,12 @@ export default function Stage0Page() {
 
   const handleViewResults = () => {
     completeStage(0);
-    router.push('/stage0/result');
+    router.push(withBasePath('/stage0/result'));
   };
 
   const handleViewSummary = () => {
     completeStage(0);
-    router.push('/stage0/result');
+    router.push(withBasePath('/stage0/result'));
   };
 
   const canProceed = answers[question.id]?.length > 0;
@@ -101,7 +102,7 @@ export default function Stage0Page() {
     if (currentQ > 0) {
       setCurrentQ((prev) => Math.max(0, prev - 1));
     } else {
-      router.push('/dashboard');
+      router.push(withBasePath('/dashboard'));
     }
   };
 

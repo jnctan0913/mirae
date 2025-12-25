@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
+import { withBasePath } from '@/lib/basePath';
 
 interface StoryboardPanel {
   scene: string;
@@ -42,7 +43,7 @@ export default function Stage5Page() {
 
   const handleComplete = () => {
     completeStage(5);
-    router.push('/dashboard');
+    router.push(withBasePath('/dashboard'));
   };
 
   return (

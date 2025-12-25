@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const language = context?.language || 'ko';
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         {

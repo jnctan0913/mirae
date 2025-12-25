@@ -47,7 +47,6 @@ export default function AvatarLabPage() {
   };
 
   const handleConfigChange = (config: AvatarConfig) => {
-    console.log('Avatar config updated:', config);
     updateUserProfile({
       avatar: {
         ...getUserProfile().avatar,

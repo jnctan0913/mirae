@@ -8,7 +8,8 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { conversation, language, userYear } = await request.json();
+    const body = await request.json();
+    const { conversation, language, userYear } = body;
     
     // Prepare context for the AI
     const context = {
@@ -47,20 +48,32 @@ export async function POST(request: NextRequest) {
       rawResponse: feedbackText
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('OpenAI API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
-        feedback: getFallbackFeedback(language)
+        error: errorMessage,
+        feedback: getFallbackFeedback('en')
       },
       { status: 500 }
     );
   }
 }
 
-function createPrompt(conversation: any[], context: any, language: string): string {
+interface ConversationMessage {
+  role: string;
+  message: string;
+}
+
+interface ConversationContext {
+  userYear: string;
+  conversationLength: number;
+  language: string;
+}
+
+function createPrompt(conversation: ConversationMessage[], context: ConversationContext, language: string): string {
   const convoText = conversation
     .map(msg => `${msg.role === 'ai' ? 'Mirae' : 'Student'}: ${msg.message}`)
     .join('\n');

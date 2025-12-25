@@ -1,0 +1,50 @@
+{
+  "user": {
+    "id": "1",
+    "name": "User",
+    "year": "year2",
+    "conversationDate": "2025-12-25T19:35:44.497Z",
+    "language": "en"
+  },
+  "responses": {},
+  "feedback": [],
+  "insights": [
+    "It sounds like chemistry is a tough spot for you, but remember, everyone has subjects they find challenging. Seeking help is a great step forward.",
+    "Consider creating a study schedule that dedicates specific times to focus on chemistry, breaking down topics into manageable parts.",
+    "Joining a study group or finding a study buddy can also make learning more interactive and less daunting. You might find that others have useful tips and tricks that work for them.",
+    "Remember to celebrate your progress, no matter how small. Each concept you understand is a step towards mastery. Keep pushing forward!"
+  ],
+  "summary": "Year 2 student. Reflected on course uncertainty and motivation this semester, Semester 1.",
+  "keywords": [
+    "worried",
+    "result",
+    "chemistry",
+    "bad",
+    "example"
+  ],
+  "transcript": "Mirae: Hi! I'm glad you want to talk. I see you're in Year 2, Semester 1.\nHow are you doing this semester?\nStudent: I;m worried about my result for chemistry. I'm bad at example. I shouldn't have taken it\nMirae: It's completely normal to feel worried about a subject like chemistry, especially if it's challenging for you. Remember, it’s okay to struggle sometimes; it doesn’t define your abilities. Have you thought about seeking extra help, like a tutor or study group, to boost your confidence and skills?",
+  "conversation": [
+    {
+      "role": "ai",
+      "message": "Hi! I'm glad you want to talk. I see you're in Year 2, Semester 1.\nHow are you doing this semester?",
+      "timestamp": "2025-12-25T19:33:39.017Z"
+    },
+    {
+      "role": "user",
+      "message": "I;m worried about my result for chemistry. I'm bad at example. I shouldn't have taken it",
+      "timestamp": "2025-12-25T19:35:35.433Z"
+    },
+    {
+      "role": "ai",
+      "message": "It's completely normal to feel worried about a subject like chemistry, especially if it's challenging for you. Remember, it’s okay to struggle sometimes; it doesn’t define your abilities. Have you thought about seeking extra help, like a tutor or study group, to boost your confidence and skills?",
+      "timestamp": "2025-12-25T19:35:37.578Z"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "stage": "stage3",
+    "exportedAt": "2025-12-25T19:35:44.497Z",
+    "conversationState": "in_progress",
+    "totalMessages": 3
+  }
+}

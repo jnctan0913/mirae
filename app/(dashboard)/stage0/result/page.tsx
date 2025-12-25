@@ -7,6 +7,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 import questionnaire from '@/lib/data/questionnaire.json';
 import rolesData from '@/lib/data/roles.json';
+import { withBasePath } from '@/lib/basePath';
 
 type Language = 'ko' | 'en';
 
@@ -281,7 +282,7 @@ export default function Stage0ResultPage() {
 
   useEffect(() => {
     if (!completed) {
-      router.push('/stage0');
+      router.push(withBasePath('/stage0'));
     }
   }, [completed, router]);
 
@@ -565,9 +566,9 @@ export default function Stage0ResultPage() {
               language === 'ko'
                 ? 'Stage 0 진단을 완료했어요'
                 : 'Completed Stage 0 reflection',
-            scopeStage: 'S',
-            activityType: 'MiraeActivity',
-            source: 'Mirae',
+            scopeStage: 'S' as const,
+            activityType: 'MiraeActivity' as const,
+            source: 'Mirae' as const,
             shortReflection: primaryLabel ?? undefined,
           },
         ];
@@ -582,7 +583,7 @@ export default function Stage0ResultPage() {
       strengthTags: mappedStrengthTags.length > 0 ? mappedStrengthTags : profile.strengthTags,
       stage0Summary: {
         tagCounts,
-        recommendedRoles: recommendedRoles.map((entry) => entry.role.id),
+        // Note: Role recommendations are now handled by AI in Stage 1
       },
       stage0Profile: {
         primaryTag: primaryTag ?? undefined,
@@ -663,7 +664,7 @@ export default function Stage0ResultPage() {
 
   const handleFinish = () => {
     persistResults();
-    router.push('/dashboard');
+    router.push(withBasePath('/dashboard'));
   };
 
   useEffect(() => {
@@ -1023,7 +1024,7 @@ export default function Stage0ResultPage() {
                     {finishLabel}
                   </button>
                   <button
-                    onClick={() => router.push('/stage1')}
+                    onClick={() => router.push(withBasePath('/stage1'))}
                     className="w-full rounded-full border border-white/70 bg-white/80 py-3 text-sm sm:text-base font-semibold text-slate-700 hover:bg-white"
                   >
                     {nextStageLabel}

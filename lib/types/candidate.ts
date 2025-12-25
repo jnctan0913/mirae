@@ -1,0 +1,24 @@
+export type Candidate = {
+  id: string;
+  name: string;
+  summary: string;
+  details: string[];
+  imageUrl: string;
+  matchPercent?: number;
+  careers?: string[];
+  coreCourses?: string[];
+  workloadStyle?: string;
+  portfolio?: string;
+  collaboration?: string;
+  pace?: string;
+  location?: string;
+  scholarships?: string[];
+  tuitionRange?: string;
+  aidStrength?: string;
+  internshipPipeline?: string;
+  selectivity?: string;
+  campusVibe?: string;
+  housing?: string;
+  exchange?: string;
+  aiGenerated?: boolean;
+};

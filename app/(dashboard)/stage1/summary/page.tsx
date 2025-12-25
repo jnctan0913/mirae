@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 import rolesData from '@/lib/data/roles.json';
+import { withBasePath } from '@/lib/basePath';
 
 type RoleLocale = { en: string; ko: string };
 type RoleListLocale = { en: string[]; ko: string[] };
@@ -80,9 +81,9 @@ export default function Stage1SummaryPage() {
               id: 'stage1-complete',
               date: today,
               title: 'Completed Stage 1 role roulette',
-              scopeStage: 'C',
-              activityType: 'MiraeActivity',
-              source: 'Mirae',
+              scopeStage: 'C' as const,
+              activityType: 'MiraeActivity' as const,
+              source: 'Mirae' as const,
               shortReflection: uniqueLiked.slice(0, 3).join(', '),
             },
           ];
@@ -119,10 +120,15 @@ export default function Stage1SummaryPage() {
     }
   }, []);
 
-  const likedRoles = useMemo(
-    () => roles.filter((role) => likedRoleIds.includes(role.id)),
-    [likedRoleIds]
-  );
+  const likedRoles = useMemo(() => {
+    const profile = getUserProfile();
+    // First try to get AI-generated roles from profile
+    if (profile.aiGeneratedRoles && profile.aiGeneratedRoles.length > 0) {
+      return profile.aiGeneratedRoles.filter((role) => likedRoleIds.includes(role.id));
+    }
+    // Fallback to hardcoded roles if no AI-generated roles found
+    return roles.filter((role) => likedRoleIds.includes(role.id));
+  }, [likedRoleIds]);
 
   const headingText = t('stage1SummaryHeading');
   const subheadingText = t('stage1SummarySubheading');
@@ -144,7 +150,7 @@ export default function Stage1SummaryPage() {
 
   const handleRedo = () => {
     updateUserProfile({ roleSwipes: [], likedRoles: [] });
-    router.push('/stage1');
+    router.push(withBasePath('/stage1'));
   };
 
   return (
@@ -264,7 +270,7 @@ export default function Stage1SummaryPage() {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push(withBasePath('/dashboard'))}
             className="rounded-full border border-white/70 bg-white/80 px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 ease-out hover:bg-white"
           >
             {dashboardLabel}
@@ -278,7 +284,7 @@ export default function Stage1SummaryPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/stage2')}
+            onClick={() => router.push(withBasePath('/stage2'))}
             className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-300 ease-out hover:bg-slate-800"
           >
             {nextStageLabel}

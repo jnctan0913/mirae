@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import coursesData from '@/lib/data/courses-descriptions.json';
 import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
+import { withBasePath } from '@/lib/basePath';
 
 type CourseCategory = 'general' | 'career' | 'interdisciplinary';
 
@@ -57,12 +58,6 @@ type SelectionSlot = {
 } | null;
 
 const categories: CourseCategory[] = ['general', 'career', 'interdisciplinary'];
-const categoryLabels: Record<CourseCategory, { en: string; ko: string }> = {
-  general: { en: 'General', ko: '공통' },
-  career: { en: 'Career', ko: '진로' },
-  interdisciplinary: { en: 'Interdisciplinary', ko: '융합' },
-};
-
 const maxBucketSize = 6;
 const courses = coursesData as CourseSubject[];
 
@@ -101,7 +96,7 @@ const hashToUnit = (value: string) => {
 
 const strengthSignals: Record<
   string,
-  { keywords: string[]; reasonEn: string; reasonKo: string }
+  { keywords: string[]; reasonEn: string; reasonKo: string; subjectPriority?: Record<string, number> }
 > = {
   analytical: {
     keywords: ['math', 'statistics', 'data', 'science', 'physics', 'chemistry', 'algebra', 'calculus'],
@@ -160,7 +155,7 @@ const stage0TagToStrength: Record<string, string> = {
 
 const roleSignals: Record<
   string,
-  { keywords: string[]; reasonEn: string; reasonKo: string }
+  { keywords: string[]; reasonEn: string; reasonKo: string; subjectPriority?: Record<string, number> }
 > = {
   'ux-designer': {
     keywords: ['design', 'media', 'art', 'writing', 'communication'],
@@ -171,6 +166,11 @@ const roleSignals: Record<
     keywords: ['data', 'statistics', 'math', 'informatics', 'science', 'ai'],
     reasonEn: 'Related to roles you liked (data/AI)',
     reasonKo: '좋아한 역할과 연관됨 (데이터/AI)',
+    subjectPriority: {
+      'Informatics': 2.5,
+      'Mathematics': 1.0,
+      'Science': 1.2,
+    },
   },
   'product-manager': {
     keywords: ['product', 'strategy', 'roadmap', 'business', 'user', 'market', 'growth'],
@@ -181,6 +181,11 @@ const roleSignals: Record<
     keywords: ['software', 'computer', 'programming', 'coding', 'engineering', 'systems'],
     reasonEn: 'Related to roles you liked (engineering)',
     reasonKo: '좋아한 역할과 연관됨 (공학)',
+    subjectPriority: {
+      'Informatics': 2.5,
+      'Mathematics': 1.3,
+      'Technology & Home Economics': 1.5,
+    },
   },
   'robotics-engineer': {
     keywords: ['robot', 'robotics', 'automation', 'hardware', 'mechatronics', 'control'],
@@ -196,6 +201,10 @@ const roleSignals: Record<
     keywords: ['biomedical', 'biology', 'medicine', 'health', 'genetics', 'laboratory'],
     reasonEn: 'Related to roles you liked (biomedical)',
     reasonKo: '좋아한 역할과 연관됨 (바이오메디컬)',
+    subjectPriority: {
+      'Science': 2.0,
+      'Mathematics': 1.2,
+    },
   },
   'clinical-psychologist': {
     keywords: ['psychology', 'mental', 'therapy', 'counseling', 'behavior', 'wellbeing'],
@@ -259,7 +268,6 @@ export default function Stage2Page() {
   const [likedRoles, setLikedRoles] = useState<string[]>([]);
   const [stage0Roles, setStage0Roles] = useState<string[]>([]);
   const [docKeywords, setDocKeywords] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(true);
   const [savedSlots, setSavedSlots] = useState<SelectionSlot[]>([null, null, null]);
   const [focusedCourseKey, setFocusedCourseKey] = useState<string | null>(null);
   const [targetSemester, setTargetSemester] = useState<string>('');
@@ -332,7 +340,18 @@ export default function Stage2Page() {
     setSavedSlots(normalized);
   }, []);
 
-  const syncProfileSignals = (profile: ReturnType<typeof getUserProfile>) => {
+  const semesterOptions = useMemo(
+    () => [
+      { value: 'year-2-sem-1', label: language === 'ko' ? '2학년 1학기' : 'Year 2 Semester 1' },
+      { value: 'year-2-sem-2', label: language === 'ko' ? '2학년 2학기' : 'Year 2 Semester 2' },
+      { value: 'year-3-sem-1', label: language === 'ko' ? '3학년 1학기' : 'Year 3 Semester 1' },
+      { value: 'year-3-sem-2', label: language === 'ko' ? '3학년 2학기' : 'Year 3 Semester 2' },
+    ],
+    [language]
+  );
+
+  const syncProfileSignals = useCallback(
+    (profile: ReturnType<typeof getUserProfile>) => {
     const rawStrengths = (profile as unknown as { strengths?: string[] }).strengths;
     const strengthTags = Array.isArray(rawStrengths)
       ? rawStrengths
@@ -441,7 +460,9 @@ export default function Stage2Page() {
         });
       }
     }
-  };
+    },
+    [semesterOptions]
+  );
 
   useEffect(() => {
     syncProfileSignals(getUserProfile());
@@ -451,7 +472,7 @@ export default function Stage2Page() {
       return () => window.removeEventListener('miraeProfileUpdated', handleProfileUpdate);
     }
     return undefined;
-  }, []);
+  }, [syncProfileSignals]);
 
   useEffect(() => {
     if (!filteredSubjects.length) return;
@@ -495,7 +516,10 @@ export default function Stage2Page() {
             const signal = strengthSignals[strength];
             if (!signal) return;
             if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
-              score += 2;
+              const subjectMultiplier = signal.subjectPriority?.[subject.subject_en] ?? 1.0;
+              const baseScore = 2;
+              const adjustedScore = Math.round(baseScore * subjectMultiplier);
+              score += adjustedScore;
               reasons.add(language === 'ko' ? signal.reasonKo : signal.reasonEn);
             }
           });
@@ -523,8 +547,11 @@ export default function Stage2Page() {
             const signal = roleSignals[roleId];
             if (!signal) return;
             if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
-              score += 3;
-              primaryScore += 3;
+              const subjectMultiplier = signal.subjectPriority?.[subject.subject_en] ?? 1.0;
+              const baseScore = 3;
+              const adjustedScore = Math.round(baseScore * subjectMultiplier);
+              score += adjustedScore;
+              primaryScore += adjustedScore;
               reasons.add(language === 'ko' ? signal.reasonKo : signal.reasonEn);
             }
           });
@@ -532,8 +559,11 @@ export default function Stage2Page() {
             const signal = roleSignals[roleId];
             if (!signal) return;
             if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
-              score += 2;
-              primaryScore += 2;
+              const subjectMultiplier = signal.subjectPriority?.[subject.subject_en] ?? 1.0;
+              const baseScore = 2;
+              const adjustedScore = Math.round(baseScore * subjectMultiplier);
+              score += adjustedScore;
+              primaryScore += adjustedScore;
               reasons.add(
                 language === 'ko'
                   ? 'Stage 0 역할 신호 기반'
@@ -598,7 +628,10 @@ export default function Stage2Page() {
           const signal = strengthSignals[strength];
           if (!signal) return;
           if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
-            score += 2;
+            const subjectMultiplier = signal.subjectPriority?.[selectedSubject.subject_en] ?? 1.0;
+            const baseScore = 2;
+            const adjustedScore = Math.round(baseScore * subjectMultiplier);
+            score += adjustedScore;
             reasons.add(language === 'ko' ? signal.reasonKo : signal.reasonEn);
           }
         });
@@ -626,8 +659,11 @@ export default function Stage2Page() {
           const signal = roleSignals[roleId];
           if (!signal) return;
           if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
-            score += 3;
-            primaryScore += 3;
+            const subjectMultiplier = signal.subjectPriority?.[selectedSubject.subject_en] ?? 1.0;
+            const baseScore = 3;
+            const adjustedScore = Math.round(baseScore * subjectMultiplier);
+            score += adjustedScore;
+            primaryScore += adjustedScore;
             reasons.add(language === 'ko' ? signal.reasonKo : signal.reasonEn);
           }
         });
@@ -635,8 +671,11 @@ export default function Stage2Page() {
           const signal = roleSignals[roleId];
           if (!signal) return;
           if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
-            score += 2;
-            primaryScore += 2;
+            const subjectMultiplier = signal.subjectPriority?.[selectedSubject.subject_en] ?? 1.0;
+            const baseScore = 2;
+            const adjustedScore = Math.round(baseScore * subjectMultiplier);
+            score += adjustedScore;
+            primaryScore += adjustedScore;
             reasons.add(
               language === 'ko'
                 ? 'Stage 0 역할 신호 기반'
@@ -732,13 +771,10 @@ export default function Stage2Page() {
   const searchPlaceholder = language === 'ko' ? '과목 검색' : 'Search courses';
   const subjectTitle = language === 'ko' ? '과목' : 'Subjects';
   const noCoursesLabel = language === 'ko' ? '표시할 과목이 없어요.' : 'No courses to show.';
-  const allLabel = language === 'ko' ? '전체' : 'All';
   const suggestionTitle = language === 'ko' ? '추천' : 'Recommended';
   const suggestionEmpty = language === 'ko'
     ? '추천 신호가 없어요. Stage 0/1 또는 온보딩 키워드를 먼저 채워주세요.'
     : 'No recommendation signals yet. Complete Stage 0/1 or add onboarding keywords.';
-  const suggestionToggleLabel = language === 'ko' ? '접기' : 'Collapse';
-  const suggestionToggleOpenLabel = language === 'ko' ? '펼치기' : 'Expand';
   const infoLabel = language === 'ko' ? '설명 보기' : 'View description';
   const suggestionSubtitle = language === 'ko'
     ? '추천은 Stage 0/1, 온보딩 키워드, 업로드, 현재 선택을 기반으로 해요.'
@@ -758,13 +794,6 @@ export default function Stage2Page() {
   const courseDetailsLabel = language === 'ko' ? '과목 상세' : 'Course details';
   const selectedCourseLabel = language === 'ko' ? '선택됨' : 'Selected';
   const targetSemesterLabel = language === 'ko' ? '대상 학기' : 'Target semester';
-
-  const semesterOptions = [
-    { value: 'year-2-sem-1', label: language === 'ko' ? '2학년 1학기' : 'Year 2 Semester 1' },
-    { value: 'year-2-sem-2', label: language === 'ko' ? '2학년 2학기' : 'Year 2 Semester 2' },
-    { value: 'year-3-sem-1', label: language === 'ko' ? '3학년 1학기' : 'Year 3 Semester 1' },
-    { value: 'year-3-sem-2', label: language === 'ko' ? '3학년 2학기' : 'Year 3 Semester 2' },
-  ];
 
   const getDescription = (course: CourseLabel) => {
     const description = language === 'ko' ? course.description?.kr : course.description?.en;
@@ -909,7 +938,7 @@ export default function Stage2Page() {
     updateUserProfile(profileUpdates);
     updateProfileAnalytics(nextLogs);
     completeStage(2);
-    router.push('/stage2/summary');
+    router.push(withBasePath('/stage2/summary'));
   };
 
   const saveSlot = (index: number) => {
@@ -1119,10 +1148,6 @@ export default function Stage2Page() {
                         '--orb-y': `${item.y}%`,
                         animationDelay: `${item.index * 80}ms`,
                       } as CSSProperties;
-                      const orbGlow = item.isRecommended
-                        ? 'shadow-[0_0_16px_rgba(244,169,200,0.55)]'
-                        : 'shadow-[0_0_14px_rgba(190,237,227,0.7)]';
-
                       return (
                         <button
                           key={item.key}
@@ -1479,7 +1504,7 @@ export default function Stage2Page() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push('/stage2/summary')}
+                onClick={() => router.push(withBasePath('/stage2/summary'))}
                 disabled={!progress.stage2Complete}
                 className="rounded-full border border-white/60 bg-white/70 px-8 py-3 text-sm font-semibold text-slate-700 shadow-[0_18px_30px_-20px_rgba(155,203,255,0.4)] transition hover:bg-white/90 disabled:opacity-50"
               >

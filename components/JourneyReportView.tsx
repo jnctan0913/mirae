@@ -269,11 +269,13 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
       ...(groups?.learning ?? []),
       ...(groups?.currentState ?? []),
     ].filter(Boolean);
-    if (grouped.length > 0) return grouped;
     const raw = profile.stage0Profile?.insights
       ? Object.values(profile.stage0Profile.insights).map((insight) => insight.body)
       : [];
-    return raw;
+    const reflectionInsights = (profile.reflectionSessions ?? [])
+      .flatMap((session) => session.insights ?? [])
+      .filter(Boolean);
+    return [...grouped, ...raw, ...reflectionInsights];
   })();
   const observedTendencies = useMemo(
     () => buildObservedTendencies(logs, cards, stage0Insights),

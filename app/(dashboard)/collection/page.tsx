@@ -11,6 +11,7 @@ import { useI18n } from '@/lib/i18n';
 import ActivityCalendar from '@/components/ActivityCalendar';
 import JourneyReportView from '@/components/JourneyReportView';
 import { loadActivityLogs, saveActivityLogs, type ActivityLog } from '@/lib/activityLogs';
+import { withBasePath } from '@/lib/basePath';
 import {
   MiraeCharacter,
   getEvolutionMessage,
@@ -305,7 +306,6 @@ const AvatarPanel = ({
   const [showCustomizer, setShowCustomizer] = useState(false);
 
   useEffect(() => {
-    console.log('AvatarPanel: equippedAccessories changed:', equippedAccessories);
   }, [equippedAccessories]);
 
   return (
@@ -560,9 +560,19 @@ export default function MiraePlusStatement() {
   const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
   const [activeCategory, setActiveCategory] = useState<CollectionSection | null>(null);
   const [adventureOpen, setAdventureOpen] = useState(false);
-  const [adventureView, setAdventureView] = useState<'archive' | 'report'>('archive');
+  const [adventureView, setAdventureView] = useState<'archive' | 'report' | 'reflections'>('archive');
   const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [reflectionSessions, setReflectionSessions] = useState<
+    Array<{
+      id: string;
+      createdAt: string;
+      summary: string;
+      insights: string[];
+      keywords: string[];
+      transcript: string;
+    }>
+  >([]);
   const [studentName, setStudentName] = useState('Student');
   const collectionScrollRef = useRef<HTMLDivElement | null>(null);
   const reportGenerationRef = useRef(false);
@@ -591,6 +601,12 @@ export default function MiraePlusStatement() {
       setReflections(profile.reflections);
     } else {
       setReflections({});
+    }
+
+    if (profile.reflectionSessions) {
+      setReflectionSessions(profile.reflectionSessions);
+    } else {
+      setReflectionSessions([]);
     }
 
     if (profile.collection?.viewMode) {
@@ -662,9 +678,7 @@ export default function MiraePlusStatement() {
   };
 
   const handleAccessoryChange = (newAccessories: EquippedAccessories) => {
-    console.log('Collection page: handleAccessoryChange called with:', newAccessories);
     setEquippedAccessories(newAccessories);
-    console.log('Collection page: State updated, profile saved');
     updateUserProfile({
       avatar: { ...getUserProfile().avatar, equippedAccessories: newAccessories },
     });
@@ -1020,7 +1034,9 @@ export default function MiraePlusStatement() {
               <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => router.push(`/dashboard?stage=${progress.currentStage}`)}
+                    onClick={() =>
+                      router.push(withBasePath(`/dashboard?stage=${progress.currentStage}`))
+                    }
                     className="px-5 py-2 rounded-full text-sm font-medium bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition-colors"
                   >
                     Back to Dashboard
@@ -1153,6 +1169,16 @@ export default function MiraePlusStatement() {
                   >
                     Journey Report
                   </button>
+                  <button
+                    onClick={() => setAdventureView('reflections')}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                      adventureView === 'reflections'
+                        ? 'bg-slate-800 text-white'
+                        : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
+                    }`}
+                  >
+                    Reflections
+                  </button>
                   
                   {/* Share Dropdown */}
                   <div className="relative">
@@ -1186,7 +1212,6 @@ export default function MiraePlusStatement() {
                           <button
                             onClick={() => {
                               // TODO: Implement share link
-                              console.log('Share link');
                               setShareDropdownOpen(false);
                             }}
                             className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition flex items-center gap-3"
@@ -1203,9 +1228,10 @@ export default function MiraePlusStatement() {
               </div>
 
               <div className="max-h-[75vh] overflow-y-auto pr-2">
-                {adventureView === 'archive' ? (
+                {adventureView === 'archive' && (
                   <ActivityCalendar logs={activityLogs} onAddLog={handleAddLog} />
-                ) : (
+                )}
+                {adventureView === 'report' && (
                   <JourneyReportView
                     logs={activityLogs}
                     cards={cards.map((card) => ({
@@ -1218,6 +1244,42 @@ export default function MiraePlusStatement() {
                     }))}
                     studentName={studentName}
                   />
+                )}
+                {adventureView === 'reflections' && (
+                  <div className="space-y-4">
+                    {reflectionSessions.length === 0 ? (
+                      <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 text-sm text-slate-500">
+                        No reflection sessions yet.
+                      </div>
+                    ) : (
+                      reflectionSessions
+                        .slice()
+                        .reverse()
+                        .map((session) => (
+                          <div
+                            key={session.id}
+                            className="rounded-2xl border border-white/60 bg-white/90 p-5 shadow-sm"
+                          >
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs uppercase tracking-wide text-slate-400">
+                                {new Date(session.createdAt).toLocaleDateString()}
+                              </p>
+                              <p className="text-xs text-slate-500">{session.keywords.join(', ')}</p>
+                            </div>
+                            <p className="mt-2 text-sm font-semibold text-slate-800">{session.summary}</p>
+                            {session.insights.length > 0 && (
+                              <div className="mt-3 space-y-2 text-sm text-slate-600">
+                                {session.insights.map((insight, index) => (
+                                  <div key={`${session.id}-insight-${index}`} className="rounded-xl bg-slate-50 px-3 py-2">
+                                    {insight}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>

@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { getUser } from '@/lib/auth';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
+import { withBasePath } from '@/lib/basePath';
 import { WelcomePhase } from './WelcomePhase';
 import { ContextCollectionPhase } from './ContextCollectionPhase';
 import { DocumentUploadPhase } from './DocumentUploadPhase';
@@ -58,7 +59,7 @@ export const OnboardingChat: React.FC<OnboardingChatProps> = ({ onComplete }) =>
   const handleJourneyStart = () => {
     const user = getUser();
     if (!user) {
-      router.push('/login');
+      router.push(withBasePath('/login'));
       return;
     }
     completeOnboarding();

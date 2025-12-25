@@ -5,31 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
-import rolesData from '@/lib/data/roles.json';
-
-type Candidate = {
-  id: string;
-  name: string;
-  summary: string;
-  details: string[];
-  imageUrl: string;
-  matchPercent?: number;
-  careers?: string[];
-  coreCourses?: string[];
-  workloadStyle?: string;
-  portfolio?: string;
-  collaboration?: string;
-  pace?: string;
-  location?: string;
-  scholarships?: string[];
-  tuitionRange?: string;
-  aidStrength?: string;
-  internshipPipeline?: string;
-  selectivity?: string;
-  campusVibe?: string;
-  housing?: string;
-  exchange?: string;
-};
+import { Candidate, generateAIRecommendations, extractUserSummary } from '@/lib/ai-recommendations';
 
 type MatchSnapshot = {
   phase: 'intro' | 'major' | 'university' | 'result';
@@ -42,307 +18,35 @@ type MatchSnapshot = {
   universityWinner: Candidate | null;
 };
 
-type RoleProfile = {
-  id: string;
-  title?: { en?: string; ko?: string };
-  tagline?: { en?: string; ko?: string };
-  details?: { en?: string; ko?: string };
-};
-
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
-
-const MAJOR_CANDIDATES: Candidate[] = [
-  {
-    id: 'cs',
-    name: 'Computer Science',
-    summary: 'Build software, systems, and algorithms.',
-    imageUrl: 'https://picsum.photos/id/180/800/500',
-    matchPercent: 88,
-    careers: ['Software engineer', 'Data engineer', 'Product developer'],
-    coreCourses: ['Algorithms', 'Databases', 'Systems'],
-    workloadStyle: 'Project-heavy with weekly coding labs',
-    portfolio: 'Yes - apps, systems, open-source',
-    collaboration: 'Mixed - solo coding + team sprints',
-    pace: 'Intense',
-    details: ['Strong logic fit', 'High demand roles', 'Project driven'],
-  },
-  {
-    id: 'business',
-    name: 'Business Administration',
-    summary: 'Lead teams, strategy, and operations.',
-    imageUrl: 'https://picsum.photos/id/1074/800/500',
-    matchPercent: 74,
-    careers: ['Strategy analyst', 'Operations manager', 'Marketing lead'],
-    coreCourses: ['Accounting', 'Strategy', 'Marketing'],
-    workloadStyle: 'Case studies and group presentations',
-    portfolio: 'Yes - case decks, market plans',
-    collaboration: 'Team-heavy',
-    pace: 'Moderate',
-    details: ['Leadership focus', 'Broad career paths', 'Practical projects'],
-  },
-  {
-    id: 'design',
-    name: 'UX Design',
-    summary: 'Design products around human needs.',
-    imageUrl: 'https://picsum.photos/id/1060/800/500',
-    matchPercent: 91,
-    careers: ['UX designer', 'Product designer', 'UX researcher'],
-    coreCourses: ['Interaction design', 'User research', 'Prototyping'],
-    workloadStyle: 'Studio critiques and iterative projects',
-    portfolio: 'Yes - product case studies',
-    collaboration: 'Team-heavy',
-    pace: 'Moderate to intense',
-    details: ['Creative problem solving', 'User research', 'Portfolio friendly'],
-  },
-  {
-    id: 'psych',
-    name: 'Psychology',
-    summary: 'Understand behavior and motivation.',
-    imageUrl: 'https://picsum.photos/id/1027/800/500',
-    matchPercent: 69,
-    careers: ['Counselor', 'Behavior analyst', 'UX researcher'],
-    coreCourses: ['Cognitive psych', 'Statistics', 'Research methods'],
-    workloadStyle: 'Reading, labs, and research papers',
-    portfolio: 'Optional - research summaries',
-    collaboration: 'Balanced',
-    pace: 'Moderate',
-    details: ['People-focused', 'Research skills', 'Counseling pathways'],
-  },
-  {
-    id: 'biomed',
-    name: 'Biomedical Engineering',
-    summary: 'Combine medicine and engineering.',
-    imageUrl: 'https://picsum.photos/id/1033/800/500',
-    matchPercent: 63,
-    careers: ['Bioengineer', 'Medical device designer', 'R&D specialist'],
-    coreCourses: ['Biomechanics', 'Signals', 'Materials'],
-    workloadStyle: 'Lab-heavy with technical projects',
-    portfolio: 'Yes - prototypes, lab reports',
-    collaboration: 'Team-heavy',
-    pace: 'Intense',
-    details: ['STEM heavy', 'Lab work', 'Healthcare impact'],
-  },
-  {
-    id: 'media',
-    name: 'Media Studies',
-    summary: 'Create stories and digital content.',
-    imageUrl: 'https://picsum.photos/id/1043/800/500',
-    matchPercent: 77,
-    careers: ['Content producer', 'Media strategist', 'Film editor'],
-    coreCourses: ['Storytelling', 'Digital media', 'Production'],
-    workloadStyle: 'Project-driven with critiques',
-    portfolio: 'Yes - reels, campaigns',
-    collaboration: 'Team-heavy',
-    pace: 'Moderate',
-    details: ['Storytelling', 'Production skills', 'Creative collaboration'],
-  },
-  {
-    id: 'econ',
-    name: 'Economics',
-    summary: 'Model markets and decision making.',
-    imageUrl: 'https://picsum.photos/id/1050/800/500',
-    matchPercent: 71,
-    careers: ['Policy analyst', 'Economist', 'Data analyst'],
-    coreCourses: ['Microeconomics', 'Econometrics', 'Game theory'],
-    workloadStyle: 'Problem sets and analytical papers',
-    portfolio: 'Optional - data analyses',
-    collaboration: 'Solo leaning',
-    pace: 'Moderate',
-    details: ['Data analysis', 'Policy impact', 'Quantitative reasoning'],
-  },
-  {
-    id: 'social',
-    name: 'Social Entrepreneurship',
-    summary: 'Build ventures with social impact.',
-    imageUrl: 'https://picsum.photos/id/1015/800/500',
-    matchPercent: 84,
-    careers: ['Social founder', 'Program manager', 'Impact strategist'],
-    coreCourses: ['Impact finance', 'Venture design', 'Policy'],
-    workloadStyle: 'Pitching and venture building',
-    portfolio: 'Yes - venture plans',
-    collaboration: 'Team-heavy',
-    pace: 'Moderate',
-    details: ['Mission driven', 'Startup mindset', 'Community focus'],
-  },
-];
-
-const UNIVERSITY_BASE: Candidate[] = [
-  {
-    id: 'seoul-tech',
-    name: 'Seoul Tech University',
-    summary: 'Engineering focused campus with industry ties.',
-    imageUrl: 'https://picsum.photos/id/1011/800/500',
-    location: 'Seoul, South Korea',
-    scholarships: ['Merit scholarship', 'STEM excellence grant'],
-    tuitionRange: '$$',
-    aidStrength: 'Strong merit aid',
-    internshipPipeline: 'High - industry partnerships',
-    selectivity: 'High',
-    campusVibe: 'Urban, fast-paced',
-    housing: 'On-campus, limited',
-    exchange: 'Asia-Pacific exchanges',
-    details: ['Capstone required', 'Urban campus', 'Strong internships'],
-  },
-  {
-    id: 'hanriver',
-    name: 'Han River University',
-    summary: 'Balanced programs with global exchange.',
-    imageUrl: 'https://picsum.photos/id/1018/800/500',
-    location: 'Busan, South Korea',
-    scholarships: ['Global exchange award', 'Community service scholarship'],
-    tuitionRange: '$$',
-    aidStrength: 'Balanced',
-    internshipPipeline: 'Medium - regional partners',
-    selectivity: 'Medium',
-    campusVibe: 'Coastal, collaborative',
-    housing: 'On-campus, available',
-    exchange: 'Global exchange tracks',
-    details: ['Exchange options', 'Career coaching', 'Modern facilities'],
-  },
-  {
-    id: 'skyline',
-    name: 'Skyline National University',
-    summary: 'Research-heavy with competitive admissions.',
-    imageUrl: 'https://picsum.photos/id/1020/800/500',
-    location: 'Daejeon, South Korea',
-    scholarships: ['Research fellowship', 'Graduate pathway stipend'],
-    tuitionRange: '$$$',
-    aidStrength: 'Research grants available',
-    internshipPipeline: 'High - lab placements',
-    selectivity: 'Very high',
-    campusVibe: 'Research intensive',
-    housing: 'On-campus, competitive',
-    exchange: 'Research exchange programs',
-    details: ['Research labs', 'Top faculty', 'Graduate pathways'],
-  },
-  {
-    id: 'daehan',
-    name: 'Daehan Institute',
-    summary: 'Hands-on, project-centric curriculum.',
-    imageUrl: 'https://picsum.photos/id/1024/800/500',
-    location: 'Incheon, South Korea',
-    scholarships: ['Portfolio scholarship', 'Mentor-backed award'],
-    tuitionRange: '$$',
-    aidStrength: 'Portfolio-based aid',
-    internshipPipeline: 'Medium - studio partners',
-    selectivity: 'Medium',
-    campusVibe: 'Studio-driven',
-    housing: 'Off-campus focus',
-    exchange: 'Design studio exchanges',
-    details: ['Studio classes', 'Mentor network', 'Portfolio reviews'],
-  },
-  {
-    id: 'bluebay',
-    name: 'Blue Bay University',
-    summary: 'Interdisciplinary programs and flexible tracks.',
-    imageUrl: 'https://picsum.photos/id/1031/800/500',
-    location: 'Gwangju, South Korea',
-    scholarships: ['Interdisciplinary grant', 'Innovation challenge award'],
-    tuitionRange: '$$',
-    aidStrength: 'Innovation grants',
-    internshipPipeline: 'Medium',
-    selectivity: 'Medium',
-    campusVibe: 'Interdisciplinary, open',
-    housing: 'On-campus, available',
-    exchange: 'Cross-major exchange',
-    details: ['Cross-major electives', 'Team projects', 'Open curriculum'],
-  },
-  {
-    id: 'mountain',
-    name: 'Mountain Valley College',
-    summary: 'Close-knit community with strong support.',
-    imageUrl: 'https://picsum.photos/id/1039/800/500',
-    location: 'Gangwon, South Korea',
-    scholarships: ['Leadership scholarship', 'Community builder grant'],
-    tuitionRange: '$',
-    aidStrength: 'Strong need-based aid',
-    internshipPipeline: 'Low to medium',
-    selectivity: 'Low to medium',
-    campusVibe: 'Small, supportive',
-    housing: 'On-campus, abundant',
-    exchange: 'Limited exchange options',
-    details: ['Small cohorts', 'Advisor matching', 'Leadership programs'],
-  },
-  {
-    id: 'metro',
-    name: 'Metro City University',
-    summary: 'Large network with strong alumni reach.',
-    imageUrl: 'https://picsum.photos/id/1047/800/500',
-    location: 'Seoul, South Korea',
-    scholarships: ['Alumni legacy scholarship', 'Industry partner grant'],
-    tuitionRange: '$$$',
-    aidStrength: 'Merit + partner aid',
-    internshipPipeline: 'High - corporate partners',
-    selectivity: 'High',
-    campusVibe: 'Large, energetic',
-    housing: 'On-campus, competitive',
-    exchange: 'Global partner network',
-    details: ['Alumni mentorship', 'Career fairs', 'City partnerships'],
-  },
-  {
-    id: 'bright',
-    name: 'Bright Horizon University',
-    summary: 'Global outlook and bilingual tracks.',
-    imageUrl: 'https://picsum.photos/id/1056/800/500',
-    location: 'Jeju, South Korea',
-    scholarships: ['Bilingual excellence award', 'Global traveler stipend'],
-    tuitionRange: '$$',
-    aidStrength: 'Global scholarships',
-    internshipPipeline: 'Medium',
-    selectivity: 'Medium',
-    campusVibe: 'International, scenic',
-    housing: 'On-campus, available',
-    exchange: 'Study abroad focus',
-    details: ['Bilingual courses', 'International projects', 'Study abroad'],
-  },
-];
 
 const TOTAL_ROUNDS = 3;
 
-const buildUniversitiesForMajor = (major: Candidate): Candidate[] =>
-  UNIVERSITY_BASE.map((university) => ({
-    ...university,
-    details: [...university.details, `Popular track: ${major.name}`],
-  }));
-
 const getMatchReasons = (
   candidate: Candidate,
-  mode: 'major' | 'university',
-  t: (key: string, vars?: Record<string, string | number>) => string
+  mode: 'major' | 'university'
 ): string[] => {
   const reasons: string[] = [];
 
   if (mode === 'major') {
     if (candidate.matchPercent !== undefined) {
-      reasons.push(t('stage4MatchAlignment', { value: candidate.matchPercent }));
+      reasons.push(`${candidate.matchPercent}% alignment`);
     }
     if (candidate.careers?.length) {
-      reasons.push(t('stage4MatchCareer', { value: candidate.careers[0] }));
+      reasons.push(`Career: ${candidate.careers[0]}`);
     }
     if (candidate.coreCourses?.length) {
-      reasons.push(t('stage4MatchCourse', { value: candidate.coreCourses[0] }));
-    }
-    if (candidate.workloadStyle) {
-      reasons.push(t('stage4MatchWorkload', { value: candidate.workloadStyle }));
-    }
-    if (candidate.collaboration) {
-      reasons.push(t('stage4MatchCollaboration', { value: candidate.collaboration }));
+      reasons.push(`Course: ${candidate.coreCourses[0]}`);
     }
   } else {
     if (candidate.internshipPipeline) {
-      reasons.push(t('stage4MatchInternships', { value: candidate.internshipPipeline }));
+      reasons.push(`Internships: ${candidate.internshipPipeline}`);
     }
     if (candidate.aidStrength) {
-      reasons.push(t('stage4MatchAid', { value: candidate.aidStrength }));
-    }
-    if (candidate.campusVibe) {
-      reasons.push(t('stage4MatchVibe', { value: candidate.campusVibe }));
-    }
-    if (candidate.exchange) {
-      reasons.push(t('stage4MatchExchange', { value: candidate.exchange }));
+      reasons.push(`Financial aid: ${candidate.aidStrength}`);
     }
     if (candidate.selectivity) {
-      reasons.push(t('stage4MatchSelectivity', { value: candidate.selectivity }));
+      reasons.push(`Selectivity: ${candidate.selectivity}`);
     }
   }
 
@@ -359,31 +63,106 @@ export default function Stage4Page() {
   const [majorWinner, setMajorWinner] = useState<Candidate | null>(null);
   const [universityWinner, setUniversityWinner] = useState<Candidate | null>(null);
   const [history, setHistory] = useState<MatchSnapshot[]>([]);
-  const [personalizedMajors, setPersonalizedMajors] = useState<Candidate[]>(MAJOR_CANDIDATES);
-  const [confidence, setConfidence] = useState(72);
+  const [personalizedMajors, setPersonalizedMajors] = useState<Candidate[]>([]);
+  const [confidence, setConfidence] = useState(85);
   const [insightStrengths, setInsightStrengths] = useState<string[]>([]);
   const [insightRoles, setInsightRoles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userSummary, setUserSummary] = useState<string>('');
+  
   const router = useRouter();
   const { completeStage } = useUserStore();
-  const { t, language } = useI18n();
 
-  const startMajorTournament = () => {
-    setPhase('major');
-    setMode('major');
-    setRoundCandidates(personalizedMajors);
-    setNextRoundCandidates([]);
-    setMatchIndex(0);
-    setRound(1);
-    setHistory([]);
+  useEffect(() => {
+    const initializeUserData = () => {
+      const profile = getUserProfile();
+      const summary = extractUserSummary(profile);
+      setUserSummary(summary);
+      
+      // Extract strengths for insights
+      const strengthMap: Record<string, string> = {
+        analytical: 'Analytical',
+        creative: 'Creative',
+        empathy: 'Empathy',
+        organization: 'Organization',
+      };
+      
+      const userStrengths = profile.strengthTags || [];
+      const strengthLabels = userStrengths
+        .map(strength => strengthMap[strength])
+        .filter(Boolean)
+        .slice(0, 3);
+      
+      setInsightStrengths(strengthLabels);
+      
+      // Extract liked roles for insights
+      const likedRoles = profile.likedRoles || [];
+      setInsightRoles(likedRoles.slice(0, 3));
+    };
+    
+    initializeUserData();
+  }, []);
+
+  const startMajorTournament = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await generateAIRecommendations({
+        userSummary,
+        type: 'major',
+        count: 8
+      });
+      
+      if (result.success && result.recommendations.length > 0) {
+        setPersonalizedMajors(result.recommendations);
+        setPhase('major');
+        setMode('major');
+        setRoundCandidates(result.recommendations);
+        setNextRoundCandidates([]);
+        setMatchIndex(0);
+        setRound(1);
+        setHistory([]);
+      } else {
+        throw new Error(result.error || 'AI failed to generate major recommendations');
+      }
+    } catch (error) {
+      console.error('Failed to start major tournament:', error);
+      setError('AI failed to generate recommendations. Please check your API key and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const startUniversityTournament = (major: Candidate) => {
-    setPhase('university');
-    setMode('university');
-    setRoundCandidates(buildUniversitiesForMajor(major));
-    setNextRoundCandidates([]);
-    setMatchIndex(0);
-    setRound(1);
+  const startUniversityTournament = async (major: Candidate) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await generateAIRecommendations({
+        userSummary,
+        type: 'university',
+        currentMajor: major.name,
+        count: 5
+      });
+      
+      if (result.success && result.recommendations.length > 0) {
+        setPhase('university');
+        setMode('university');
+        setRoundCandidates(result.recommendations);
+        setNextRoundCandidates([]);
+        setMatchIndex(0);
+        setRound(1);
+      } else {
+        throw new Error(result.error || 'AI failed to generate university recommendations');
+      }
+    } catch (error) {
+      console.error('Failed to start university tournament:', error);
+      setError('AI failed to generate university recommendations. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetTournament = () => {
@@ -396,116 +175,8 @@ export default function Stage4Page() {
     setMajorWinner(null);
     setUniversityWinner(null);
     setHistory([]);
+    setError(null);
   };
-
-  useEffect(() => {
-    const profile = getUserProfile();
-    const selection = profile.stage2Selection;
-
-    const strengthMap: Record<string, string[]> = {
-      analytical: ['analysis', 'data', 'logic', 'economics', 'statistics'],
-      creative: ['design', 'creative', 'media', 'story', 'ux'],
-      empathy: ['people', 'psychology', 'community', 'social'],
-      organization: ['management', 'strategy', 'operations', 'business'],
-    };
-
-    const tokens = new Set<string>();
-    const rawStrengths = (profile as unknown as { strengths?: string[] }).strengths;
-    const strengthTags = Array.isArray(rawStrengths)
-      ? rawStrengths
-      : profile.strengthTags ?? [];
-    strengthTags.forEach((strength) => {
-      strengthMap[strength]?.forEach((token) => tokens.add(token));
-    });
-    (profile?.onboarding?.docKeywords ?? []).forEach((keyword) => {
-      const normalized = keyword.toLowerCase().trim();
-      if (normalized.length >= 3) {
-        tokens.add(normalized);
-      }
-    });
-
-    const likedRoleIds = new Set(profile?.likedRoles ?? []);
-    (rolesData as RoleProfile[]).forEach((role) => {
-      if (!likedRoleIds.has(role.id)) return;
-      [role.title?.en, role.tagline?.en, role.details?.en].forEach((text) => {
-        if (!text) return;
-        text
-          .toLowerCase()
-          .split(/[^\p{L}\p{N}]+/u)
-          .filter((token) => token.length >= 3)
-          .forEach((token) => tokens.add(token));
-      });
-    });
-
-    const selectionTokens = [...(selection?.anchor ?? []), ...(selection?.signal ?? [])]
-      .map((value) => value.split('::'))
-      .flatMap((parts) => parts.filter(Boolean))
-      .map((value) => value.toLowerCase());
-    selectionTokens.forEach((token) => {
-      if (token.length >= 3) tokens.add(token);
-    });
-
-    const strengthLabels = strengthTags
-      .map((strength) => {
-        switch (strength) {
-          case 'analytical':
-            return t('stage0OptionAnalytical');
-          case 'creative':
-            return t('stage0OptionCreative');
-          case 'empathy':
-            return t('stage0OptionEmpathy');
-          case 'organization':
-            return t('stage0OptionOrganization');
-          default:
-            return strength;
-        }
-      })
-      .filter(Boolean)
-      .slice(0, 3);
-
-    const roleLabels = (profile?.likedRoles ?? [])
-      .map((roleId) => (rolesData as RoleProfile[]).find((role) => role.id === roleId))
-      .map((role) => (role ? (language === 'ko' ? role.title?.ko : role.title?.en) : null))
-      .filter((label): label is string => Boolean(label))
-      .slice(0, 3);
-
-    setInsightStrengths(strengthLabels);
-    setInsightRoles(roleLabels);
-
-    if (tokens.size === 0) {
-      setPersonalizedMajors(MAJOR_CANDIDATES);
-      return;
-    }
-
-    const keywordList = Array.from(tokens);
-    const scored = MAJOR_CANDIDATES.map((candidate, index) => {
-      const text = [
-        candidate.name,
-        candidate.summary,
-        ...candidate.details,
-        ...(candidate.careers ?? []),
-        ...(candidate.coreCourses ?? []),
-        candidate.workloadStyle,
-        candidate.collaboration,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      const score = keywordList.reduce((total, keyword) => {
-        if (!keyword || keyword.length < 3) return total;
-        return text.includes(keyword) ? total + 1 : total;
-      }, 0);
-
-      return { candidate, score, index };
-    });
-
-    const sorted = scored
-      .sort((a, b) => (b.score === a.score ? a.index - b.index : b.score - a.score))
-      .map((entry) => entry.candidate);
-
-    setPersonalizedMajors(sorted);
-  }, [language, t]);
 
   const handlePick = (winner: Candidate) => {
     setHistory((prev) => [
@@ -572,27 +243,52 @@ export default function Stage4Page() {
       return;
     }
 
-    const result = {
-      major: { id: majorWinner.id, name: majorWinner.name },
-      university: { id: universityWinner.id, name: universityWinner.name },
+    // Prepare the stage4Result according to your UserProfile type
+    const stage4Result = {
+      major: { 
+        id: majorWinner.id, 
+        name: majorWinner.name
+      },
+      university: { 
+        id: universityWinner.id, 
+        name: universityWinner.name
+      },
       confidence,
       insightStrengths,
       insightRoles,
       completedAt: new Date().toISOString(),
     };
 
-    updateUserProfile({ stage4Result: result });
+    // Update the user profile with the result
+    updateUserProfile({ stage4Result });
 
+    // Mark stage as complete
     completeStage(4);
+    
+    // Redirect to dashboard
     const dashboardPath = `${BASE_PATH}/dashboard`;
     router.push(dashboardPath);
-    if (typeof window !== 'undefined') {
-      window.location.assign(dashboardPath);
-    }
   };
 
   const currentPair = roundCandidates.slice(matchIndex * 2, matchIndex * 2 + 2);
   const totalMatches = roundCandidates.length ? roundCandidates.length / 2 : 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center"
+        style={{
+          backgroundImage: 'url(/asset/Background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}>
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-lg">AI is generating personalized recommendations...</p>
+          <p className="mt-2 text-sm text-white/70">Analyzing your profile and preferences</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -615,9 +311,9 @@ export default function Stage4Page() {
         />
 
         <div className="mb-6 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/80">{t('stage4Label')}</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/80">Stage 4: Tournament</p>
           <h1 className="text-3xl sm:text-4xl font-semibold text-white drop-shadow">
-            {t('stage4TournamentTitle')}
+            AI-Powered Major & University Tournament
           </h1>
         </div>
         <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-xs">
@@ -628,7 +324,7 @@ export default function Stage4Page() {
                 : 'bg-white/30'
             }`}
           >
-            {t('stage4MajorTitle')}
+            Major Tournament
           </span>
           <span className="text-white/80">→</span>
           <span
@@ -636,7 +332,7 @@ export default function Stage4Page() {
               phase === 'university' ? 'bg-white/60' : 'bg-white/30'
             }`}
           >
-            {t('stage4UniversityTitle')}
+            University Tournament
           </span>
           <span className="text-white/80">→</span>
           <span
@@ -644,46 +340,85 @@ export default function Stage4Page() {
               phase === 'result' ? 'bg-white/60' : 'bg-white/30'
             }`}
           >
-            {t('stage4FinalResults')}
+            Final Results
           </span>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50/80 backdrop-blur border border-red-200 rounded-2xl">
+            <p className="text-red-700 text-sm font-medium">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="mt-2 text-xs text-red-600 hover:text-red-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {phase === 'intro' && (
           <div className="bg-white/80 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center border border-white/60">
             <div className="mb-6">
               <img
                 src={`${BASE_PATH}/asset/Stage_option.png`}
-                alt={t('stage4IntroImageAlt')}
+                alt="Tournament introduction"
                 className="mx-auto h-40 w-full max-w-md rounded-3xl object-cover shadow-md"
                 loading="lazy"
               />
             </div>
             <p className="text-gray-700 mb-6 text-base">
-              {t('stage4Intro')}
+              Our AI has analyzed your profile. Now, choose your path through a tournament-style selection process.
             </p>
+            
+            <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-left">
+              <h3 className="font-semibold text-blue-800 mb-2">Your AI Profile Analysis:</h3>
+              <p className="text-sm text-blue-700">{userSummary}</p>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-6">
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 shadow-md">
                 <h2 className="text-lg font-semibold mb-2 text-slate-800">
-                  {t('stage4MajorTitle')}
+                  Major Tournament
                 </h2>
                 <p className="text-sm text-slate-600">
-                  {t('stage4MajorDesc')}
+                  AI will generate 8 majors based on your profile. Pick your favorites in head-to-head matchups.
                 </p>
               </div>
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 shadow-md">
                 <h2 className="text-lg font-semibold mb-2 text-slate-800">
-                  {t('stage4UniversityTitle')}
+                  University Tournament
                 </h2>
                 <p className="text-sm text-slate-600">
-                  {t('stage4UniversityDesc')}
+                  After choosing a major, AI will recommend 5 Korean universities. Select the best fit.
                 </p>
               </div>
             </div>
+            
+            <div className="text-xs text-slate-500 mb-4">
+              <span className="inline-flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+                100% AI-Powered Recommendations
+              </span>
+            </div>
+            
             <button
               onClick={startMajorTournament}
-              className="px-6 py-3 rounded-full font-medium text-slate-800 bg-white/90 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 ease-out"
+              disabled={loading}
+              className="px-6 py-3 rounded-full font-medium text-slate-800 bg-white/90 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t('stage4Start')}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  AI Processing...
+                </span>
+              ) : (
+                'Start AI Tournament'
+              )}
             </button>
           </div>
         )}
@@ -693,22 +428,22 @@ export default function Stage4Page() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70">
-                  {mode === 'major' ? t('stage4MajorTitle') : t('stage4UniversityTitle')}
+                  {mode === 'major' ? 'Major Tournament' : 'University Tournament'}
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-semibold text-white drop-shadow">
-                  {t('stage4RoundLabel', { round, total: TOTAL_ROUNDS })}
+                  Round {round} of {TOTAL_ROUNDS}
                 </h2>
                 <p className="text-sm text-white/80">
-                  {t('stage4MatchLabel', { current: matchIndex + 1, total: totalMatches })}
+                  Match {matchIndex + 1} of {totalMatches}
                 </p>
               </div>
               <div className="text-sm text-slate-700 bg-white/20 border border-white/30 rounded-full px-4 py-1">
-                {t('stage4WinnersLocked', { value: nextRoundCandidates.length })}
+                {nextRoundCandidates.length} winners selected
               </div>
             </div>
 
             <div className="text-center text-white/80 text-sm">
-              {t('stage4PickWinner')}
+              Which option better matches your preferences?
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -716,103 +451,111 @@ export default function Stage4Page() {
                 <button
                   key={candidate.id}
                   onClick={() => handlePick(candidate)}
-                  className="text-left bg-white/85 backdrop-blur rounded-3xl shadow-xl p-6 border border-white/70 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ease-out"
+                  className="group text-left bg-white/85 backdrop-blur rounded-3xl shadow-xl p-6 border border-white/70 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ease-out"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-slate-800">{candidate.name}</h3>
+                    <div>
+                      <h3 className="text-xl font-semibold text-slate-800">{candidate.name}</h3>
+                      <span className="inline-flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mt-1">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                        </svg>
+                        AI-Powered Match
+                      </span>
+                    </div>
                     <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                      {t('stage4PickLabel')}
+                      Pick
                     </span>
                   </div>
+                  
                   {mode === 'major' && candidate.matchPercent !== undefined && (
-                    <p className="text-sm text-slate-700 font-medium mb-2">
-                      {t('stage4MatchScore', { value: candidate.matchPercent })}
-                    </p>
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-slate-700">AI Match Score</span>
+                        <span className="text-sm font-bold text-blue-600">{candidate.matchPercent}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${candidate.matchPercent}%` }}
+                        ></div>
+                      </div>
+                    </div>
                   )}
-                  {mode === 'major' && candidate.careers && (
-                    <p className="text-sm text-slate-600 mb-1">
-                      {t('stage4Careers', { value: candidate.careers.join(', ') })}
-                    </p>
+                  
+                  <p className="text-slate-600 mb-4 text-sm leading-relaxed">{candidate.summary}</p>
+                  
+                  {mode === 'major' && candidate.careers && candidate.careers.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-sm font-medium text-slate-700 mb-1">Potential Careers:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {candidate.careers.slice(0, 3).map((career, index) => (
+                          <span key={index} className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
+                            {career}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  {mode === 'major' && candidate.coreCourses && (
-                    <p className="text-sm text-slate-600 mb-1">
-                      {t('stage4CoreCourses', { value: candidate.coreCourses.join(', ') })}
-                    </p>
+                  
+                  {mode === 'major' && candidate.coreCourses && candidate.coreCourses.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-slate-700 mb-1">Key Courses:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {candidate.coreCourses.slice(0, 3).map((course, index) => (
+                          <span key={index} className="text-xs text-slate-600 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full">
+                            {course}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  {mode === 'major' && candidate.workloadStyle && (
-                    <p className="text-sm text-slate-600 mb-1">
-                      {t('stage4Workload', { value: candidate.workloadStyle })}
-                    </p>
-                  )}
-                  {mode === 'major' && candidate.portfolio && (
-                    <p className="text-sm text-slate-600 mb-1">
-                      {t('stage4Portfolio', { value: candidate.portfolio })}
-                    </p>
-                  )}
-                  {mode === 'major' && candidate.collaboration && (
-                    <p className="text-sm text-slate-600 mb-1">
-                      {t('stage4Collaboration', { value: candidate.collaboration })}
-                    </p>
-                  )}
-                  {mode === 'major' && candidate.pace && (
-                    <p className="text-sm text-slate-600 mb-3">
-                      {t('stage4Pace', { value: candidate.pace })}
-                    </p>
-                  )}
+                  
                   {mode === 'university' && candidate.location && (
-                    <p className="text-sm text-slate-600 mb-1">
-                      {t('stage4Location', { value: candidate.location })}
-                    </p>
+                    <div className="mb-3">
+                      <p className="text-sm font-medium text-slate-700 mb-1">Location:</p>
+                      <p className="text-sm text-slate-600">{candidate.location}</p>
+                    </div>
                   )}
-                  {mode === 'university' && candidate.scholarships?.length && (
-                    <p className="text-sm text-slate-600 mb-3">
-                      {t('stage4Scholarships', { value: candidate.scholarships.join(', ') })}
-                    </p>
+                  
+                  {mode === 'university' && candidate.scholarships && candidate.scholarships.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-slate-700 mb-1">Scholarship Opportunities:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {candidate.scholarships.slice(0, 2).map((scholarship, index) => (
+                          <span key={index} className="text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded-full">
+                            {scholarship}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
+                  
                   {mode === 'university' && (
-                    <div className="text-sm text-slate-600 mb-3 space-y-1">
+                    <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
                       {candidate.tuitionRange && (
-                        <p>{t('stage4Tuition', { value: candidate.tuitionRange })}</p>
-                      )}
-                      {candidate.aidStrength && (
-                        <p>{t('stage4FinancialAid', { value: candidate.aidStrength })}</p>
-                      )}
-                      {candidate.internshipPipeline && (
-                        <p>{t('stage4Internships', { value: candidate.internshipPipeline })}</p>
+                        <div className="bg-slate-50 p-2 rounded-lg">
+                          <p className="text-slate-500">Tuition</p>
+                          <p className="font-medium">{candidate.tuitionRange}</p>
+                        </div>
                       )}
                       {candidate.selectivity && (
-                        <p>{t('stage4Selectivity', { value: candidate.selectivity })}</p>
-                      )}
-                      {candidate.campusVibe && (
-                        <p>{t('stage4CampusVibe', { value: candidate.campusVibe })}</p>
-                      )}
-                      {candidate.housing && (
-                        <p>{t('stage4Housing', { value: candidate.housing })}</p>
-                      )}
-                      {candidate.exchange && (
-                        <p>{t('stage4Exchange', { value: candidate.exchange })}</p>
+                        <div className="bg-slate-50 p-2 rounded-lg">
+                          <p className="text-slate-500">Selectivity</p>
+                          <p className="font-medium">{candidate.selectivity}</p>
+                        </div>
                       )}
                     </div>
                   )}
-                  <p className="text-sm text-slate-600 mb-4">{candidate.summary}</p>
-                  {mode === 'university' && (
-                    <a
-                      href="https://example.com"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mb-3 inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-white"
-                    >
-                      {t('stage4UniversitySite')}
-                    </a>
-                  )}
+                  
                   <div className="mb-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">
-                      {t('stage4WhyMatchup')}
+                      Why this matches you:
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {getMatchReasons(candidate, mode, t).map((reason) => (
+                      {getMatchReasons(candidate, mode).map((reason, index) => (
                         <span
-                          key={reason}
+                          key={index}
                           className="text-xs text-slate-700 bg-white/70 border border-white/70 rounded-full px-3 py-1 shadow-sm"
                         >
                           {reason}
@@ -820,16 +563,25 @@ export default function Stage4Page() {
                       ))}
                     </div>
                   </div>
-                  <ul className="text-sm text-slate-600 space-y-1">
-                    {candidate.details.map((detail) => (
-                      <li key={detail}>- {detail}</li>
-                    ))}
-                  </ul>
+                  
+                  {candidate.details && candidate.details.length > 0 && (
+                    <ul className="text-sm text-slate-600 space-y-1 mb-4">
+                      {candidate.details.slice(0, 3).map((detail, index) => (
+                        <li key={index} className="flex items-start">
+                          <svg className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  
                   <img
                     src={candidate.imageUrl}
                     alt={candidate.name}
                     loading="lazy"
-                    className="mt-4 h-36 w-full rounded-2xl object-cover"
+                    className="mt-4 h-36 w-full rounded-2xl object-cover group-hover:scale-[1.02] transition-transform duration-300"
                   />
                 </button>
               ))}
@@ -840,18 +592,18 @@ export default function Stage4Page() {
                 onClick={resetTournament}
                 className="rounded-full border border-white/60 bg-white/20 px-4 py-1 text-sm text-slate-700 shadow-sm transition hover:bg-white/35"
               >
-                {t('stage4Restart')}
+                Restart
               </button>
               <button
                 onClick={handleUndo}
                 className="rounded-full border border-white/60 bg-white/25 px-4 py-1 text-sm text-slate-700 shadow-sm transition hover:bg-white/35 disabled:text-slate-400"
                 disabled={history.length === 0}
               >
-                {t('stage4Undo')}
+                Undo Last Choice
               </button>
               {majorWinner && mode === 'university' && (
                 <div className="rounded-full border border-white/60 bg-white/20 px-4 py-1 text-sm text-slate-700 shadow-sm">
-                  {t('stage4CurrentMajor', { value: majorWinner.name })}
+                  Major: {majorWinner.name}
                 </div>
               )}
             </div>
@@ -882,72 +634,116 @@ export default function Stage4Page() {
             <div>
               <img
                 src={`${BASE_PATH}/asset/Stage_evolve.png`}
-                alt={t('stage4ResultImageAlt')}
+                alt="Final results celebration"
                 className="mx-auto h-36 w-full max-w-md rounded-3xl object-cover shadow-md"
                 loading="lazy"
               />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                {t('stage4FinalResults')}
+                Final Results
               </p>
               <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">
-                {t('stage4WinningPath')}
+                Your Winning Path
               </h2>
             </div>
+            
+            <div className="bg-green-50/70 border border-green-200 rounded-2xl p-4">
+              <div className="flex items-center justify-center space-x-2 text-green-700">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">AI-Powered Perfect Match!</span>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 text-left shadow-md">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  {t('stage4MajorLabel')}
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Selected Major
+                  </p>
+                  {majorWinner.matchPercent && (
+                    <span className="text-sm font-bold text-blue-600">{majorWinner.matchPercent}% match</span>
+                  )}
+                </div>
                 <h3 className="text-lg font-semibold text-slate-800">{majorWinner.name}</h3>
                 <p className="text-sm text-slate-600 mt-2">{majorWinner.summary}</p>
+                
+                {majorWinner.careers && majorWinner.careers.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-slate-500 mb-1">Top Career Paths:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {majorWinner.careers.slice(0, 3).map((career, index) => (
+                        <span key={index} className="text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-full">
+                          {career}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 text-left shadow-md">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  {t('stage4UniversityLabel')}
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">
+                  Selected University
                 </p>
                 <h3 className="text-lg font-semibold text-slate-800">{universityWinner.name}</h3>
                 <p className="text-sm text-slate-600 mt-2">{universityWinner.summary}</p>
+                
+                {universityWinner.location && (
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-slate-500">Location</p>
+                    <p className="text-sm text-slate-700">{universityWinner.location}</p>
+                  </div>
+                )}
               </div>
             </div>
+            
             <div className="bg-white/70 border border-white/70 rounded-2xl p-5 text-left shadow-md">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-3">
-                {t('stage4CombinedTitle')}
+                Your Academic Path
               </p>
               <p className="text-sm text-slate-700">
-                {t('stage4CombinedSummary', {
-                  major: majorWinner.name,
-                  university: universityWinner.name,
-                })}
+                {majorWinner.name} at {universityWinner.name}
               </p>
               <p className="text-sm text-slate-600 mt-2">
                 {majorWinner.summary} · {universityWinner.summary}
               </p>
             </div>
+            
             {(insightStrengths.length > 0 || insightRoles.length > 0) && (
               <div className="bg-white/70 border border-white/70 rounded-2xl p-5 text-left shadow-md">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-3">
-                  {t('stage4InsightTitle')}
+                  AI Insights
                 </p>
                 {insightStrengths.length > 0 && (
-                  <p className="text-sm text-slate-700">
-                    {t('stage4InsightStrengths', { value: insightStrengths.join(', ') })}
-                  </p>
+                  <div className="mb-3">
+                    <p className="text-sm text-slate-700 mb-1">
+                      Based on your strengths: {insightStrengths.join(', ')}
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {insightStrengths.map((strength, index) => (
+                        <span key={index} className="text-xs text-purple-700 bg-purple-50 px-2 py-1 rounded-full">
+                          {strength}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
                 {insightRoles.length > 0 && (
                   <p className="text-sm text-slate-700 mt-2">
-                    {t('stage4InsightRoles', { value: insightRoles.join(', ') })}
+                    Linked to your liked roles: {insightRoles.join(', ')}
                   </p>
                 )}
               </div>
             )}
+            
             <div className="bg-white/70 border border-white/70 rounded-2xl p-5 text-left shadow-md">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-3">
-                {t('stage4ConfidenceLabel')}
+                Your Confidence Level
               </p>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-slate-500">{t('stage4ConfidenceLow')}</span>
+                <span className="text-xs text-slate-500">Low</span>
                 <input
                   type="range"
                   min={40}
@@ -956,24 +752,25 @@ export default function Stage4Page() {
                   onChange={(event) => setConfidence(Number(event.target.value))}
                   className="w-full accent-[#9BCBFF]"
                 />
-                <span className="text-xs text-slate-500">{t('stage4ConfidenceHigh')}</span>
+                <span className="text-xs text-slate-500">High</span>
               </div>
               <p className="mt-2 text-sm text-slate-700">
-                {t('stage4ConfidenceValue', { value: confidence })}
+                Confidence: {confidence}%
               </p>
             </div>
+            
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleComplete}
                 className="px-6 py-3 rounded-full font-medium text-slate-800 bg-white/90 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 ease-out"
               >
-                {t('stage4SaveReturn')}
+                Save & Return to Dashboard
               </button>
               <button
                 onClick={resetTournament}
                 className="px-6 py-3 rounded-full border border-white/70 text-slate-700 bg-white/70 hover:bg-white/90 shadow-md transition-all duration-300 ease-out"
               >
-                {t('stage4RunAnother')}
+                Run Another Tournament
               </button>
             </div>
           </div>
