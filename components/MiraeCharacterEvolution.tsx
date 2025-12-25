@@ -392,6 +392,9 @@ export const MiraeCharacter: React.FC<MiraeCharacterProps> = ({
   const state = getCharacterState(cardCount);
   const expression = getCharacterExpression(recentCardTypes);
 
+  // Debug logging
+  console.log('MiraeCharacter render:', { equippedAccessories, cardCount, state });
+
   const characterMap: Record<CharacterState, React.ReactNode> = {
     base: <MiraeBaseSVG />,
     awakening: <MiraeAwakeningSVG />,
@@ -406,9 +409,16 @@ export const MiraeCharacter: React.FC<MiraeCharacterProps> = ({
   const accessoryComponent = equippedAccessories.accessory ? getAccessoryById(equippedAccessories.accessory)?.component : null;
   const effectComponent = equippedAccessories.effect ? getAccessoryById(equippedAccessories.effect)?.component : null;
 
+  console.log('Accessory components:', {
+    cape: capeComponent ? 'yes' : 'no',
+    hat: hatComponent ? 'yes' : 'no',
+    accessory: accessoryComponent ? 'yes' : 'no',
+    effect: effectComponent ? 'yes' : 'no',
+  });
+
   return (
     <motion.div
-      key={state}
+      key={`${state}-${JSON.stringify(equippedAccessories)}`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}

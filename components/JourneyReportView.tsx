@@ -38,6 +38,14 @@ const stageLabels: Record<ScopeStage, string> = {
   E: 'Evolve',
 };
 
+const stageColors: Record<ScopeStage, string> = {
+  S: 'bg-[#9BCBFF]',
+  C: 'bg-[#BEEDE3]',
+  O: 'bg-[#FFD1A8]',
+  P: 'bg-[#F4A9C8]',
+  E: 'bg-[#C7B9FF]',
+};
+
 const activityTypeLabels: Record<ActivityLog['activityType'], string> = {
   MiraeActivity: 'Mirae activity',
   Study: 'Study',
@@ -220,6 +228,10 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
   }, [logs]);
 
   const reflections = logs.filter((log) => log.shortReflection).slice(0, 4);
+  const snapshotDays = useMemo(() => {
+    const sorted = logs.slice().sort((a, b) => a.date.localeCompare(b.date));
+    return sorted.slice(-14);
+  }, [logs]);
 
   return (
     <div className="space-y-6">
@@ -351,6 +363,22 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
               </ul>
             ) : (
               <p className="text-xs text-slate-400">Add reflections to see them here.</p>
+            )}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/50 bg-white/80 p-4 mt-4">
+          <p className="text-sm font-semibold text-slate-700 mb-2">Calendar snapshot</p>
+          <div className="grid grid-cols-7 gap-2">
+            {snapshotDays.length > 0 ? (
+              snapshotDays.map((log) => (
+                <div
+                  key={`${log.id}-snapshot`}
+                  className={`h-6 rounded-lg ${stageColors[log.scopeStage]}`}
+                  title={`${log.date}: ${log.title}`}
+                />
+              ))
+            ) : (
+              <p className="text-xs text-slate-400">No activity yet.</p>
             )}
           </div>
         </div>

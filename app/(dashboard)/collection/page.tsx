@@ -1677,105 +1677,82 @@ export default function MiraePlusStatement() {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-4xl rounded-3xl border border-white/40 bg-white/95 p-6 shadow-2xl backdrop-blur-lg"
+              className="w-full max-w-6xl rounded-3xl border border-white/40 bg-white/95 p-6 shadow-2xl backdrop-blur-lg"
             >
-              <div className="flex items-start justify-between mb-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-5">
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Adventure Report</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Personal Statement Support</p>
                   <h2 className="text-2xl font-semibold text-slate-800">Your Growth Map</h2>
                   <p className="text-sm text-slate-500">
-                    Mirae is noticing your strengths, interests, and growth over time.
+                    Mirae tracks strengths, interests, and growth over time to help you articulate your journey.
                   </p>
                 </div>
-                <button
-                  onClick={handleCloseAdventure}
-                  className="h-9 w-9 rounded-full bg-white/70 border border-white/60 text-slate-600 hover:text-slate-800 transition"
-                  aria-label="Close"
-                >
-                  ✕
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setAdventureView('archive')}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                      adventureView === 'archive'
+                        ? 'bg-slate-800 text-white'
+                        : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
+                    }`}
+                  >
+                    Activity Archive
+                  </button>
+                  <button
+                    onClick={() => setAdventureView('report')}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                      adventureView === 'report'
+                        ? 'bg-slate-800 text-white'
+                        : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
+                    }`}
+                  >
+                    Journey Report
+                  </button>
+                  <button
+                    onClick={() => setAdventureView('report')}
+                    className="px-4 py-2 rounded-full text-xs font-semibold bg-[#9BCBFF]/90 text-slate-800 hover:bg-[#9BCBFF] transition"
+                  >
+                    View Report
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
+                    type="button"
+                  >
+                    Download PDF
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
+                    type="button"
+                  >
+                    Share link
+                  </button>
+                  <button
+                    onClick={handleCloseAdventure}
+                    className="h-9 w-9 rounded-full bg-white/70 border border-white/60 text-slate-600 hover:text-slate-800 transition"
+                    aria-label="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-                <div className="space-y-4">
-                  <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-                    <p className="text-sm font-semibold text-slate-700 mb-2">Signals Mirae Sees</p>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {['Analytical', 'Empathy', 'Design-curious', 'Community-driven', 'Reflective'].map((signal) => (
-                        <span key={signal} className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
-                          {signal}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-xs text-slate-500 mt-3">
-                      These are patterns your recent activities reveal, even when you do not say them out loud.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-                    <p className="text-sm font-semibold text-slate-700 mb-3">Activity Archive</p>
-                    <div className="grid grid-cols-7 gap-2 text-center text-[10px] text-slate-400 mb-2">
-                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                        <span key={day}>{day}</span>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-7 gap-2">
-                      {Array.from({ length: 28 }).map((_, index) => {
-                        const intensity = [0, 1, 2, 3][index % 4];
-                        const shade = [
-                          'bg-slate-100',
-                          'bg-[#BEEDE3]',
-                          'bg-[#C7B9FF]',
-                          'bg-[#F4A9C8]',
-                        ][intensity];
-                        return (
-                          <div
-                            key={index}
-                            className={`h-7 rounded-lg ${shade} shadow-sm`}
-                            aria-hidden
-                          />
-                        );
-                      })}
-                    </div>
-                    <p className="text-xs text-slate-500 mt-3">
-                      Simulated activity log (study, reflection, projects, and uploads).
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-                    <p className="text-sm font-semibold text-slate-700 mb-2">Recent Entries</p>
-                    <ul className="space-y-3 text-sm text-slate-600">
-                      {[
-                        'Drafted a “Future Day” storyboard',
-                        'Saved 3 role ideas from Role Roulette',
-                        'Added research notes from a design article',
-                        'Uploaded a club project outline',
-                        'Reflected on strengths after Stage 0',
-                      ].map((entry) => (
-                        <li key={entry} className="flex items-start gap-2">
-                          <span className="mt-1 h-2 w-2 rounded-full bg-[#9BCBFF]" />
-                          <span>{entry}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-                    <p className="text-sm font-semibold text-slate-700 mb-2">Connected Sources (Simulated)</p>
-                    <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-                      {['Google Drive', 'Notion To-Do', 'School Planner', 'Club Folder'].map((source) => (
-                        <span key={source} className="rounded-full bg-slate-100 px-3 py-1">
-                          {source}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-xs text-slate-500 mt-3">
-                      These are placeholders for future integrations.
-                    </p>
-                  </div>
-                </div>
+              <div className="max-h-[75vh] overflow-y-auto pr-2">
+                {adventureView === 'archive' ? (
+                  <ActivityCalendar logs={activityLogs} onAddLog={handleAddLog} />
+                ) : (
+                  <JourneyReportView
+                    logs={activityLogs}
+                    cards={cards.map((card) => ({
+                      id: card.id,
+                      type: card.type,
+                      title: card.title,
+                      description: card.description,
+                      stage: card.stage,
+                      unlocked: card.unlocked,
+                    }))}
+                    studentName={studentName}
+                  />
+                )}
               </div>
             </motion.div>
           </motion.div>
