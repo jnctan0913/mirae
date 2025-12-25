@@ -1299,8 +1299,13 @@ export default function MiraePlusStatement() {
   useEffect(() => {
     if (!adventureOpen) {
       setAdventureToolsOpen(false);
+      // Remove body class when modal closes
+      document.body.classList.remove('modal-open');
       return;
     }
+    // Add body class when modal opens
+    document.body.classList.add('modal-open');
+    
     if (adventureView === 'report') {
       setAdventureToolsOpen(false);
     } else {
@@ -1690,8 +1695,15 @@ export default function MiraePlusStatement() {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-6xl rounded-3xl border border-white/40 bg-white/95 p-6 shadow-2xl backdrop-blur-lg"
+              className="relative w-full max-w-6xl rounded-3xl border border-white/40 bg-white/95 p-6 shadow-2xl backdrop-blur-lg"
             >
+              <button
+                onClick={handleCloseAdventure}
+                className="absolute right-4 top-4 h-9 w-9 rounded-full bg-white/70 border border-white/60 text-slate-600 hover:text-slate-800 transition"
+                aria-label="Close"
+              >
+                ✕
+              </button>
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-5">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Personal Statement Support</p>
@@ -1752,13 +1764,6 @@ export default function MiraePlusStatement() {
                       </button>
                     </>
                   )}
-                  <button
-                    onClick={handleCloseAdventure}
-                    className="h-9 w-9 rounded-full bg-white/70 border border-white/60 text-slate-600 hover:text-slate-800 transition"
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
                 </div>
               </div>
 

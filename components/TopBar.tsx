@@ -16,6 +16,7 @@ export default function TopBar() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isAuthPage = useMemo(
     () => pathname?.startsWith('/login') || pathname?.startsWith('/signup'),
@@ -41,6 +42,22 @@ export default function TopBar() {
     }
   }, [language]);
 
+  useEffect(() => {
+    // Watch for modal-open class on body
+    const checkModalState = () => {
+      setIsModalOpen(document.body.classList.contains('modal-open'));
+    };
+
+    // Initial check
+    checkModalState();
+
+    // Watch for class changes
+    const observer = new MutationObserver(checkModalState);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleSignOut = () => {
     signOut();
     reset();
@@ -54,7 +71,7 @@ export default function TopBar() {
 
   return (
     <>
-      <div className="fixed top-4 right-4 z-50">
+      <div className={`fixed top-4 right-4 z-50 transition-all duration-300 ${isModalOpen ? 'opacity-0 pointer-events-none -translate-y-4' : 'opacity-100 translate-y-0'}`}>
         <div className="glass-card rounded-full flex items-center gap-2 px-3 py-2">
           {!isAuthPage && (
             <>
