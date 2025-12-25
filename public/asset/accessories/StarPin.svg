@@ -1,0 +1,21 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Star shape -->
+  <path
+    d="M50 25 L57 45 L78 48 L62 62 L66 83 L50 72 L34 83 L38 62 L22 48 L43 45 Z"
+    fill="url(#starGrad)"
+  />
+  <!-- Inner highlight -->
+  <path
+    d="M50 30 L54 42 L66 44 L56 53 L58 65 L50 59 L42 65 L44 53 L34 44 L46 42 Z"
+    fill="white"
+    opacity="0.3"
+  />
+  <!-- Pin needle -->
+  <circle cx="50" cy="50" r="4" fill="#E8D068" />
+  <defs>
+    <radialGradient id="starGrad">
+      <stop offset="0%" stop-color="#FFE5A8" />
+      <stop offset="100%" stop-color="#F4D675" />
+    </radialGradient>
+  </defs>
+</svg>

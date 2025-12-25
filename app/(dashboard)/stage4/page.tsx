@@ -49,7 +49,7 @@ type RoleProfile = {
   details?: { en?: string; ko?: string };
 };
 
-const BASE_PATH = '/Mirae.ai';
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 const MAJOR_CANDIDATES: Candidate[] = [
   {

@@ -268,7 +268,7 @@ export default function Stage2SummaryPage() {
     language === 'ko'
       ? 'Your saved selection will be cleared so you can rebuild it.'
       : 'Your saved selection will be cleared so you can rebuild it.';
-  const confirmCancel = language === 'ko' ? 'Cancel' : 'Cancel';
+  const confirmCancel = language === 'ko' ? '취소' : 'Cancel';
   const confirmConfirm = language === 'ko' ? 'Yes, clear' : 'Yes, clear';
 
   const handleRedo = () => {

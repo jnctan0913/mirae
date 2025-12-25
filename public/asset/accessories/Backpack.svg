@@ -1,0 +1,51 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main backpack body -->
+  <rect
+    x="30"
+    y="35"
+    width="40"
+    height="50"
+    rx="8"
+    fill="url(#backpackGrad)"
+  />
+  <!-- Top flap -->
+  <rect
+    x="32"
+    y="30"
+    width="36"
+    height="8"
+    rx="4"
+    fill="#8DC9B8"
+  />
+  <!-- Pocket -->
+  <rect
+    x="38"
+    y="45"
+    width="24"
+    height="20"
+    rx="4"
+    fill="#A8D5BA"
+    opacity="0.4"
+  />
+  <!-- Straps -->
+  <path
+    d="M40 35 Q35 30 35 25"
+    stroke="#7EBCA8"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <path
+    d="M60 35 Q65 30 65 25"
+    stroke="#7EBCA8"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <defs>
+    <linearGradient id="backpackGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A8D5BA" />
+      <stop offset="100%" stop-color="#8DC9B8" />
+    </linearGradient>
+  </defs>
+</svg>

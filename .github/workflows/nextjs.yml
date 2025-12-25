@@ -55,12 +55,6 @@ jobs:
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
-          static_site_generator: next
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -78,6 +72,7 @@ jobs:
           # OpenAI API key is optional for builds - the app will work without it
           # Add OPENAI_API_KEY to repository secrets if you want AI features in production
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEXT_OUTPUT: export
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
