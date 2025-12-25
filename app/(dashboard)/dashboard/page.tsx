@@ -132,7 +132,11 @@ export default function DashboardPage() {
         {/* Journey Map */}
         <div className="relative flex-shrink-0">
           {/* Mirae Character */}
-          <div className="absolute -top-8 right-20 z-10">
+          <button
+            onClick={() => router.push('/collection')}
+            className="absolute -top-8 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
+            title="View your collection"
+          >
             <Image
               src="/asset/Mirae_Icon1.png"
               alt="Mirae"
@@ -140,7 +144,8 @@ export default function DashboardPage() {
               height={150}
               className="object-contain floating"
             />
-          </div>
+            <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors" />
+          </button>
 
           {/* Journey Path */}
           <div className="relative py-6 px-6">

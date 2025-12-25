@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Sparkles, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -138,6 +138,61 @@ const SEED_CARDS: IdentityCard[] = [
     stage: 'E',
     type: 'ValueSignal',
     title: 'Core Values Clarity',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-11',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Strategic Planner',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-12',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Behavioral Psychology',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-13',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Research Methods',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-14',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Internship Reflection',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-15',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Community Impact',
     description: 'Unlock by continuing your journey.',
     rarity: 'Rare',
     unlocked: false,
@@ -577,6 +632,7 @@ export default function MiraePlusStatement() {
   const [reflections, setReflections] = useState<Record<string, string>>({});
   const [currentReflection, setCurrentReflection] = useState('');
   const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
+  const collectionScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -614,6 +670,13 @@ export default function MiraePlusStatement() {
   const handleAccessoryChange = (newAccessories: EquippedAccessories) => {
     setEquippedAccessories(newAccessories);
     localStorage.setItem('miraePlus_accessories', JSON.stringify(newAccessories));
+  };
+
+  const handleScrollToBottom = () => {
+    collectionScrollRef.current?.scrollTo({
+      top: collectionScrollRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
   const unlockedCards = cards.filter((c) => c.unlocked);
@@ -716,7 +779,7 @@ export default function MiraePlusStatement() {
               </button>
             </div>
 
-            <div className="relative flex-1 min-h-0 overflow-y-auto pr-2">
+            <div ref={collectionScrollRef} className="relative flex-1 min-h-0 overflow-y-auto pr-2">
               {viewMode === 'collection' ? (
                 <div className="space-y-8">
                   <div className="min-h-full flex flex-col justify-center">
@@ -803,9 +866,14 @@ export default function MiraePlusStatement() {
                 >
                   Back to Dashboard
                 </button>
-                <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow-md animate-bounce">
+                <button
+                  type="button"
+                  onClick={handleScrollToBottom}
+                  className="absolute left-1/2 -translate-x-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow-md animate-bounce hover:bg-white transition"
+                  aria-label="Scroll to bottom"
+                >
                   ↓
-                </div>
+                </button>
               </div>
             </div>
           </div>
