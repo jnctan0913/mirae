@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Lock, Sparkles, Pencil, Edit2, Check, X as XIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { useUserStore } from '@/lib/stores/userStore';
 import {
   MiraeCharacter,
   getEvolutionMessage,
@@ -1252,6 +1253,7 @@ const StatementView = ({ cards, onUpdateCard }: StatementViewProps) => {
 // ============= Main Component =============
 export default function MiraePlusStatement() {
   const router = useRouter();
+  const { progress } = useUserStore();
   const [cards, setCards] = useState<IdentityCard[]>(SEED_CARDS);
   const [viewMode, setViewMode] = useState<'collection' | 'statement'>('collection');
   const [selectedCard, setSelectedCard] = useState<IdentityCard | null>(null);
@@ -1552,7 +1554,7 @@ export default function MiraePlusStatement() {
               <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push(`/dashboard?stage=${progress.currentStage}`)}
                     className="px-5 py-2 rounded-full text-sm font-medium bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition-colors"
                   >
                     Back to Dashboard

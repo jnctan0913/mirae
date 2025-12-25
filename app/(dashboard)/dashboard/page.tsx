@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Lock, Circle, ChevronLeft, ChevronRight, Sprout } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
@@ -20,6 +20,7 @@ const stages = [
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { progress, userId, setUserId, reset } = useUserStore();
   const [userName, setUserName] = useState('');
   const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
@@ -128,10 +129,18 @@ export default function DashboardPage() {
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   const viewingStage = stages.find((stage) => stage.id === viewingStageId);
 
-  // Update viewing stage when progress changes
+  // Update viewing stage when progress changes or stage query param is present
   useEffect(() => {
+    const stageParam = searchParams.get('stage');
+    if (stageParam !== null) {
+      const stageId = parseInt(stageParam, 10);
+      if (!isNaN(stageId) && stageId >= 0 && stageId < stages.length) {
+        setViewingStageId(stageId);
+        return;
+      }
+    }
     setViewingStageId(progress.currentStage);
-  }, [progress.currentStage]);
+  }, [progress.currentStage, searchParams]);
 
   const canNavigateToPrevious = viewingStageId > 0;
   const canNavigateToNext = viewingStageId < stages.length - 1;
