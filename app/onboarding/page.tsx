@@ -80,52 +80,6 @@ export default function OnboardingPage() {
             <div className="relative flex-1 min-h-0 overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
               <OnboardingChat onComplete={handleFinish} />
             </div>
-
-            {/* Input Area - Fixed at bottom */}
-            <div className="relative flex-shrink-0 space-y-3">
-              {state.uploadedFiles.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {state.uploadedFiles.map((file) => (
-                    <span key={file.name} className="px-3 py-2 rounded-full bg-white/90 border border-white/70 text-xs text-slate-700 shadow-sm flex items-center gap-2">
-                      📎 {file.name}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <div className="flex-1 relative">
-                  <button
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.multiple = true;
-                      input.onchange = (e) => {
-                        const files = Array.from((e.target as HTMLInputElement).files || []);
-                        if (files.length > 0) {
-                          // Handle file upload through the hook
-                        }
-                      };
-                      input.click();
-                    }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full text-slate-500 hover:text-slate-700 hover:bg-white/50 transition"
-                    title="Upload documents"
-                  >
-                    📎
-                  </button>
-                  <input
-                    type="text"
-                    placeholder={t('onboardingPlaceholder')}
-                    className="w-full rounded-full pl-14 pr-4 py-3 bg-white/95 border-2 border-slate-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF] shadow-sm"
-                  />
-                </div>
-                <button
-                  className="soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold"
-                >
-                  {t('stage3Send')}
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Right: Sidebar */}

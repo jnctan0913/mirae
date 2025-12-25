@@ -136,31 +136,6 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
               </p>
             </div>
           </div>
-          
-          {/* Free text input */}
-          <div className="flex gap-2 items-end">
-            <input
-              type="text"
-              placeholder="Share what's on your mind..."
-              className="flex-1 rounded-full px-4 py-3 bg-white/95 border-2 border-slate-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF] shadow-sm"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                  handleFreeTextSubmit(e.currentTarget.value);
-                }
-              }}
-            />
-            <button 
-              className="px-6 py-3 bg-gradient-to-r from-pink-300 to-orange-300 rounded-full text-white font-medium shadow-md hover:-translate-y-0.5 transition-all"
-              onClick={(e) => {
-                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                if (input?.value.trim()) {
-                  handleFreeTextSubmit(input.value);
-                }
-              }}
-            >
-              Send
-            </button>
-          </div>
         </>
       )}
     </>
