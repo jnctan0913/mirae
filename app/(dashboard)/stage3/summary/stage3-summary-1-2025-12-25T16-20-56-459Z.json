@@ -1,0 +1,57 @@
+{
+  "user": {
+    "id": "1",
+    "name": "User",
+    "year": "year1",
+    "conversationDate": "2025-12-25T16:20:56.459Z",
+    "language": "en"
+  },
+  "responses": {
+    "year": "year1",
+    "year1": {
+      "hasChosenCourses": true
+    }
+  },
+  "feedback": [],
+  "summary": "Year 1 student. Courses selected for next semester. Shared excitement and concerns.",
+  "keywords": [],
+  "conversation": [
+    {
+      "role": "ai",
+      "message": "Hello! What would you like to talk about today?",
+      "timestamp": "2025-12-25T16:20:28.628Z"
+    },
+    {
+      "role": "user",
+      "message": "Year 1",
+      "timestamp": "2025-12-25T16:20:29.340Z"
+    },
+    {
+      "role": "ai",
+      "message": "Which year are you currently in?",
+      "timestamp": "2025-12-25T16:20:29.429Z"
+    },
+    {
+      "role": "ai",
+      "message": "Have you chosen your courses for next semester?",
+      "timestamp": "2025-12-25T16:20:30.341Z"
+    },
+    {
+      "role": "user",
+      "message": "Yes",
+      "timestamp": "2025-12-25T16:20:31.487Z"
+    },
+    {
+      "role": "ai",
+      "message": "Are you ready and excited for your next semester? What are you most looking forward to, and any concerns you'd like to share?",
+      "timestamp": "2025-12-25T16:20:32.488Z"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "stage": "stage3",
+    "exportedAt": "2025-12-25T16:20:56.459Z",
+    "conversationState": "year1-yes",
+    "totalMessages": 6
+  }
+}
