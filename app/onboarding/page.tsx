@@ -76,8 +76,8 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            {/* Chat Messages Area */}
-            <div className="relative flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+            {/* Chat Messages Area - Scrollable */}
+            <div className="relative flex-1 min-h-0 overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
               <OnboardingChat onComplete={handleFinish} />
             </div>
           </div>
