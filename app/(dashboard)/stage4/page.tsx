@@ -1,9 +1,11 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
+import { storage } from '@/lib/utils/storage';
+import rolesData from '@/lib/data/roles.json';
 
 type Candidate = {
   id: string;
@@ -38,6 +40,13 @@ type MatchSnapshot = {
   round: number;
   majorWinner: Candidate | null;
   universityWinner: Candidate | null;
+};
+
+type RoleProfile = {
+  id: string;
+  title?: { en?: string; ko?: string };
+  tagline?: { en?: string; ko?: string };
+  details?: { en?: string; ko?: string };
 };
 
 const BASE_PATH = '/Mirae.ai';
@@ -350,14 +359,15 @@ export default function Stage4Page() {
   const [majorWinner, setMajorWinner] = useState<Candidate | null>(null);
   const [universityWinner, setUniversityWinner] = useState<Candidate | null>(null);
   const [history, setHistory] = useState<MatchSnapshot[]>([]);
+  const [personalizedMajors, setPersonalizedMajors] = useState<Candidate[]>(MAJOR_CANDIDATES);
   const router = useRouter();
-  const { completeStage } = useUserStore();
+  const { completeStage, userId } = useUserStore();
   const { t } = useI18n();
 
   const startMajorTournament = () => {
     setPhase('major');
     setMode('major');
-    setRoundCandidates(MAJOR_CANDIDATES);
+    setRoundCandidates(personalizedMajors);
     setNextRoundCandidates([]);
     setMatchIndex(0);
     setRound(1);
@@ -384,6 +394,92 @@ export default function Stage4Page() {
     setUniversityWinner(null);
     setHistory([]);
   };
+
+  useEffect(() => {
+    const profile = storage.get<{
+      strengths?: string[];
+      likedRoles?: string[];
+      docKeywords?: string[];
+    }>('userProfile');
+    const selectionKey = `stage2Selection_${userId ?? 'guest'}`;
+    const selection = storage.get<{
+      anchor?: string[];
+      signal?: string[];
+    }>(selectionKey);
+
+    const strengthMap: Record<string, string[]> = {
+      analytical: ['analysis', 'data', 'logic', 'economics', 'statistics'],
+      creative: ['design', 'creative', 'media', 'story', 'ux'],
+      empathy: ['people', 'psychology', 'community', 'social'],
+      organization: ['management', 'strategy', 'operations', 'business'],
+    };
+
+    const tokens = new Set<string>();
+    (profile?.strengths ?? []).forEach((strength) => {
+      strengthMap[strength]?.forEach((token) => tokens.add(token));
+    });
+    (profile?.docKeywords ?? []).forEach((keyword) => {
+      const normalized = keyword.toLowerCase().trim();
+      if (normalized.length >= 3) {
+        tokens.add(normalized);
+      }
+    });
+
+    const likedRoleIds = new Set(profile?.likedRoles ?? []);
+    (rolesData as RoleProfile[]).forEach((role) => {
+      if (!likedRoleIds.has(role.id)) return;
+      [role.title?.en, role.tagline?.en, role.details?.en].forEach((text) => {
+        if (!text) return;
+        text
+          .toLowerCase()
+          .split(/[^\p{L}\p{N}]+/u)
+          .filter((token) => token.length >= 3)
+          .forEach((token) => tokens.add(token));
+      });
+    });
+
+    const selectionTokens = [...(selection?.anchor ?? []), ...(selection?.signal ?? [])]
+      .map((value) => value.split('::'))
+      .flatMap((parts) => parts.filter(Boolean))
+      .map((value) => value.toLowerCase());
+    selectionTokens.forEach((token) => {
+      if (token.length >= 3) tokens.add(token);
+    });
+
+    if (tokens.size === 0) {
+      setPersonalizedMajors(MAJOR_CANDIDATES);
+      return;
+    }
+
+    const keywordList = Array.from(tokens);
+    const scored = MAJOR_CANDIDATES.map((candidate, index) => {
+      const text = [
+        candidate.name,
+        candidate.summary,
+        ...candidate.details,
+        ...(candidate.careers ?? []),
+        ...(candidate.coreCourses ?? []),
+        candidate.workloadStyle,
+        candidate.collaboration,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      const score = keywordList.reduce((total, keyword) => {
+        if (!keyword || keyword.length < 3) return total;
+        return text.includes(keyword) ? total + 1 : total;
+      }, 0);
+
+      return { candidate, score, index };
+    });
+
+    const sorted = scored
+      .sort((a, b) => (b.score === a.score ? a.index - b.index : b.score - a.score))
+      .map((entry) => entry.candidate);
+
+    setPersonalizedMajors(sorted);
+  }, [userId]);
 
   const handlePick = (winner: Candidate) => {
     setHistory((prev) => [
@@ -718,12 +814,14 @@ export default function Stage4Page() {
         {phase === 'result' && majorWinner && universityWinner && (
           <div className="relative overflow-hidden bg-white/85 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center space-y-6 border border-white/60">
             <div className="confetti pointer-events-none absolute inset-0">
-              {Array.from({ length: 14 }).map((_, index) => (
+              {Array.from({ length: 18 }).map((_, index) => (
                 <span
                   key={index}
                   style={{
-                    left: `${(index + 1) * 6}%`,
-                    animationDelay: `${(index % 7) * 0.15}s`,
+                    left: `${(index + 1) * 5}%`,
+                    animationDelay: `${(index % 6) * 0.12}s`,
+                    ['--drift' as string]: `${(index % 2 === 0 ? 1 : -1) * (20 + index * 2)}vw`,
+                    ['--spin' as string]: `${120 + index * 20}deg`,
                     background:
                       index % 3 === 0
                         ? '#C7B9FF'
@@ -800,24 +898,24 @@ export default function Stage4Page() {
       <style jsx>{`
         .confetti span {
           position: absolute;
-          top: -10%;
+          top: -8%;
           width: 10px;
           height: 18px;
-          opacity: 0.7;
+          opacity: 0.85;
           border-radius: 6px;
-          animation: confetti-fall 3.6s ease-out infinite;
+          animation: confetti-burst 2.4s ease-out infinite;
         }
 
-        @keyframes confetti-fall {
+        @keyframes confetti-burst {
           0% {
-            transform: translateY(0) rotate(0deg);
+            transform: translateY(0) translateX(0) rotate(0deg) scale(0.9);
             opacity: 0;
           }
-          10% {
-            opacity: 0.8;
+          15% {
+            opacity: 1;
           }
           100% {
-            transform: translateY(120vh) rotate(220deg);
+            transform: translateY(120vh) translateX(var(--drift)) rotate(var(--spin)) scale(0.6);
             opacity: 0;
           }
         }
