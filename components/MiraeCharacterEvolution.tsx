@@ -38,6 +38,7 @@ export interface Accessory {
     value: number | string;
   };
   component: React.ReactNode;
+  renderComponent?: (size: number) => React.ReactNode;
 }
 
 export interface EquippedAccessories {
@@ -284,6 +285,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Shine bright like a star',
     unlockCondition: { type: 'cardCount', value: 1 },
     component: <StarCrownSVG />,
+    renderComponent: (size) => <StarCrownSVG key="star-crown-render" />,
   },
   {
     id: 'flower-crown',
@@ -292,6 +294,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Bloom with creativity',
     unlockCondition: { type: 'cardCount', value: 3 },
     component: <FlowerCrownSVG />,
+    renderComponent: (size) => <FlowerCrownSVG key="flower-crown-render" />,
   },
   {
     id: 'glow-halo',
@@ -300,6 +303,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Radiate wisdom',
     unlockCondition: { type: 'cardCount', value: 5 },
     component: <GlowHaloSVG />,
+    renderComponent: (size) => <GlowHaloSVG key="glow-halo-render" />,
   },
   // Capes
   {
@@ -309,6 +313,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Ready for action',
     unlockCondition: { type: 'cardCount', value: 2 },
     component: <HeroCapeSVG />,
+    renderComponent: (size) => <HeroCapeSVG key="hero-cape-render" />,
   },
   {
     id: 'magic-cape',
@@ -317,6 +322,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Flows with possibility',
     unlockCondition: { type: 'cardCount', value: 4 },
     component: <MagicCapeSVG />,
+    renderComponent: (size) => <MagicCapeSVG key="magic-cape-render" />,
   },
   // Accessories
   {
@@ -326,6 +332,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Always learning',
     unlockCondition: { type: 'stage', value: 'O' },
     component: <BookAccessorySVG />,
+    renderComponent: (size) => <BookAccessorySVG key="book-render" />,
   },
   {
     id: 'butterfly',
@@ -334,6 +341,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Transformation companion',
     unlockCondition: { type: 'stage', value: 'E' },
     component: <ButterflyAccessorySVG />,
+    renderComponent: (size) => <ButterflyAccessorySVG key="butterfly-render" />,
   },
   // Effects
   {
@@ -343,6 +351,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Extra magical vibes',
     unlockCondition: { type: 'cardCount', value: 6 },
     component: <SparkleEffectSVG />,
+    renderComponent: (size) => <SparkleEffectSVG key="sparkles-render" />,
   },
   {
     id: 'rainbow-aura',
@@ -351,6 +360,7 @@ export const ACCESSORIES: Accessory[] = [
     description: 'Full spectrum energy',
     unlockCondition: { type: 'cardCount', value: 8 },
     component: <RainbowAuraSVG />,
+    renderComponent: (size) => <RainbowAuraSVG key="rainbow-aura-render" />,
   },
 ];
 
@@ -413,24 +423,26 @@ export const MiraeCharacter: React.FC<MiraeCharacterProps> = ({
 
   // Render accessory components fresh (not from stored JSX)
   const renderAccessory = (id: string | undefined) => {
-    if (!id) return null;
-    
-    switch (id) {
-      // Hats
-      case 'star-crown': return <StarCrownSVG key={id} />;
-      case 'flower-crown': return <FlowerCrownSVG key={id} />;
-      case 'glow-halo': return <GlowHaloSVG key={id} />;
-      // Capes
-      case 'hero-cape': return <HeroCapeSVG key={id} />;
-      case 'magic-cape': return <MagicCapeSVG key={id} />;
-      // Accessories
-      case 'book': return <BookAccessorySVG key={id} />;
-      case 'butterfly': return <ButterflyAccessorySVG key={id} />;
-      // Effects
-      case 'sparkle': return <SparkleEffectSVG key={id} />;
-      case 'rainbow': return <RainbowAuraSVG key={id} />;
-      default: return null;
+    if (!id) {
+      console.log('renderAccessory: No id provided');
+      return null;
     }
+    
+    console.log('renderAccessory: Looking for accessory with id:', id);
+    const accessory = ACCESSORIES.find((acc) => acc.id === id);
+    
+    if (!accessory) {
+      console.log('renderAccessory: Accessory not found for id:', id);
+      return null;
+    }
+    
+    if (!accessory.renderComponent) {
+      console.log('renderAccessory: No renderComponent for accessory:', id);
+      return null;
+    }
+    
+    console.log('renderAccessory: Rendering accessory:', id);
+    return accessory.renderComponent(size);
   };
 
   console.log('Rendering MiraeCharacter with accessories:', { capeId, hatId, accessoryId, effectId });

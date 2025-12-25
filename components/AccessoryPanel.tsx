@@ -172,7 +172,11 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
                     return (
                       <motion.button
                         key={accessory.id}
-                        onClick={() => handleAccessoryToggle(accessory)}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAccessoryToggle(accessory);
+                        }}
                         disabled={!isUnlocked}
                         whileHover={isUnlocked ? { scale: 1.02 } : {}}
                         whileTap={isUnlocked ? { scale: 0.98 } : {}}
@@ -244,7 +248,11 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
                   </p>
                   {Object.keys(equippedAccessories).length > 0 && (
                     <button
-                      onClick={handleResetAll}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleResetAll();
+                      }}
                       className="px-4 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100 transition-colors"
                     >
                       Reset All
