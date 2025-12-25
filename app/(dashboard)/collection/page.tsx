@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Sparkles, Pencil } from 'lucide-react';
+import { Lock, Sparkles, Pencil, Edit2, Check, X as XIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -195,6 +195,556 @@ const SEED_CARDS: IdentityCard[] = [
     title: 'Community Impact',
     description: 'Unlock by continuing your journey.',
     rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-16',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Systems Thinker',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-17',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Pattern Spotter',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-18',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Insight Connector',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-19',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Structured Creator',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-20',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Big-Picture Vision',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-21',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Detail Guardian',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-22',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Focus Builder',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-23',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Process Designer',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-24',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Calm Decision-Maker',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-25',
+    stage: 'S',
+    type: 'StrengthPattern',
+    title: 'Learning Strategist',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 0: Strength Discovery',
+  },
+  {
+    id: 'card-26',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Product Curiosity',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-27',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Social Impact Lens',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-28',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Health & Wellness Interest',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-29',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Media Storytelling',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-30',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'AI & Ethics',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-31',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Environmental Futures',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-32',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Business Strategy',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-33',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Education Innovation',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-34',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Urban Design',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-35',
+    stage: 'C',
+    type: 'CuriosityThread',
+    title: 'Cultural Analysis',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 1: Role Roulette',
+  },
+  {
+    id: 'card-36',
+    stage: 'O',
+    type: 'Experience',
+    title: 'AP Computer Science',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-37',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Statistics Lab',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-38',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Design Studio',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-39',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Economics Foundations',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-40',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Research Seminar',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-41',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Data Visualization',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-42',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Biology Lab',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-43',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Ethnography Project',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-44',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Entrepreneurship Workshop',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-45',
+    stage: 'O',
+    type: 'Experience',
+    title: 'Portfolio Review',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 2: Course Roadmap',
+  },
+  {
+    id: 'card-46',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Capstone Showcase',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-47',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Competition Win',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-48',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Mentor Feedback',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-49',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Club Leadership',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-50',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Prototype Launch',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-51',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Field Interview',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-52',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Hackathon Sprint',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-53',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Volunteer Impact',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-54',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Peer Teaching',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-55',
+    stage: 'P',
+    type: 'ProofMoment',
+    title: 'Case Study Submission',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 3: Skill Translation',
+  },
+  {
+    id: 'card-56',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Equity Focus',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-57',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Sustainability Drive',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-58',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Creativity First',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-59',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Long-Term Stability',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-60',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Community Belonging',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-61',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Global Perspective',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-62',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Collaboration Energy',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-63',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Independent Growth',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Rare',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-64',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Balance & Wellbeing',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Common',
+    unlocked: false,
+    tags: [],
+    createdFrom: 'Stage 4: Evolve',
+  },
+  {
+    id: 'card-65',
+    stage: 'E',
+    type: 'ValueSignal',
+    title: 'Meaningful Work',
+    description: 'Unlock by continuing your journey.',
+    rarity: 'Epic',
     unlocked: false,
     tags: [],
     createdFrom: 'Stage 4: Evolve',
@@ -540,9 +1090,14 @@ const AvatarPanel = ({
 // ============= StatementView =============
 interface StatementViewProps {
   cards: IdentityCard[];
+  onUpdateCard: (cardId: string, updates: { title?: string; description?: string }) => void;
 }
 
-const StatementView = ({ cards }: StatementViewProps) => {
+const StatementView = ({ cards, onUpdateCard }: StatementViewProps) => {
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+
   const unlockedCards = cards.filter((c) => c.unlocked);
 
   const drawnTo = unlockedCards.filter(
@@ -555,6 +1110,84 @@ const StatementView = ({ cards }: StatementViewProps) => {
     (c) => c.type === 'ThenVsNow' || c.type === 'StrengthPattern'
   );
 
+  const handleStartEdit = (card: IdentityCard) => {
+    setEditingCardId(card.id);
+    setEditTitle(card.title);
+    setEditDescription(card.description);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingCardId) {
+      onUpdateCard(editingCardId, { title: editTitle, description: editDescription });
+      setEditingCardId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCardId(null);
+    setEditTitle('');
+    setEditDescription('');
+  };
+
+  const renderEditableCard = (card: IdentityCard) => {
+    const isEditing = editingCardId === card.id;
+
+    if (isEditing) {
+      return (
+        <li key={card.id} className="text-sm bg-slate-50 rounded-lg p-3 space-y-2">
+          <div className="flex items-start gap-2">
+            <span className="text-slate-400 mt-1">•</span>
+            <div className="flex-1 space-y-2">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full px-2 py-1 text-sm font-medium border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#9DD5F5]"
+                placeholder="Title"
+              />
+              <textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#9DD5F5] min-h-[60px]"
+                placeholder="Description"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-3 py-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition flex items-center gap-1"
+                >
+                  <Check className="w-3 h-3" />
+                  Save
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-3 py-1 bg-slate-300 text-slate-700 text-xs rounded-full hover:bg-slate-400 transition flex items-center gap-1"
+                >
+                  <XIcon className="w-3 h-3" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </li>
+      );
+    }
+
+    return (
+      <li key={card.id} className="text-sm text-slate-600 flex items-start gap-2 group hover:bg-slate-50 rounded-lg p-2 -ml-2 transition">
+        <span className="text-slate-400 mt-1">•</span>
+        <span className="flex-1">{card.title}: {card.description}</span>
+        <button
+          onClick={() => handleStartEdit(card)}
+          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white rounded transition"
+          title="Edit"
+        >
+          <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+        </button>
+      </li>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/40 bg-white/85 p-6 backdrop-blur-lg">
@@ -563,12 +1196,7 @@ const StatementView = ({ cards }: StatementViewProps) => {
         </h3>
         {drawnTo.length > 0 ? (
           <ul className="space-y-2 mb-3">
-            {drawnTo.map((card) => (
-              <li key={card.id} className="text-sm text-slate-600 flex items-start gap-2">
-                <span className="text-slate-400 mt-1">•</span>
-                <span>{card.title}: {card.description}</span>
-              </li>
-            ))}
+            {drawnTo.map((card) => renderEditableCard(card))}
           </ul>
         ) : (
           <p className="text-sm text-slate-400 mb-3">Nothing here yet.</p>
@@ -584,12 +1212,7 @@ const StatementView = ({ cards }: StatementViewProps) => {
         </h3>
         {done.length > 0 ? (
           <ul className="space-y-2 mb-3">
-            {done.map((card) => (
-              <li key={card.id} className="text-sm text-slate-600 flex items-start gap-2">
-                <span className="text-slate-400 mt-1">•</span>
-                <span>{card.title}: {card.description}</span>
-              </li>
-            ))}
+            {done.map((card) => renderEditableCard(card))}
           </ul>
         ) : (
           <p className="text-sm text-slate-400 mb-3">Nothing here yet.</p>
@@ -605,12 +1228,7 @@ const StatementView = ({ cards }: StatementViewProps) => {
         </h3>
         {changed.length > 0 ? (
           <ul className="space-y-2 mb-3">
-            {changed.map((card) => (
-              <li key={card.id} className="text-sm text-slate-600 flex items-start gap-2">
-                <span className="text-slate-400 mt-1">•</span>
-                <span>{card.title}: {card.description}</span>
-              </li>
-            ))}
+            {changed.map((card) => renderEditableCard(card))}
           </ul>
         ) : (
           <p className="text-sm text-slate-400 mb-3">Nothing here yet.</p>
@@ -626,7 +1244,7 @@ const StatementView = ({ cards }: StatementViewProps) => {
 // ============= Main Component =============
 export default function MiraePlusStatement() {
   const router = useRouter();
-  const [cards] = useState<IdentityCard[]>(SEED_CARDS);
+  const [cards, setCards] = useState<IdentityCard[]>(SEED_CARDS);
   const [viewMode, setViewMode] = useState<'collection' | 'statement'>('collection');
   const [selectedCard, setSelectedCard] = useState<IdentityCard | null>(null);
   const [reflections, setReflections] = useState<Record<string, string>>({});
@@ -639,10 +1257,15 @@ export default function MiraePlusStatement() {
     const savedReflections = localStorage.getItem('miraePlus_reflections');
     const savedViewMode = localStorage.getItem('miraePlus_viewMode');
     const savedAccessories = localStorage.getItem('miraePlus_accessories');
+    const savedCards = localStorage.getItem('miraePlus_cards');
 
     if (savedReflections) setReflections(JSON.parse(savedReflections));
     if (savedViewMode) setViewMode(savedViewMode as 'collection' | 'statement');
     if (savedAccessories) setEquippedAccessories(JSON.parse(savedAccessories));
+    if (savedCards) {
+      const parsedCards = JSON.parse(savedCards);
+      setCards(parsedCards);
+    }
   }, []);
 
   const handleCardClick = (card: IdentityCard) => {
@@ -670,6 +1293,14 @@ export default function MiraePlusStatement() {
   const handleAccessoryChange = (newAccessories: EquippedAccessories) => {
     setEquippedAccessories(newAccessories);
     localStorage.setItem('miraePlus_accessories', JSON.stringify(newAccessories));
+  };
+
+  const handleUpdateCard = (cardId: string, updates: { title?: string; description?: string }) => {
+    const updatedCards = cards.map((card) =>
+      card.id === cardId ? { ...card, ...updates } : card
+    );
+    setCards(updatedCards);
+    localStorage.setItem('miraePlus_cards', JSON.stringify(updatedCards));
   };
 
   const handleScrollToBottom = () => {
@@ -853,7 +1484,7 @@ export default function MiraePlusStatement() {
                   </div>
                 </div>
               ) : (
-                <StatementView cards={cards} />
+                <StatementView cards={cards} onUpdateCard={handleUpdateCard} />
               )}
 
             </div>
