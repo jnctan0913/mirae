@@ -16,6 +16,9 @@ interface AccessoryPanelProps {
   completedStages: string[];
   equippedAccessories: EquippedAccessories;
   onAccessoryChange: (equipped: EquippedAccessories) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  showTriggerButton?: boolean;
 }
 
 export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
@@ -23,9 +26,15 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
   completedStages,
   equippedAccessories,
   onAccessoryChange,
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
+  showTriggerButton = true,
 }) => {
   const [activeTab, setActiveTab] = useState<AccessoryType>('hat');
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalOnClose ? (value: boolean) => !value && externalOnClose() : setInternalIsOpen;
 
   const tabs: { type: AccessoryType; label: string; emoji: string }[] = [
     { type: 'hat', label: 'Hats', emoji: '👑' },
@@ -60,15 +69,17 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
 
   return (
     <>
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#9DD5F5] to-[#C7B9FF] text-white font-semibold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-      >
-        <span className="flex items-center justify-center gap-2">
-          ✨ Customize Mirae ({unlockedCount}/{ACCESSORIES.length} unlocked)
-        </span>
-      </button>
+      {/* Toggle Button (optional) */}
+      {showTriggerButton && (
+        <button
+          onClick={() => setInternalIsOpen(!internalIsOpen)}
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#9DD5F5] to-[#C7B9FF] text-white font-semibold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+        >
+          <span className="flex items-center justify-center gap-2">
+            ✨ Customize Mirae ({unlockedCount}/{ACCESSORIES.length} unlocked)
+          </span>
+        </button>
+      )}
 
       {/* Accessory Panel Modal */}
       <AnimatePresence>
@@ -78,7 +89,7 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm px-4"
-            onClick={() => setIsOpen(false)}
+            onClick={() => externalOnClose ? externalOnClose() : setInternalIsOpen(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -92,7 +103,7 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-slate-800">Customize Mirae</h2>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => externalOnClose ? externalOnClose() : setInternalIsOpen(false)}
                   className="p-2 rounded-full hover:bg-slate-100 transition"
                 >
                   <X className="w-5 h-5 text-slate-600" />
@@ -199,7 +210,7 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
                   {unlockedCount} of {ACCESSORIES.length} unlocked
                 </p>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => externalOnClose ? externalOnClose() : setInternalIsOpen(false)}
                   className="px-6 py-2 rounded-full bg-slate-800 text-white font-medium hover:bg-slate-700 transition"
                 >
                   Done

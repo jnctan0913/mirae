@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Sparkles } from 'lucide-react';
+import { Lock, Sparkles, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -401,70 +401,84 @@ const AvatarPanel = ({
   completedStages,
   onAccessoryChange,
 }: AvatarPanelProps) => {
+  const [showCustomizer, setShowCustomizer] = useState(false);
+
   return (
-    <div className="sticky top-6 space-y-4">
-      <div className="rounded-3xl border border-white/40 bg-white/85 p-6 shadow-lg backdrop-blur-lg">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Your Identity</h3>
+    <>
+      <div className="sticky top-6">
+        <div className="rounded-3xl border border-white/40 bg-white/85 p-6 shadow-lg backdrop-blur-lg relative">
+          {/* Pencil Icon Button - Top Right */}
+          <button
+            onClick={() => setShowCustomizer(true)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gradient-to-r from-[#9DD5F5] to-[#C7B9FF] text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 z-10"
+            title="Customize Mirae"
+          >
+            <Pencil className="w-5 h-5" />
+          </button>
 
-        <div className="relative w-full aspect-[4/3] max-h-[280px] mb-4 rounded-2xl bg-gradient-to-br from-sky-50 via-violet-50 to-rose-50 flex items-center justify-center overflow-hidden">
-          <MiraeCharacter
-            cardCount={cardCount}
-            recentCardTypes={recentCardTypes}
-            size={220}
-            equippedAccessories={equippedAccessories}
-          />
-        </div>
+          <h3 className="text-lg font-semibold text-slate-800 mb-4">Your Identity</h3>
 
-        <div className="mb-4 p-3 rounded-xl bg-slate-50/80">
-          <p className="text-sm font-medium text-slate-700 text-center">
-            {getEvolutionMessage(
-              cardCount === 0 ? 'base' :
-              cardCount <= 2 ? 'awakening' :
-              cardCount <= 4 ? 'discovering' :
-              cardCount <= 7 ? 'emerging' :
-              'realized'
-            )}
-          </p>
-          <p className="text-xs text-slate-500 text-center mt-1">
-            {cardCount} {cardCount === 1 ? 'card' : 'cards'} collected
-          </p>
-        </div>
-
-        <div className="mb-3">
-          <p className="text-xs font-medium text-slate-600 mb-2">Your Themes</p>
-          <div className="flex flex-wrap gap-1.5">
-            {allTags.length > 0 ? (
-              allTags.slice(0, 8).map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-600"
-                >
-                  {tag}
-                </span>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400 italic">
-                Themes will appear as you collect cards
-              </p>
-            )}
+          <div className="relative w-full aspect-[4/3] max-h-[280px] mb-4 rounded-2xl bg-gradient-to-br from-sky-50 via-violet-50 to-rose-50 flex items-center justify-center overflow-hidden">
+            <MiraeCharacter
+              cardCount={cardCount}
+              recentCardTypes={recentCardTypes}
+              size={220}
+              equippedAccessories={equippedAccessories}
+            />
           </div>
+
+          <div className="mb-4 p-3 rounded-xl bg-slate-50/80">
+            <p className="text-sm font-medium text-slate-700 text-center">
+              {getEvolutionMessage(
+                cardCount === 0 ? 'base' :
+                cardCount <= 2 ? 'awakening' :
+                cardCount <= 4 ? 'discovering' :
+                cardCount <= 7 ? 'emerging' :
+                'realized'
+              )}
+            </p>
+            <p className="text-xs text-slate-500 text-center mt-1">
+              {cardCount} {cardCount === 1 ? 'card' : 'cards'} collected
+            </p>
+          </div>
+
+          <div className="mb-3">
+            <p className="text-xs font-medium text-slate-600 mb-2">Your Themes</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allTags.length > 0 ? (
+                allTags.slice(0, 8).map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-600"
+                  >
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <p className="text-xs text-slate-400 italic">
+                  Themes will appear as you collect cards
+                </p>
+              )}
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 italic">
+            Mirae evolves with each card you collect, reflecting your growing sense of self.
+          </p>
         </div>
-
-        <p className="text-xs text-slate-400 italic">
-          Mirae evolves with each card you collect, reflecting your growing sense of self.
-        </p>
       </div>
 
-      {/* Accessory Customization Panel */}
-      <div className="rounded-3xl border border-white/40 bg-white/85 p-4 shadow-lg backdrop-blur-lg">
-        <AccessoryPanel
-          cardCount={cardCount}
-          completedStages={completedStages}
-          equippedAccessories={equippedAccessories}
-          onAccessoryChange={onAccessoryChange}
-        />
-      </div>
-    </div>
+      {/* Accessory Customization Modal */}
+      <AccessoryPanel
+        cardCount={cardCount}
+        completedStages={completedStages}
+        equippedAccessories={equippedAccessories}
+        onAccessoryChange={onAccessoryChange}
+        isOpen={showCustomizer}
+        onClose={() => setShowCustomizer(false)}
+        showTriggerButton={false}
+      />
+    </>
   );
 };
 
@@ -640,7 +654,7 @@ export default function MiraePlusStatement() {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-screen overflow-hidden">
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -653,10 +667,10 @@ export default function MiraePlusStatement() {
       </div>
       <FloatingOrbsBackground />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10 h-screen overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8 h-full">
           {/* Left Column */}
-          <div className="space-y-6">
+          <div className="space-y-6 h-full">
             <div className="mb-6">
               <h1 className="text-3xl sm:text-4xl font-semibold text-slate-800 mb-2">
                 Your story, so far
@@ -676,7 +690,7 @@ export default function MiraePlusStatement() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-6">
+          <div className="space-y-6 h-full flex flex-col">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleViewModeChange('collection')}
@@ -702,42 +716,83 @@ export default function MiraePlusStatement() {
               </button>
             </div>
 
-            {viewMode === 'collection' ? (
-              <>
-                <p className="text-xs text-slate-500 mb-4">
-                  More cards appear as you explore.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {collectionSections.map((section) => {
-                    const sectionCards = cards.filter((card) =>
-                      section.types.includes(card.type)
-                    );
-                    return (
-                      <div key={section.id} className="space-y-3">
-                        <div>
-                          <h2 className="text-sm font-semibold text-slate-800">
-                            {section.title}
-                          </h2>
-                          <p className="text-xs text-slate-500">{section.subtitle}</p>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3">
-                          {sectionCards.map((card) => (
-                            <IdentityCardTile
-                              key={card.id}
-                              card={card}
-                              onClick={() => handleCardClick(card)}
-                              compact
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+              {viewMode === 'collection' ? (
+                <div className="space-y-8">
+                  <div className="min-h-full flex flex-col justify-center">
+                    <p className="text-xs text-slate-500 mb-4">
+                      More cards appear as you explore.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {collectionSections
+                        .filter((section) =>
+                          ['self-strengths', 'curiosity-roles', 'academics-path'].includes(section.id)
+                        )
+                        .map((section) => {
+                          const sectionCards = cards.filter((card) =>
+                            section.types.includes(card.type)
+                          );
+                          return (
+                            <div key={section.id} className="space-y-3">
+                              <div>
+                                <h2 className="text-sm font-semibold text-slate-800">
+                                  {section.title}
+                                </h2>
+                                <p className="text-xs text-slate-500">{section.subtitle}</p>
+                              </div>
+                              <div className="grid grid-cols-1 gap-3">
+                                {sectionCards.map((card) => (
+                                  <IdentityCardTile
+                                    key={card.id}
+                                    card={card}
+                                    onClick={() => handleCardClick(card)}
+                                    compact
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                  <div className="min-h-full flex flex-col justify-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {collectionSections
+                        .filter((section) =>
+                          ['proof-experiences', 'values-fit'].includes(section.id)
+                        )
+                        .map((section) => {
+                          const sectionCards = cards.filter((card) =>
+                            section.types.includes(card.type)
+                          );
+                          return (
+                            <div key={section.id} className="space-y-3">
+                              <div>
+                                <h2 className="text-sm font-semibold text-slate-800">
+                                  {section.title}
+                                </h2>
+                                <p className="text-xs text-slate-500">{section.subtitle}</p>
+                              </div>
+                              <div className="grid grid-cols-1 gap-3">
+                                {sectionCards.map((card) => (
+                                  <IdentityCardTile
+                                    key={card.id}
+                                    card={card}
+                                    onClick={() => handleCardClick(card)}
+                                    compact
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <StatementView cards={cards} />
-            )}
+              ) : (
+                <StatementView cards={cards} />
+              )}
+            </div>
 
             <div>
               <button
