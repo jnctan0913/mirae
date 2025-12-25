@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Lock, Circle, ChevronLeft, ChevronRight, Sprout, Target, Link2 } from 'lucide-react';
+import { CheckCircle, Lock, Circle, ChevronLeft, ChevronRight, Sprout } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
 
@@ -132,20 +132,20 @@ export default function DashboardPage() {
         {/* Journey Map */}
         <div className="relative flex-shrink-0">
           {/* Mirae Character */}
-          <div className="absolute -top-4 right-8 z-10">
+          <div className="absolute -top-8 right-20 z-10">
             <Image
               src="/asset/Mirae_Icon1.png"
               alt="Mirae"
-              width={110}
-              height={110}
+              width={150}
+              height={150}
               className="object-contain floating"
             />
           </div>
 
           {/* Journey Path */}
           <div className="relative py-6 px-6">
-            {/* Gradient Path Background */}
-            <div className="absolute inset-0 h-1.5 top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#9BCBFF] via-[#F4A9C8] to-[#BEEDE3] rounded-full opacity-30" />
+            {/* Gradient Path Background - matching SCOPE+ colors */}
+            <div className="absolute inset-0 h-1.5 top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#9DD5F5] via-[#A8D5BA] via-[#F4D675] via-[#F5B7A8] to-[#FFB6D9] rounded-full opacity-30" />
 
             {/* Stage Nodes */}
             <div className="relative flex justify-between items-center">
@@ -154,15 +154,26 @@ export default function DashboardPage() {
                 const isCurrent = stage.id === progress.currentStage;
                 const isViewing = stage.id === viewingStageId;
 
+                // Stage-specific colors matching SCOPE+ framework
+                const stageColors = [
+                  { bg: 'from-[#9DD5F5] to-[#7EC4F0]', ring: 'ring-[#9DD5F5]/60' }, // S - Lighter Blue
+                  { bg: 'from-[#A8D5BA] to-[#8DC9B8]', ring: 'ring-[#A8D5BA]/60' }, // C - Mint
+                  { bg: 'from-[#F4D675] to-[#E8D068]', ring: 'ring-[#F4D675]/60' }, // O - Gold
+                  { bg: 'from-[#F5B7A8] to-[#F2A896]', ring: 'ring-[#F5B7A8]/60' }, // P - Peach
+                  { bg: 'from-[#B19CD9] to-[#A78BCA]', ring: 'ring-[#B19CD9]/60' }, // E - Purple
+                  { bg: 'from-[#FFB6D9] to-[#FF9EC7]', ring: 'ring-[#FFB6D9]/60' }, // + - Pink (Role Roulette)
+                ];
+                const stageColor = stageColors[stage.id];
+
                 return (
                   <div key={stage.id} className="flex flex-col items-center space-y-1">
                     {/* Stage Circle */}
                     <div
                       className={`
                         w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 shadow-md cursor-pointer
-                        ${status === 'complete' ? 'bg-gradient-to-br from-[#73c8a9] to-[#56b899] text-white' : ''}
-                        ${isCurrent && !isViewing ? 'bg-gradient-to-br from-[#9BCBFF] to-[#7AAFFF] text-white ring-3 ring-white/50 scale-105' : ''}
-                        ${isViewing ? 'bg-gradient-to-br from-[#9BCBFF] to-[#7AAFFF] text-white ring-4 ring-[#9BCBFF]/60 scale-110' : ''}
+                        ${status === 'complete' ? `bg-gradient-to-br ${stageColor.bg} text-white` : ''}
+                        ${isCurrent && !isViewing ? `bg-gradient-to-br ${stageColor.bg} text-white ring-3 ring-white/50 scale-105` : ''}
+                        ${isViewing ? `bg-gradient-to-br ${stageColor.bg} text-white ring-4 ${stageColor.ring} scale-110` : ''}
                         ${status === 'locked' ? 'bg-white/60 text-slate-400' : ''}
                         ${status === 'available' && !isCurrent && !isViewing ? 'bg-white/80 text-slate-600 hover:scale-105' : ''}
                       `}
@@ -197,7 +208,7 @@ export default function DashboardPage() {
 
         {/* Current Stage Card */}
         {viewingStage && (
-          <div className="max-w-4xl mx-auto flex-1 min-h-0 relative flex items-center gap-4">
+          <div className="w-[64.8rem] mx-auto flex-1 min-h-0 relative flex items-center gap-4">
             {/* Left Navigation Button */}
             <button
               onClick={handlePreviousStage}
@@ -229,88 +240,194 @@ export default function DashboardPage() {
                 )}
 
                 <div
-                  className={`relative space-y-4 flex-1 flex flex-col transition-all duration-300 ${
+                  className={`relative flex-1 transition-all duration-300 ${
                     slideDirection === 'left' ? 'translate-x-[-100%] opacity-0' :
                     slideDirection === 'right' ? 'translate-x-[100%] opacity-0' :
                     'translate-x-0 opacity-100'
                   }`}
                 >
-                  {/* Stage Header */}
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#9BCBFF] to-[#7AAFFF] flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                      {viewingStage.letter}
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-slate-800">
-                        {viewingStage.letter} | {t(viewingStage.nameKey)}
-                      </h2>
-                    </div>
-                  </div>
+                  {viewingStageId === 0 ? (
+                    /* Grid Layout for Stage 0 (Strength Discovery) */
+                    <div className="flex h-full gap-6">
+                      {/* Left Side - 3/5 width with 2 stacked grids */}
+                      <div className="flex flex-col gap-4" style={{ width: '60%' }}>
+                        {/* Top Grid - Title and Details */}
+                        <div className="flex-1 space-y-4 pt-14">
+                          {/* Stage Header */}
+                          <div className="flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-[#9DD5F5] to-[#7EC4F0] flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
+                              {viewingStage.letter}
+                            </div>
+                            <div>
+                              <h2 className="text-2xl font-bold text-slate-800">
+                                {t(viewingStage.nameKey)}
+                              </h2>
+                            </div>
+                          </div>
 
-                  {/* Stage Question */}
-                  <p className="text-xl text-slate-700 font-medium flex-shrink-0">
-                    {t(viewingStage.promptKey)}
-                  </p>
+                          {/* Stage Question */}
+                          <p className="text-xl text-slate-700 font-medium">
+                            {t(viewingStage.promptKey)}
+                          </p>
 
-                  {/* Subtitle */}
-                  <p className="text-base text-slate-600 flex-shrink-0">
-                    Let's explore safely. No commitments needed.
-                  </p>
-
-                  {/* Activity Options */}
-                  <div className="flex-1 grid grid-cols-2 gap-4 py-4">
-                    {/* Role Roulette */}
-                    <div className="glass-card rounded-2xl p-6 hover:shadow-lg transition cursor-pointer flex items-center">
-                      <div className="flex items-center gap-4 w-full">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FFB6D9] to-[#FF9EC7] flex items-center justify-center shadow-md flex-shrink-0">
-                          <Target className="w-8 h-8 text-white" />
+                          {/* Subtitle */}
+                          <p className="text-base text-slate-600">
+                            {t('stage0Subtitle')}
+                          </p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-slate-800 text-base">Role Roulette</h3>
-                          <p className="text-sm text-slate-600">Spin to preview different roles</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Decision Chain */}
-                    <div className="glass-card rounded-2xl p-6 hover:shadow-lg transition cursor-pointer flex items-center">
-                      <div className="flex items-center gap-4 w-full">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#9BCBFF] to-[#7AAFFF] flex items-center justify-center shadow-md flex-shrink-0">
-                          <Link2 className="w-8 h-8 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-slate-800 text-base">Decision Chain</h3>
-                          <p className="text-sm text-slate-600">Play out short, safe scenarios</p>
+                        {/* Bottom Grid - Button centered */}
+                        <div className="flex items-center justify-center flex-1">
+                          <button
+                            onClick={() => !isViewingStageLocked && router.push(viewingStage.path)}
+                            disabled={isViewingStageLocked}
+                            className={`py-4 px-12 rounded-full text-lg font-semibold ${
+                              isViewingStageLocked
+                                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                : 'soft-button'
+                            }`}
+                          >
+                            Start exploring
+                          </button>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Start Button */}
-                  <button
-                    onClick={() => !isViewingStageLocked && router.push(viewingStage.path)}
-                    disabled={isViewingStageLocked}
-                    className={`w-full max-w-md mx-auto block py-4 rounded-full text-lg font-semibold mt-auto flex-shrink-0 ${
-                      isViewingStageLocked
-                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                        : 'soft-button'
-                    }`}
-                  >
-                    Start exploring
-                  </button>
+                      {/* Right Side - 2/5 width with Image */}
+                      <div className="flex items-center justify-center" style={{ width: '40%' }}>
+                        <Image
+                          src="/asset/Stage_strength.png"
+                          alt="Strength Discovery"
+                          width={400}
+                          height={300}
+                          className="object-contain"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* Grid Layout for Other Stages */
+                    <div className="flex h-full gap-6">
+                      {/* Left Side - 3/5 width with 2 stacked grids */}
+                      <div className="flex flex-col gap-4" style={{ width: '60%' }}>
+                        {/* Top Grid - Title and Details */}
+                        <div className="flex-1 space-y-4 pt-14">
+                          {/* Stage Header */}
+                          <div className="flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${
+                              viewingStageId === 1 ? 'from-[#A8D5BA] to-[#8DC9B8]' :
+                              viewingStageId === 2 ? 'from-[#F4D675] to-[#E8D068]' :
+                              viewingStageId === 3 ? 'from-[#F5B7A8] to-[#F2A896]' :
+                              viewingStageId === 4 ? 'from-[#B19CD9] to-[#A78BCA]' :
+                              'from-[#FFB6D9] to-[#FF9EC7]'
+                            } flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
+                              {viewingStage.letter}
+                            </div>
+                            <div>
+                              <h2 className="text-2xl font-bold text-slate-800">
+                                {t(viewingStage.nameKey)}
+                              </h2>
+                            </div>
+                          </div>
+
+                          {/* Stage Question */}
+                          <p className="text-xl text-slate-700 font-medium">
+                            {t(viewingStage.promptKey)}
+                          </p>
+
+                          {/* Subtitle */}
+                          <p className="text-base text-slate-600">
+                            Let's explore safely. No commitments needed.
+                          </p>
+                        </div>
+
+                        {/* Bottom Grid - Button centered */}
+                        <div className="flex items-center justify-center flex-1">
+                          <button
+                            onClick={() => !isViewingStageLocked && router.push(viewingStage.path)}
+                            disabled={isViewingStageLocked}
+                            className={`py-4 px-12 rounded-full text-lg font-semibold ${
+                              isViewingStageLocked
+                                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                : 'soft-button'
+                            }`}
+                          >
+                            Start exploring
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right Side - 2/5 width with Image */}
+                      <div className="flex items-center justify-center" style={{ width: '40%' }}>
+                        {viewingStageId === 1 && (
+                          <Image
+                            src="/asset/stage_curiosity.png"
+                            alt="Curiosity"
+                            width={400}
+                            height={300}
+                            className="object-contain"
+                          />
+                        )}
+                        {viewingStageId === 2 && (
+                          <Image
+                            src="/asset/Stage_option.png"
+                            alt="Options"
+                            width={400}
+                            height={300}
+                            className="object-contain"
+                          />
+                        )}
+                        {viewingStageId === 3 && (
+                          <Image
+                            src="/asset/Stage_proof.png"
+                            alt="Proof"
+                            width={400}
+                            height={300}
+                            className="object-contain"
+                          />
+                        )}
+                        {viewingStageId === 4 && (
+                          <Image
+                            src="/asset/stage_evolve.png"
+                            alt="Evolve"
+                            width={400}
+                            height={300}
+                            className="object-contain"
+                          />
+                        )}
+                        {viewingStageId === 5 && (
+                          <Image
+                            src="/asset/stage_plus.png"
+                            alt="Storyboard"
+                            width={400}
+                            height={300}
+                            className="object-contain"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Progress Dots Below Card */}
               <div className="flex justify-center gap-2">
-                {stages.map((stage, index) => (
-                  <div
-                    key={stage.id}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === viewingStageId ? 'bg-[#9BCBFF]' : 'bg-slate-300'
-                    }`}
-                  />
-                ))}
+                {stages.map((stage, index) => {
+                  const dotColors = [
+                    'bg-[#9DD5F5]', // S - Lighter Blue
+                    'bg-[#A8D5BA]', // C - Mint
+                    'bg-[#F4D675]', // O - Gold
+                    'bg-[#F5B7A8]', // P - Peach
+                    'bg-[#B19CD9]', // E - Purple
+                    'bg-[#FFB6D9]', // + - Pink (Role Roulette)
+                  ];
+                  return (
+                    <div
+                      key={stage.id}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === viewingStageId ? dotColors[index] : 'bg-slate-300'
+                      }`}
+                    />
+                  );
+                })}
               </div>
             </div>
 
