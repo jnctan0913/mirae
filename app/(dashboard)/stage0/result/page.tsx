@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { useUserStore } from '@/lib/stores/userStore';
@@ -223,13 +223,49 @@ const domainTagBonus: Record<string, string[]> = {
   health: ['meaning', 'impact'],
 };
 
+const stage0TagToStrength: Record<string, string> = {
+  analysis: 'analytical',
+  logic: 'analytical',
+  research: 'analytical',
+  mastery: 'analytical',
+  skill: 'analytical',
+  curiosity: 'analytical',
+  creativity: 'creative',
+  ideation: 'creative',
+  intuition: 'creative',
+  ambiguity: 'creative',
+  social: 'empathy',
+  support: 'empathy',
+  discussion: 'empathy',
+  collaboration: 'empathy',
+  fairness: 'empathy',
+  impact: 'empathy',
+  meaning: 'empathy',
+  'social-value': 'empathy',
+  structure: 'organization',
+  stability: 'organization',
+  autonomy: 'organization',
+  practice: 'organization',
+  achievement: 'organization',
+  change: 'organization',
+  growth: 'organization',
+  resilience: 'organization',
+  reflection: 'organization',
+  adaptability: 'organization',
+  motivation: 'organization',
+  anxiety: 'organization',
+};
+
 
 export default function Stage0ResultPage() {
   const router = useRouter();
   const { language } = useI18n();
   const { userId, completeStage } = useUserStore();
   const profile = getUserProfile();
-  const answers = (profile.questionnaireAnswers as Record<string, string[]>) ?? {};
+  const answers = useMemo(
+    () => (profile.questionnaireAnswers as Record<string, string[]>) ?? {},
+    [profile.questionnaireAnswers]
+  );
   const [insightsExpanded, setInsightsExpanded] = useState(false);
 
   const normalizedAnswers = useMemo(() => {
@@ -304,6 +340,71 @@ export default function Stage0ResultPage() {
     return top.map(({ role, matchedTags }) => ({ role, matchedTags }));
   }, [normalizedAnswers, tagCounts]);
 
+  const primaryTag = topSignals[0];
+  const secondaryTag = topSignals[1];
+  const primaryLabel = primaryTag ? tagLabels[primaryTag]?.[language as Language] : null;
+  const secondaryLabel = secondaryTag ? tagLabels[secondaryTag]?.[language as Language] : null;
+
+  const personaAdjectives: Record<string, RoleLocale> = {
+    curiosity: { ko: '??? ??', en: 'Curious' },
+    creativity: { ko: '????', en: 'Creative' },
+    analysis: { ko: '????', en: 'Analytical' },
+    social: { ko: '????', en: 'Empathic' },
+    structure: { ko: '????', en: 'Structured' },
+    impact: { ko: '??? ????', en: 'Impact-driven' },
+    meaning: { ko: '??? ??', en: 'Purposeful' },
+    growth: { ko: '?? ????', en: 'Growth-minded' },
+    mastery: { ko: '??? ????', en: 'Mastery-focused' },
+    autonomy: { ko: '????', en: 'Independent' },
+    collaboration: { ko: '????', en: 'Collaborative' },
+    research: { ko: '????', en: 'Investigative' },
+    discussion: { ko: '??? ???', en: 'Communicative' },
+    practice: { ko: '???', en: 'Hands-on' },
+    logic: { ko: '????', en: 'Logical' },
+    intuition: { ko: '????', en: 'Intuitive' },
+    ambiguity: { ko: '?? ????', en: 'Open-ended' },
+    stability: { ko: '????', en: 'Steady' },
+    change: { ko: '??? ??', en: 'Change-ready' },
+  };
+  const personaNouns: Record<string, RoleLocale> = {
+    curiosity: { ko: '???', en: 'Explorer' },
+    creativity: { ko: '?????', en: 'Creator' },
+    analysis: { ko: '???', en: 'Analyst' },
+    social: { ko: '???', en: 'Connector' },
+    structure: { ko: '???', en: 'Strategist' },
+    impact: { ko: '???', en: 'Changer' },
+    meaning: { ko: '???', en: 'Seeker' },
+    growth: { ko: '??', en: 'Builder' },
+    mastery: { ko: '???', en: 'Specialist' },
+    autonomy: { ko: '?????', en: 'Navigator' },
+    collaboration: { ko: '????', en: 'Teammate' },
+    research: { ko: '???', en: 'Researcher' },
+    discussion: { ko: '??????', en: 'Communicator' },
+    practice: { ko: '???', en: 'Maker' },
+    logic: { ko: '???', en: 'Designer' },
+    intuition: { ko: '????', en: 'Visionary' },
+    ambiguity: { ko: '???', en: 'Pioneer' },
+    stability: { ko: '???', en: 'Stabilizer' },
+    change: { ko: '???', en: 'Catalyst' },
+  };
+  const personaTitle =
+    [primaryTag, secondaryTag]
+      .map((tag, index) =>
+        index === 0
+          ? personaAdjectives[tag ?? '']?.[language as Language]
+          : personaNouns[tag ?? '']?.[language as Language],
+      )
+      .filter(Boolean)
+      .join(' ') || (language === 'ko' ? '?? ?? ????' : 'Emerging persona');
+  const personaSummary =
+    primaryLabel && secondaryLabel
+      ? language === 'ko'
+        ? `${primaryLabel}?(?) ???? ${secondaryLabel} ??? ?? ????.`
+        : `You lead with ${primaryLabel} and lean on ${secondaryLabel} when making choices.`
+      : language === 'ko'
+        ? '?? ??? ???? ????? ??? ?????.'
+        : 'A quick snapshot of your learning and career tendencies.';
+
   const sectionGroups = [
     { title: { ko: '핵심 동기 & 몰입', en: 'Core Motivation & Flow' }, ids: ['Q1', 'Q4'] },
     { title: { ko: '사고/결정 스타일', en: 'Thinking & Decisions' }, ids: ['Q2', 'Q3', 'Q11'] },
@@ -313,7 +414,7 @@ export default function Stage0ResultPage() {
     { title: { ko: '현재 상태', en: 'Current State' }, ids: ['Q14'] },
   ];
 
-  const getInsight = (questionId: string) => {
+  const getInsight = useCallback((questionId: string) => {
     const tag = normalizedAnswers[questionId];
     const insight = insightMap[questionId];
     if (!tag || !insight) return null;
@@ -321,7 +422,7 @@ export default function Stage0ResultPage() {
       title: insight.title[language as Language],
       body: insight.values[tag]?.[language as Language] ?? tag,
     };
-  };
+  }, [language, normalizedAnswers]);
 
   const insightById = useMemo(() => {
     const map: Record<string, { title: string; body: string }> = {};
@@ -330,24 +431,40 @@ export default function Stage0ResultPage() {
       if (insight) map[id] = insight;
     });
     return map;
-  }, [language, normalizedAnswers]);
+  }, [getInsight]);
 
-  const getInsightBodies = (ids: string[], limit = 3) => {
+  const getInsightBodies = useCallback((ids: string[], limit = 3) => {
     return ids
       .map((id) => insightById[id]?.body)
       .filter(Boolean)
       .slice(0, limit) as string[];
-  };
+  }, [insightById]);
 
-  const getInsightTags = (ids: string[]) => {
+  const getInsightTags = useCallback((ids: string[]) => {
     const tags = ids
       .map((id) => normalizedAnswers[id])
       .filter(Boolean)
       .map((tag) => tagLabels[tag]?.[language as Language] ?? tag);
     return Array.from(new Set(tags));
-  };
+  }, [language, normalizedAnswers]);
 
-  const handleFinish = () => {
+  const didPersistRef = useRef(false);
+
+  const persistResults = useCallback(() => {
+    if (didPersistRef.current) return;
+    didPersistRef.current = true;
+    const existingSignals = profile.stage0Profile?.topSignals ?? [];
+    const hasStage0SummaryCard = (profile.collection?.cards as Record<string, unknown>[] | undefined)?.some(
+      (card) => (card as { id?: string }).id === 'stage0-summary'
+    );
+    const hasStage0Log = (profile.activityLogs ?? []).some((log) => log.id === 'stage0-complete');
+    const sameSignals =
+      existingSignals.length === topSignals.length &&
+      existingSignals.every((signal) => topSignals.includes(signal));
+    if (sameSignals && hasStage0SummaryCard && hasStage0Log) {
+      completeStage(0);
+      return;
+    }
     const profileCards = (profile.collection?.cards as Record<string, unknown>[] | undefined) ?? [];
     const existingCardIndex = profileCards.findIndex(
       (card) => (card as { id?: string }).id === 'stage0-summary'
@@ -437,7 +554,6 @@ export default function Stage0ResultPage() {
     ];
     const today = new Date().toISOString().slice(0, 10);
     const existingLogs = profile.activityLogs ?? [];
-    const hasStage0Log = existingLogs.some((log) => log.id === 'stage0-complete');
     const nextLogs = hasStage0Log
       ? existingLogs
       : [
@@ -456,9 +572,14 @@ export default function Stage0ResultPage() {
           },
         ];
 
+    const mappedStrengthTags = Array.from(
+      new Set(topSignals.map((tag) => stage0TagToStrength[tag]).filter(Boolean))
+    );
+
     updateUserProfile({
       id: userId ?? 'demo-user',
       questionnaireAnswers: answers,
+      strengthTags: mappedStrengthTags.length > 0 ? mappedStrengthTags : profile.strengthTags,
       stage0Summary: {
         tagCounts,
         recommendedRoles: recommendedRoles.map((entry) => entry.role.id),
@@ -520,78 +641,41 @@ export default function Stage0ResultPage() {
     updateProfileAnalytics(nextLogs);
 
     completeStage(0);
+  }, [
+    answers,
+    completeStage,
+    language,
+    primaryLabel,
+    primaryTag,
+    profile,
+    recommendedRoles,
+    secondaryLabel,
+    secondaryTag,
+    topSignals,
+    userId,
+    personaSummary,
+    personaTitle,
+    tagCounts,
+    getInsightBodies,
+    getInsightTags,
+    insightById,
+  ]);
+
+  const handleFinish = () => {
+    persistResults();
     router.push('/dashboard');
   };
+
+  useEffect(() => {
+    if (!completed) return;
+    persistResults();
+  }, [completed, persistResults]);
 
   if (!completed) {
     return null;
   }
 
-  const primaryTag = topSignals[0];
-  const secondaryTag = topSignals[1];
-  const primaryLabel = primaryTag ? tagLabels[primaryTag]?.[language as Language] : null;
-  const secondaryLabel = secondaryTag ? tagLabels[secondaryTag]?.[language as Language] : null;
-
   const personaLabel = language === 'ko' ? '?? ????' : 'Student persona';
-  const personaAdjectives: Record<string, RoleLocale> = {
-    curiosity: { ko: '??? ??', en: 'Curious' },
-    creativity: { ko: '????', en: 'Creative' },
-    analysis: { ko: '????', en: 'Analytical' },
-    social: { ko: '????', en: 'Empathic' },
-    structure: { ko: '????', en: 'Structured' },
-    impact: { ko: '??? ????', en: 'Impact-driven' },
-    meaning: { ko: '??? ??', en: 'Purposeful' },
-    growth: { ko: '?? ????', en: 'Growth-minded' },
-    mastery: { ko: '??? ????', en: 'Mastery-focused' },
-    autonomy: { ko: '????', en: 'Independent' },
-    collaboration: { ko: '????', en: 'Collaborative' },
-    research: { ko: '????', en: 'Investigative' },
-    discussion: { ko: '??? ???', en: 'Communicative' },
-    practice: { ko: '???', en: 'Hands-on' },
-    logic: { ko: '????', en: 'Logical' },
-    intuition: { ko: '????', en: 'Intuitive' },
-    ambiguity: { ko: '?? ????', en: 'Open-ended' },
-    stability: { ko: '????', en: 'Steady' },
-    change: { ko: '??? ??', en: 'Change-ready' },
-  };
-  const personaNouns: Record<string, RoleLocale> = {
-    curiosity: { ko: '???', en: 'Explorer' },
-    creativity: { ko: '?????', en: 'Creator' },
-    analysis: { ko: '???', en: 'Analyst' },
-    social: { ko: '???', en: 'Connector' },
-    structure: { ko: '???', en: 'Strategist' },
-    impact: { ko: '???', en: 'Changer' },
-    meaning: { ko: '???', en: 'Seeker' },
-    growth: { ko: '??', en: 'Builder' },
-    mastery: { ko: '???', en: 'Specialist' },
-    autonomy: { ko: '?????', en: 'Navigator' },
-    collaboration: { ko: '????', en: 'Teammate' },
-    research: { ko: '???', en: 'Researcher' },
-    discussion: { ko: '??????', en: 'Communicator' },
-    practice: { ko: '???', en: 'Maker' },
-    logic: { ko: '???', en: 'Designer' },
-    intuition: { ko: '????', en: 'Visionary' },
-    ambiguity: { ko: '???', en: 'Pioneer' },
-    stability: { ko: '???', en: 'Stabilizer' },
-    change: { ko: '???', en: 'Catalyst' },
-  };
-  const personaTitle =
-    [primaryTag, secondaryTag]
-      .map((tag, index) =>
-        index === 0
-          ? personaAdjectives[tag ?? '']?.[language as Language]
-          : personaNouns[tag ?? '']?.[language as Language],
-      )
-      .filter(Boolean)
-      .join(' ') || (language === 'ko' ? '?? ?? ????' : 'Emerging persona');
-  const personaSummary =
-    primaryLabel && secondaryLabel
-      ? language === 'ko'
-        ? `${primaryLabel}?(?) ???? ${secondaryLabel} ??? ?? ????.`
-        : `You lead with ${primaryLabel} and lean on ${secondaryLabel} when making choices.`
-      : language === 'ko'
-        ? '?? ??? ???? ????? ??? ?????.'
-        : 'A quick snapshot of your learning and career tendencies.';
   const personaStyleMap: Record<
     string,
     { card: string; aura: string; ring: string; accent: string }
@@ -765,6 +849,8 @@ export default function Stage0ResultPage() {
       : 'Expand';
   const finishLabel =
     language === 'ko' ? '대시보드로 이동' : 'Return to dashboard';
+  const nextStageLabel =
+    language === 'ko' ? '다음 단계' : 'Next step';
   const personaHighlights = [
     { label: language === 'ko' ? '???' : 'Energy', insight: getInsight('Q1')?.body },
     { label: language === 'ko' ? '??' : 'Flow', insight: getInsight('Q4')?.body },
@@ -929,12 +1015,20 @@ export default function Stage0ResultPage() {
               <div className="relative space-y-3">
                 <h2 className="text-lg font-semibold text-slate-800">{nextTitle}</h2>
                 <p className="text-sm text-slate-600">{nextHint}</p>
-                <button
-                  onClick={handleFinish}
-                  className="soft-button w-full py-3 rounded-full text-sm sm:text-base font-semibold mt-2"
-                >
-                  {finishLabel}
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handleFinish}
+                    className="soft-button w-full py-3 rounded-full text-sm sm:text-base font-semibold"
+                  >
+                    {finishLabel}
+                  </button>
+                  <button
+                    onClick={() => router.push('/stage1')}
+                    className="w-full rounded-full border border-white/70 bg-white/80 py-3 text-sm sm:text-base font-semibold text-slate-700 hover:bg-white"
+                  >
+                    {nextStageLabel}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

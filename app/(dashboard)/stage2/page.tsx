@@ -11,6 +11,23 @@ type CourseCategory = 'general' | 'career' | 'interdisciplinary';
 
 type CategoryFilter = CourseCategory | 'all';
 
+type SubjectCategory = 'all' | 'language' | 'stem' | 'social' | 'arts' | 'other';
+
+const subjectCategories: Record<number, SubjectCategory> = {
+  1: 'language',  // Korean Language
+  2: 'stem',      // Mathematics
+  3: 'language',  // English
+  4: 'social',    // Social Studies
+  5: 'stem',      // Science
+  6: 'arts',      // Physical Education
+  7: 'arts',      // Arts
+  8: 'stem',      // Technology & Home Economics
+  9: 'stem',      // Informatics
+  10: 'language', // Foreign Language
+  11: 'language', // Classical Chinese
+  12: 'other',    // Liberal Arts
+};
+
 interface CourseLabel {
   en: string;
   kr: string;
@@ -108,6 +125,39 @@ const strengthSignals: Record<
   },
 };
 
+const stage0TagToStrength: Record<string, string> = {
+  analysis: 'analytical',
+  logic: 'analytical',
+  research: 'analytical',
+  mastery: 'analytical',
+  skill: 'analytical',
+  curiosity: 'analytical',
+  creativity: 'creative',
+  ideation: 'creative',
+  intuition: 'creative',
+  ambiguity: 'creative',
+  social: 'empathy',
+  support: 'empathy',
+  discussion: 'empathy',
+  collaboration: 'empathy',
+  fairness: 'empathy',
+  impact: 'empathy',
+  meaning: 'empathy',
+  'social-value': 'empathy',
+  structure: 'organization',
+  stability: 'organization',
+  autonomy: 'organization',
+  practice: 'organization',
+  achievement: 'organization',
+  change: 'organization',
+  growth: 'organization',
+  resilience: 'organization',
+  reflection: 'organization',
+  adaptability: 'organization',
+  motivation: 'organization',
+  anxiety: 'organization',
+};
+
 const roleSignals: Record<
   string,
   { keywords: string[]; reasonEn: string; reasonKo: string }
@@ -189,14 +239,25 @@ const roleSignals: Record<
   },
 };
 
+const subjectCategoryLabels: Record<SubjectCategory, { en: string; ko: string }> = {
+  all: { en: 'All', ko: '전체' },
+  language: { en: 'Language', ko: '언어' },
+  stem: { en: 'STEM', ko: 'STEM' },
+  social: { en: 'Social', ko: '사회' },
+  arts: { en: 'Arts & PE', ko: '예체능' },
+  other: { en: 'Other', ko: '기타' },
+};
+
 export default function Stage2Page() {
   const [anchor, setAnchor] = useState<string[]>([]);
   const [signal, setSignal] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
+  const [selectedSubjectCategory, setSelectedSubjectCategory] = useState<SubjectCategory>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState<number>(courses[0]?.id ?? 0);
   const [strengths, setStrengths] = useState<string[]>([]);
   const [likedRoles, setLikedRoles] = useState<string[]>([]);
+  const [stage0Roles, setStage0Roles] = useState<string[]>([]);
   const [docKeywords, setDocKeywords] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [savedSlots, setSavedSlots] = useState<SelectionSlot[]>([null, null, null]);
@@ -207,9 +268,19 @@ export default function Stage2Page() {
   const selectedKeys = useMemo(() => new Set([...anchor, ...signal]), [anchor, signal]);
   const normalizedSearch = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
   const filteredSubjects = useMemo<CourseSubject[]>(() => {
-    if (!normalizedSearch) return courses;
+    let filtered = courses;
 
-    return courses
+    // Filter by subject category
+    if (selectedSubjectCategory !== 'all') {
+      filtered = courses.filter((subject) => {
+        return subjectCategories[subject.id] === selectedSubjectCategory;
+      });
+    }
+
+    // Filter by search term
+    if (!normalizedSearch) return filtered;
+
+    return filtered
       .map((subject) => {
         if (subjectMatches(subject, normalizedSearch)) {
           return subject;
@@ -234,7 +305,7 @@ export default function Stage2Page() {
         };
       })
       .filter((subject): subject is CourseSubject => subject !== null);
-  }, [normalizedSearch]);
+  }, [normalizedSearch, selectedSubjectCategory]);
   const courseLookup = useMemo(() => {
     const lookup = new Map<string, CourseLookupItem>();
     courses.forEach((subject) => {
@@ -260,14 +331,27 @@ export default function Stage2Page() {
     setSavedSlots(normalized);
   }, []);
 
-  useEffect(() => {
-    const profile = getUserProfile();
+  const syncProfileSignals = (profile: ReturnType<typeof getUserProfile>) => {
     const rawStrengths = (profile as unknown as { strengths?: string[] }).strengths;
     const strengthTags = Array.isArray(rawStrengths)
       ? rawStrengths
       : profile.strengthTags ?? [];
-    if (strengthTags.length > 0) {
-      setStrengths(strengthTags);
+    const derivedStrengths = strengthTags.length > 0
+      ? strengthTags
+      : Array.from(
+          new Set(
+            (profile.stage0Profile?.topSignals ?? [])
+              .map((tag) => stage0TagToStrength[tag])
+              .filter(Boolean)
+          )
+        );
+    if (derivedStrengths.length > 0) {
+      setStrengths(derivedStrengths);
+      if (strengthTags.length === 0) {
+        updateUserProfile({ strengthTags: derivedStrengths });
+      }
+    } else {
+      setStrengths([]);
     }
 
     const docStopWords = new Set([
@@ -304,6 +388,7 @@ export default function Stage2Page() {
       docKeywords?: string[];
     };
     const keywordSource = [
+      ...(profile?.keywords ?? []),
       ...(profile?.onboarding?.keywords ?? []),
       ...(profile?.onboarding?.uploadedDocs ?? []),
       ...(profile?.onboarding?.docKeywords ?? []),
@@ -330,6 +415,19 @@ export default function Stage2Page() {
     if (uniqueLiked.length > 0 && storedLiked.length === 0) {
       updateUserProfile({ likedRoles: uniqueLiked });
     }
+
+    const recommended = Array.from(new Set(profile.stage0Summary?.recommendedRoles ?? []));
+    setStage0Roles(recommended);
+  };
+
+  useEffect(() => {
+    syncProfileSignals(getUserProfile());
+    if (typeof window !== 'undefined') {
+      const handleProfileUpdate = () => syncProfileSignals(getUserProfile());
+      window.addEventListener('miraeProfileUpdated', handleProfileUpdate);
+      return () => window.removeEventListener('miraeProfileUpdated', handleProfileUpdate);
+    }
+    return undefined;
   }, []);
 
   useEffect(() => {
@@ -350,6 +448,7 @@ export default function Stage2Page() {
       string,
       {
         score: number;
+        primaryScore: number;
         reasons: Set<string>;
         label: CourseLabel;
         subject: CourseSubject;
@@ -364,8 +463,10 @@ export default function Stage2Page() {
           if (selectedKeys.has(key)) return;
 
           let score = 0;
+          let primaryScore = 0;
           const reasons = new Set<string>();
           const courseLabelLower = course.en.toLowerCase();
+          const courseLabelLowerKr = course.kr.toLowerCase();
 
           strengths.forEach((strength) => {
             const signal = strengthSignals[strength];
@@ -377,39 +478,58 @@ export default function Stage2Page() {
           });
 
           if (docKeywords.length > 0) {
-            const courseLabelLowerKr = course.kr.toLowerCase();
             const matches = docKeywords.filter(
               (keyword) =>
                 courseLabelLower.includes(keyword) || courseLabelLowerKr.includes(keyword)
             );
             if (matches.length > 0) {
-              score += Math.min(2, matches.length);
+              const boost = Math.min(2, matches.length);
+              score += boost;
+              primaryScore += boost;
               reasons.add(
                 language === 'ko'
-                  ? 'Based on your uploaded docs'
-                  : 'Based on your uploaded docs'
+                  ? '온보딩/업로드 키워드 기반'
+                  : 'Based on onboarding & uploads'
               );
             }
           }
 
+          const likedSet = new Set(likedRoles);
+          const stage0Set = new Set(stage0Roles.filter((roleId) => !likedSet.has(roleId)));
           likedRoles.forEach((roleId) => {
             const signal = roleSignals[roleId];
             if (!signal) return;
             if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
               score += 3;
+              primaryScore += 3;
               reasons.add(language === 'ko' ? signal.reasonKo : signal.reasonEn);
             }
           });
+          stage0Set.forEach((roleId) => {
+            const signal = roleSignals[roleId];
+            if (!signal) return;
+            if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
+              score += 2;
+              primaryScore += 2;
+              reasons.add(
+                language === 'ko'
+                  ? 'Stage 0 역할 신호 기반'
+                  : 'Based on Stage 0 role signals'
+              );
+            }
+          });
 
-          if (score === 0) return;
+          if (primaryScore === 0) return;
 
           const existing = suggestionMap.get(key);
           if (existing) {
             existing.score += score;
+            existing.primaryScore += primaryScore;
             reasons.forEach((reason) => existing.reasons.add(reason));
           } else {
             suggestionMap.set(key, {
               score,
+              primaryScore,
               reasons,
               label: course,
               subject,
@@ -421,13 +541,22 @@ export default function Stage2Page() {
     });
 
     return Array.from(suggestionMap.entries())
-      .sort((a, b) => b[1].score - a[1].score)
+      .sort((a, b) => {
+        const primaryDiff = b[1].primaryScore - a[1].primaryScore;
+        if (primaryDiff !== 0) return primaryDiff;
+        return b[1].score - a[1].score;
+      })
       .slice(0, 6)
       .map(([key, value]) => ({
         key,
         ...value,
       }));
-  }, [likedRoles, strengths, selectedKeys, language, docKeywords]);
+  }, [likedRoles, strengths, selectedKeys, language, docKeywords, stage0Roles]);
+
+  const displaySuggestions = useMemo(
+    () => suggestions.filter((item) => item.primaryScore > 0 && item.reasons.size > 0),
+    [suggestions]
+  );
 
   const radarItems = useMemo(() => {
     if (!selectedSubject) return [];
@@ -437,6 +566,7 @@ export default function Stage2Page() {
       return selectedSubject.electives[category].map((course) => {
         const key = createCourseKey(selectedSubject.subject_en, category, course.en);
         let score = 0;
+        let primaryScore = 0;
         const reasons = new Set<string>();
         const courseLabelLower = course.en.toLowerCase();
         const courseLabelLowerKr = course.kr.toLowerCase();
@@ -456,21 +586,39 @@ export default function Stage2Page() {
               courseLabelLower.includes(keyword) || courseLabelLowerKr.includes(keyword)
           );
           if (matches.length > 0) {
-            score += Math.min(2, matches.length);
+            const boost = Math.min(2, matches.length);
+            score += boost;
+            primaryScore += boost;
             reasons.add(
               language === 'ko'
-                ? 'Based on your uploaded docs'
-                : 'Based on your uploaded docs'
+                ? '온보딩/업로드 키워드 기반'
+                : 'Based on onboarding & uploads'
             );
           }
         }
 
+        const likedSet = new Set(likedRoles);
+        const stage0Set = new Set(stage0Roles.filter((roleId) => !likedSet.has(roleId)));
         likedRoles.forEach((roleId) => {
           const signal = roleSignals[roleId];
           if (!signal) return;
           if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
             score += 3;
+            primaryScore += 3;
             reasons.add(language === 'ko' ? signal.reasonKo : signal.reasonEn);
+          }
+        });
+        stage0Set.forEach((roleId) => {
+          const signal = roleSignals[roleId];
+          if (!signal) return;
+          if (signal.keywords.some((keyword) => courseLabelLower.includes(keyword))) {
+            score += 2;
+            primaryScore += 2;
+            reasons.add(
+              language === 'ko'
+                ? 'Stage 0 역할 신호 기반'
+                : 'Based on Stage 0 role signals'
+            );
           }
         });
 
@@ -479,6 +627,7 @@ export default function Stage2Page() {
           course,
           category,
           score,
+          primaryScore,
           reasons: Array.from(reasons),
         };
       });
@@ -503,10 +652,10 @@ export default function Stage2Page() {
         normalized,
         x,
         y,
-        isRecommended: item.score > 0,
+        isRecommended: item.primaryScore > 0,
       };
     });
-  }, [selectedSubject, selectedCategory, strengths, docKeywords, likedRoles, language]);
+  }, [selectedSubject, selectedCategory, strengths, docKeywords, likedRoles, language, stage0Roles]);
 
   const focusedCourse = useMemo(
     () => radarItems.find((item) => item.key === focusedCourseKey) ?? null,
@@ -555,14 +704,14 @@ export default function Stage2Page() {
   const allLabel = language === 'ko' ? '전체' : 'All';
   const suggestionTitle = language === 'ko' ? '추천 과목' : 'Suggested for you';
   const suggestionEmpty = language === 'ko'
-    ? 'Stage 0/1을 완료하면 추천을 볼 수 있어요.'
-    : 'Complete Stages 0/1 to see suggestions.';
+    ? '추천 신호가 없어요. Stage 0/1 또는 온보딩 키워드를 먼저 채워주세요.'
+    : 'No recommendation signals yet. Complete Stage 0/1 or add onboarding keywords.';
   const suggestionToggleLabel = language === 'ko' ? '접기' : 'Collapse';
   const suggestionToggleOpenLabel = language === 'ko' ? '펼치기' : 'Expand';
   const infoLabel = language === 'ko' ? '설명 보기' : 'View description';
   const suggestionSubtitle = language === 'ko'
-    ? '추천은 Stage 0/1, 업로드, 현재 선택을 기반으로 해요.'
-    : 'Suggestions are based on Stages 0/1, your uploads, and your current selections.';
+    ? '추천은 Stage 0/1, 온보딩 키워드, 업로드, 현재 선택을 기반으로 해요.'
+    : 'Suggestions are based on Stages 0/1, onboarding keywords, uploads, and your current selections.';
   const radarTitle = language === 'ko' ? 'Course radar' : 'Course radar';
   const radarSubtitle =
     language === 'ko'
@@ -687,8 +836,8 @@ export default function Stage2Page() {
         <div className="absolute right-10 top-24 h-80 w-80 rounded-full bg-[#F4A9C8]/30 blur-[140px]" />
         <div className="absolute bottom-10 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-[#BEEDE3]/40 blur-[160px]" />
       </div>
-      <div className="relative z-10 mx-auto max-w-6xl">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-800">
               {t('stage2Title')}
@@ -705,9 +854,10 @@ export default function Stage2Page() {
           </button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-          <aside className="rounded-[28px] border border-white/60 bg-white/70 p-5 shadow-[0_20px_50px_-40px_rgba(155,203,255,0.45)] backdrop-blur">
-            <h2 className="text-xs uppercase tracking-[0.3em] text-[#9BCBFF]">
+        {/* Horizontal subject filters */}
+        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/70 p-5 shadow-[0_20px_50px_-40px_rgba(155,203,255,0.45)] backdrop-blur">
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <h2 className="text-xs uppercase tracking-[0.3em] text-[#9BCBFF] mr-2">
               {subjectTitle}
             </h2>
             <input
@@ -715,24 +865,21 @@ export default function Stage2Page() {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={searchPlaceholder}
-              className="mt-4 w-full rounded-2xl border border-white/60 bg-white/80 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-500 focus:border-[#9BCBFF]/70 focus:outline-none"
+              className="flex-1 min-w-[200px] max-w-[300px] rounded-2xl border border-white/60 bg-white/80 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-500 focus:border-[#9BCBFF]/70 focus:outline-none"
             />
-            <div className="mt-4 space-y-2 max-h-[520px] overflow-y-auto pr-1">
-              {filteredSubjects.length === 0 && (
-                <p className="text-sm text-slate-500">{noCoursesLabel}</p>
-              )}
-              {filteredSubjects.map((subject) => {
-                const label = language === 'ko' ? subject.subject_kr : subject.subject_en;
-                const isActive = subject.id === selectedSubjectId;
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'language', 'stem', 'social', 'arts', 'other'] as SubjectCategory[]).map((category) => {
+                const label = language === 'ko' ? subjectCategoryLabels[category].ko : subjectCategoryLabels[category].en;
+                const isActive = selectedSubjectCategory === category;
                 return (
                   <button
-                    key={subject.id}
+                    key={category}
                     type="button"
-                    onClick={() => setSelectedSubjectId(subject.id)}
-                    className={`w-full rounded-2xl px-3 py-2 text-left text-sm font-semibold transition ${
+                    onClick={() => setSelectedSubjectCategory(category)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition ${
                       isActive
-                        ? 'border border-[#9BCBFF]/60 bg-[#9BCBFF]/25 text-slate-700'
-                        : 'border border-transparent bg-white/60 text-slate-600 hover:bg-white/90'
+                        ? 'border-[#9BCBFF]/60 bg-[#9BCBFF]/30 text-slate-800'
+                        : 'border-white/70 bg-white/75 text-slate-600 hover:bg-white/90'
                     }`}
                   >
                     {label}
@@ -740,62 +887,69 @@ export default function Stage2Page() {
                 );
               })}
             </div>
-          </aside>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {filteredSubjects.length === 0 && (
+              <p className="text-sm text-slate-500 w-full">{noCoursesLabel}</p>
+            )}
+            {filteredSubjects.map((subject) => {
+              const label = language === 'ko' ? subject.subject_kr : subject.subject_en;
+              const isActive = subject.id === selectedSubjectId;
+              return (
+                <button
+                  key={subject.id}
+                  type="button"
+                  onClick={() => setSelectedSubjectId(subject.id)}
+                  className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                    isActive
+                      ? 'border border-[#9BCBFF]/60 bg-[#9BCBFF]/25 text-slate-700'
+                      : 'border border-white/60 bg-white/60 text-slate-600 hover:bg-white/90'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          <div className="space-y-6">
-            <section className="rounded-[32px] border border-white/60 bg-white/70 p-6 shadow-[0_30px_70px_-50px_rgba(155,203,255,0.45)] backdrop-blur">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+        {/* Main content: Radar (3/5) and Suggestions (2/5) */}
+        <div className="grid gap-6 lg:grid-cols-[3fr_2fr] mb-6">
+          {/* Left: Radar Course Section */}
+          <section className="rounded-[32px] border border-white/60 bg-white/70 p-6 shadow-[0_30px_70px_-50px_rgba(155,203,255,0.45)] backdrop-blur">
+            <div className="mb-4">
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-800">{radarTitle}</h2>
                   <p className="mt-1 text-sm text-slate-600">{radarSubtitle}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-                    <span className="flex items-center gap-2 rounded-full border border-[#F4A9C8]/40 bg-[#F4A9C8]/20 px-3 py-1">
-                      <svg viewBox="0 0 100 100" className="h-4 w-4 text-[#FFD1A8]">
-                        <polygon
-                          points="50,5 61,38 96,38 67,58 78,91 50,70 22,91 33,58 4,38 39,38"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      {radarLegendRecommended}
+                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                  <span className="flex items-center gap-2 rounded-full border border-[#F4A9C8]/40 bg-[#F4A9C8]/20 px-3 py-1">
+                    <svg viewBox="0 0 100 100" className="h-4 w-4 text-[#FFD1A8]">
+                      <polygon
+                        points="50,5 61,38 96,38 67,58 78,91 50,70 22,91 33,58 4,38 39,38"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    {radarLegendRecommended}
+                  </span>
+                  <span className="flex items-center gap-2 rounded-full border border-[#BEEDE3]/60 bg-[#BEEDE3]/40 px-3 py-1">
+                    <span className="relative h-3 w-3 rounded-full bg-gradient-to-br from-[#BEEDE3] via-[#C7B9FF] to-[#9BCBFF] shadow-[0_0_6px_rgba(155,203,255,0.5)]">
+                      <span className="absolute left-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-white/70" />
                     </span>
-                    <span className="flex items-center gap-2 rounded-full border border-[#BEEDE3]/60 bg-[#BEEDE3]/40 px-3 py-1">
-                      <span className="relative h-3 w-3 rounded-full bg-gradient-to-br from-[#BEEDE3] via-[#C7B9FF] to-[#9BCBFF] shadow-[0_0_6px_rgba(155,203,255,0.5)]">
-                        <span className="absolute left-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-white/70" />
-                      </span>
-                      {radarLegendExplore}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(['all', ...categories] as CategoryFilter[]).map((category) => {
-                      const label =
-                        category === 'all'
-                          ? allLabel
-                          : language === 'ko'
-                            ? categoryLabels[category].ko
-                            : categoryLabels[category].en;
-                      const isActive = selectedCategory === category;
-                      return (
-                        <button
-                          key={category}
-                          type="button"
-                          onClick={() => setSelectedCategory(category)}
-                          className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
-                            isActive
-                              ? 'border-white/30 bg-white/15 text-slate-800'
-                              : 'border-white/70 bg-white/75 text-slate-600 hover:bg-white/90'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    {radarLegendExplore}
+                  </span>
                 </div>
               </div>
+              <div className="w-full rounded-2xl border border-white/60 bg-white/80 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-800 mb-1">{radarFocusHint}</p>
+                <p className="text-xs text-slate-600">
+                  Closest to the center = strongest matches. Stars are recommended picks.
+                </p>
+              </div>
+            </div>
 
-              <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_260px] items-start">
+            <div className="grid gap-6 lg:grid-cols-[1fr_280px] items-start">
                 <div className="relative">
                   <div className="relative mx-auto w-full max-w-[520px] aspect-square">
                     <div
@@ -949,110 +1103,108 @@ export default function Stage2Page() {
                       </div>
                     </div>
                   ) : (
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800">{radarFocusHint}</p>
-                      <p className="mt-2 text-xs text-slate-600">
-                        Closest to the center = strongest matches. Stars are recommended picks.
-                      </p>
+                    <div className="text-center text-slate-500">
+                      <p className="text-sm">No course selected</p>
+                      <p className="mt-1 text-xs">Click on a star or orb to view details</p>
                     </div>
                   )}
                 </div>
               </div>
             </section>
 
-            <section className="rounded-[28px] border border-white/60 bg-white/70 p-6 shadow-[0_24px_60px_-50px_rgba(155,203,255,0.45)] backdrop-blur">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-800">{suggestionTitle}</h2>
-                  <p className="mt-1 text-xs text-slate-600">{suggestionSubtitle}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSuggestions((prev) => !prev)}
-                  className="rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-white/90"
-                >
-                  {showSuggestions ? suggestionToggleLabel : suggestionToggleOpenLabel}
-                </button>
+          {/* Right: Suggested for you Section */}
+          <section className="rounded-[28px] border border-white/60 bg-white/70 p-6 shadow-[0_24px_60px_-50px_rgba(155,203,255,0.45)] backdrop-blur">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-800">{suggestionTitle}</h2>
+                <p className="mt-1 text-xs text-slate-600">{suggestionSubtitle}</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowSuggestions((prev) => !prev)}
+                className="rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-white/90"
+              >
+                {showSuggestions ? suggestionToggleLabel : suggestionToggleOpenLabel}
+              </button>
+            </div>
 
-              {showSuggestions && (
-                <div className="mt-4">
-                  {suggestions.length === 0 && (
-                    <p className="text-sm text-slate-500">{suggestionEmpty}</p>
-                  )}
-                  {suggestions.length > 0 && (
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {suggestions.map((suggestion) => {
-                        const subjectLabel =
-                          language === 'ko'
-                            ? suggestion.subject.subject_kr
-                            : suggestion.subject.subject_en;
-                        const courseLabel =
-                          language === 'ko' ? suggestion.label.kr : suggestion.label.en;
-                        const recommendedBucket = getRecommendedBucket(
-                          suggestion.category,
-                          suggestion.score
-                        );
-                        return (
-                          <div
-                            key={suggestion.key}
-                            className="rounded-2xl border border-white/60 bg-white/75 p-4 shadow-[0_16px_30px_rgba(155,203,255,0.35)]"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
-                                <p className="text-xs text-slate-500">{subjectLabel}</p>
-                              </div>
-                              {renderInfoButton(getDescription(suggestion.label))}
-                            </div>
-                            {suggestion.reasons.size > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                {Array.from(suggestion.reasons).map((reason) => (
-                                  <span
-                                    key={reason}
-                                    className="rounded-full border border-[#BEEDE3]/60 bg-[#BEEDE3]/50 px-2 py-1 text-[11px] text-slate-700"
-                                  >
-                                    {reason}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            <div className="mt-3 flex gap-2">
-                              <button
-                                type="button"
-                                onClick={() => addToAnchor(suggestion.key)}
-                                disabled={anchor.length >= maxBucketSize}
-                                className={`rounded-full border px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
-                                  recommendedBucket === 'anchor'
-                                    ? 'border-[#9BCBFF]/60 bg-[#9BCBFF]/30 text-slate-700 shadow-[0_0_16px_rgba(155,203,255,0.6)]'
-                                    : 'border-white/60 bg-white/70 text-slate-600 hover:bg-white/90'
-                                }`}
-                              >
-                                {addToAnchorLabel}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => addToSignal(suggestion.key)}
-                                disabled={signal.length >= maxBucketSize}
-                                className={`rounded-full border px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
-                                  recommendedBucket === 'signal'
-                                    ? 'border-[#F4A9C8]/60 bg-[#F4A9C8]/30 text-slate-700 shadow-[0_0_16px_rgba(244,169,200,0.6)]'
-                                    : 'border-white/60 bg-white/70 text-slate-600 hover:bg-white/90'
-                                }`}
-                              >
-                                {addToSignalLabel}
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
+            {showSuggestions && (
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                {displaySuggestions.length === 0 && (
+                  <p className="text-sm text-slate-500">{suggestionEmpty}</p>
+                )}
+                {displaySuggestions.map((suggestion) => {
+                  const subjectLabel =
+                    language === 'ko'
+                      ? suggestion.subject.subject_kr
+                      : suggestion.subject.subject_en;
+                  const courseLabel =
+                    language === 'ko' ? suggestion.label.kr : suggestion.label.en;
+                  const recommendedBucket = getRecommendedBucket(
+                    suggestion.category,
+                    suggestion.score
+                  );
+                  return (
+                    <div
+                      key={suggestion.key}
+                      className="rounded-2xl border border-white/60 bg-white/75 p-4 shadow-[0_16px_30px_rgba(155,203,255,0.35)]"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
+                          <p className="text-xs text-slate-500">{subjectLabel}</p>
+                        </div>
+                        {renderInfoButton(getDescription(suggestion.label))}
+                      </div>
+                      {suggestion.reasons.size > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {Array.from(suggestion.reasons).map((reason) => (
+                            <span
+                              key={reason}
+                              className="rounded-full border border-[#BEEDE3]/60 bg-[#BEEDE3]/50 px-2 py-1 text-[11px] text-slate-700"
+                            >
+                              {reason}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => addToAnchor(suggestion.key)}
+                          disabled={anchor.length >= maxBucketSize}
+                          className={`rounded-full border px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
+                            recommendedBucket === 'anchor'
+                              ? 'border-[#9BCBFF]/60 bg-[#9BCBFF]/30 text-slate-700 shadow-[0_0_16px_rgba(155,203,255,0.6)]'
+                              : 'border-white/60 bg-white/70 text-slate-600 hover:bg-white/90'
+                          }`}
+                        >
+                          {addToAnchorLabel}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => addToSignal(suggestion.key)}
+                          disabled={signal.length >= maxBucketSize}
+                          className={`rounded-full border px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
+                            recommendedBucket === 'signal'
+                              ? 'border-[#F4A9C8]/60 bg-[#F4A9C8]/30 text-slate-700 shadow-[0_0_16px_rgba(244,169,200,0.6)]'
+                              : 'border-white/60 bg-white/70 text-slate-600 hover:bg-white/90'
+                          }`}
+                        >
+                          {addToSignalLabel}
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
-            </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
 
-            <section className="grid gap-6 lg:grid-cols-2">
+        {/* Bottom sections */}
+        <div className="space-y-6">
+          <section className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-[28px] border border-[#9BCBFF]/60 bg-white/70 p-6 shadow-[0_24px_50px_-40px_rgba(155,203,255,0.55)] backdrop-blur">
                 <div className="mb-4">
                   <h2 className="font-semibold text-slate-800">{t('stage2Anchor')}</h2>
@@ -1206,7 +1358,6 @@ export default function Stage2Page() {
                 {viewSummaryLabel}
               </button>
             </div>
-          </div>
         </div>
       </div>
 

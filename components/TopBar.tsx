@@ -96,6 +96,7 @@ export default function TopBar() {
           {!isAuthPage && (
             <>
               <button
+                type="button"
                 onClick={() => router.back()}
                 className="flex items-center gap-1 px-2 py-2 rounded-full hover:bg-white/70 transition text-slate-700"
                 title={t('back')}
@@ -103,6 +104,7 @@ export default function TopBar() {
                 <ArrowLeft className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => router.push('/dashboard')}
                 className="flex items-center gap-1 px-2 py-2 rounded-full hover:bg-white/70 transition text-slate-700"
                 title={t('home')}
@@ -114,6 +116,7 @@ export default function TopBar() {
           )}
 
           <button
+            type="button"
             onClick={toggleLanguage}
             className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/70 border border-white/60 text-sm font-semibold text-slate-700 floating"
           >
@@ -125,6 +128,7 @@ export default function TopBar() {
 
           <div className="flex items-center gap-2 px-2">
             <button
+              type="button"
               onClick={() => setSettingsOpen(true)}
               className="h-9 w-9 rounded-full bg-gradient-to-br from-[#9BCBFF] to-[#F4A9C8] flex items-center justify-center text-base font-bold text-slate-800 shadow-md hover:shadow-lg transition"
               aria-label={t('settingsOpen')}
@@ -133,6 +137,7 @@ export default function TopBar() {
             </button>
             {!isAuthPage && (
               <button
+                type="button"
                 onClick={handleSignOut}
                 className="p-2 rounded-full text-slate-700 hover:bg-white/70 transition"
                 title={t('logout')}
@@ -147,6 +152,7 @@ export default function TopBar() {
       {settingsOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <button
+            type="button"
             className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"
             onClick={handleCloseSettings}
             aria-label={t('settingsClose')}
@@ -161,6 +167,7 @@ export default function TopBar() {
                 <p className="text-sm text-slate-500">{userEmail || t('settingsEmailPlaceholder')}</p>
               </div>
               <button
+                type="button"
                 onClick={handleCloseSettings}
                 className="h-9 w-9 rounded-full bg-white/70 border border-white/60 text-slate-600 hover:text-slate-800 transition"
                 aria-label={t('settingsClose')}
@@ -180,6 +187,7 @@ export default function TopBar() {
               </div>
 
               <button
+                type="button"
                 onClick={handleResetProfile}
                 className="w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition"
               >
@@ -192,6 +200,7 @@ export default function TopBar() {
                   <p className="text-xs text-slate-500">{t('settingsLanguageHint')}</p>
                 </div>
                 <button
+                  type="button"
                   onClick={toggleLanguage}
                   className="px-3 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition"
                 >
@@ -201,6 +210,7 @@ export default function TopBar() {
 
               {!isAuthPage && (
                 <button
+                  type="button"
                   onClick={handleSignOut}
                   className="w-full rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-100 transition"
                 >

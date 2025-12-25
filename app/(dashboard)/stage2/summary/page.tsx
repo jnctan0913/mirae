@@ -79,6 +79,39 @@ const strengthSignals: Record<
   },
 };
 
+const stage0TagToStrength: Record<string, string> = {
+  analysis: 'analytical',
+  logic: 'analytical',
+  research: 'analytical',
+  mastery: 'analytical',
+  skill: 'analytical',
+  curiosity: 'analytical',
+  creativity: 'creative',
+  ideation: 'creative',
+  intuition: 'creative',
+  ambiguity: 'creative',
+  social: 'empathy',
+  support: 'empathy',
+  discussion: 'empathy',
+  collaboration: 'empathy',
+  fairness: 'empathy',
+  impact: 'empathy',
+  meaning: 'empathy',
+  'social-value': 'empathy',
+  structure: 'organization',
+  stability: 'organization',
+  autonomy: 'organization',
+  practice: 'organization',
+  achievement: 'organization',
+  change: 'organization',
+  growth: 'organization',
+  resilience: 'organization',
+  reflection: 'organization',
+  adaptability: 'organization',
+  motivation: 'organization',
+  anxiety: 'organization',
+};
+
 const roleSignals: Record<string, { keywords: string[]; label: string }> = {
   'ux-designer': {
     keywords: ['design', 'media', 'art', 'writing', 'communication'],
@@ -148,6 +181,7 @@ export default function Stage2SummaryPage() {
   const [selection, setSelection] = useState<SavedSelection>(null);
   const [strengths, setStrengths] = useState<string[]>([]);
   const [likedRoles, setLikedRoles] = useState<string[]>([]);
+  const [stage0Roles, setStage0Roles] = useState<string[]>([]);
   const [docKeywords, setDocKeywords] = useState<string[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -158,9 +192,66 @@ export default function Stage2SummaryPage() {
     const strengthTags = Array.isArray(rawStrengths)
       ? rawStrengths
       : profile.strengthTags ?? [];
-    setStrengths(strengthTags);
+    const derivedStrengths = strengthTags.length > 0
+      ? strengthTags
+      : Array.from(
+          new Set(
+            (profile.stage0Profile?.topSignals ?? [])
+              .map((tag) => stage0TagToStrength[tag])
+              .filter(Boolean)
+          )
+        );
+    setStrengths(derivedStrengths);
     setLikedRoles(profile?.likedRoles ?? []);
-    setDocKeywords(profile?.onboarding?.docKeywords ?? []);
+    setStage0Roles(profile.stage0Summary?.recommendedRoles ?? []);
+    const docStopWords = new Set([
+      'pdf',
+      'doc',
+      'docx',
+      'hwp',
+      'txt',
+      'png',
+      'jpg',
+      'jpeg',
+      'zip',
+      'ppt',
+      'pptx',
+      'xls',
+      'xlsx',
+      'final',
+      'draft',
+      'copy',
+      'portfolio',
+      'resume',
+      'certificate',
+      'certificates',
+      '생기부',
+    ]);
+    const tokenize = (value: string) =>
+      value
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((token) => token.length >= 2 && !docStopWords.has(token));
+    const legacyProfile = profile as unknown as {
+      onboardingKeywords?: string[];
+      uploadedDocs?: string[];
+      docKeywords?: string[];
+    };
+    const keywordSource = [
+      ...(profile?.keywords ?? []),
+      ...(profile?.onboarding?.keywords ?? []),
+      ...(profile?.onboarding?.uploadedDocs ?? []),
+      ...(profile?.onboarding?.docKeywords ?? []),
+      ...(legacyProfile.onboardingKeywords ?? []),
+      ...(legacyProfile.uploadedDocs ?? []),
+      ...(legacyProfile.docKeywords ?? []),
+    ];
+    if (keywordSource.length > 0) {
+      const tokens = Array.from(new Set(keywordSource.flatMap((item) => tokenize(item))));
+      setDocKeywords(tokens);
+    } else {
+      setDocKeywords([]);
+    }
   }, []);
 
   const courseLookup = useMemo(() => {
@@ -186,6 +277,11 @@ export default function Stage2SummaryPage() {
     .filter(Boolean);
 
   const likedRoleLabels = likedRoles
+    .map((roleId) => roles.find((role) => role.id === roleId))
+    .map((role) => (role ? (language === 'ko' ? role.title.ko : role.title.en) : null))
+    .filter((label): label is string => Boolean(label));
+  const stage0RoleLabels = stage0Roles
+    .filter((roleId) => !likedRoles.includes(roleId))
     .map((roleId) => roles.find((role) => role.id === roleId))
     .map((role) => (role ? (language === 'ko' ? role.title.ko : role.title.en) : null))
     .filter((label): label is string => Boolean(label));
@@ -250,7 +346,7 @@ export default function Stage2SummaryPage() {
   const profileLabel = language === 'ko' ? 'Profile snapshot' : 'Profile snapshot';
   const alignmentLabel = language === 'ko' ? 'Alignment' : 'Alignment';
   const emptyLabel = language === 'ko' ? 'No saved selection yet.' : 'No saved selection yet.';
-  const docKeywordsLabel = language === 'ko' ? 'Uploads' : 'Uploads';
+  const docKeywordsLabel = language === 'ko' ? '온보딩/업로드 키워드' : 'Onboarding + uploads';
   const dashboardLabel = language === 'ko' ? 'Back to dashboard' : 'Back to dashboard';
   const redoLabel = language === 'ko' ? 'Clear & redo Stage 2' : 'Clear & redo Stage 2';
   const nextStageLabel = language === 'ko' ? 'Continue to Stage 3' : 'Continue to Stage 3';
@@ -408,6 +504,23 @@ export default function Stage2SummaryPage() {
                   </div>
                 </div>
                 <div>
+                  <p className="text-xs font-semibold text-slate-500">Stage 0 suggested roles</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {stage0RoleLabels.length > 0 ? (
+                      stage0RoleLabels.map((label) => (
+                        <span
+                          key={label}
+                          className="rounded-full border border-white/70 bg-white/80 px-3 py-1 text-xs text-slate-700"
+                        >
+                          {label}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-slate-500">No suggested roles yet.</span>
+                    )}
+                  </div>
+                </div>
+                <div>
                   <p className="text-xs font-semibold text-slate-500">{docKeywordsLabel}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {docKeywords.length > 0 ? (
@@ -439,7 +552,11 @@ export default function Stage2SummaryPage() {
                   <span>{alignment.roleCount} courses</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Matches uploads</span>
+                  <span>
+                    {language === 'ko'
+                      ? '온보딩/업로드 키워드 매칭'
+                      : 'Matches onboarding + uploads'}
+                  </span>
                   <span>{alignment.docCount} courses</span>
                 </div>
                 <div className="flex items-center justify-between font-semibold text-slate-700">

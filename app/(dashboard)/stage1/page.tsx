@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
@@ -211,7 +211,7 @@ export default function Stage1Page() {
       ? Math.min(Math.abs(dragOffset.x) / 120, 1)
       : 0;
 
-  const triggerShimmer = (direction: 'left' | 'right') => {
+  const triggerShimmer = useCallback((direction: 'left' | 'right') => {
     setShimmerDirection(direction);
     setShimmerKey((prev) => prev + 1);
     if (shimmerTimer.current) {
@@ -220,9 +220,9 @@ export default function Stage1Page() {
     shimmerTimer.current = window.setTimeout(() => {
       setShimmerDirection(null);
     }, 650);
-  };
+  }, []);
 
-  const commitStage1Results = (liked: string[]) => {
+  const commitStage1Results = useCallback((liked: string[]) => {
     if (liked.length === 0) return;
     const profile = getUserProfile();
     const existingCards = (profile.collection?.cards as Record<string, unknown>[]) ?? [];
@@ -298,9 +298,9 @@ export default function Stage1Page() {
       },
     });
     updateProfileAnalytics(nextLogs);
-  };
+  }, []);
 
-  const handleSwipe = (direction: 'left' | 'right', withShimmer = true) => {
+  const handleSwipe = useCallback((direction: 'left' | 'right', withShimmer = true) => {
     if (isSettling) return;
     if (isFlipped) return;
     const roleId = currentRole.id;
@@ -358,7 +358,19 @@ export default function Stage1Page() {
     } else {
       finalizeSwipe();
     }
-  };
+  }, [
+    completeStage,
+    commitStage1Results,
+    currentIndex,
+    currentRole,
+    isDragging,
+    isFlipped,
+    isSettling,
+    rolesToShow.length,
+    router,
+    triggerShimmer,
+    userId,
+  ]);
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
@@ -370,7 +382,7 @@ export default function Stage1Page() {
     return () => {
       window.removeEventListener('keydown', handleKey);
     };
-  }, [currentRole, isSettling]);
+  }, [handleSwipe]);
 
   useEffect(() => {
     return () => {

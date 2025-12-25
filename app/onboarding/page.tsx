@@ -252,14 +252,12 @@ export default function OnboardingPage() {
                 <li>• {t('onboardingNextStep2')}</li>
                 <li>• {t('onboardingNextStep3')}</li>
               </ul>
-              {state.currentPhase === 'start' && (
-                <button
-                  onClick={handleFinish}
-                  className="soft-button w-full py-3 rounded-full font-semibold"
-                >
-                  {t('onboardingFinish')}
-                </button>
-              )}
+              <button
+                onClick={handleFinish}
+                className="soft-button w-full py-3 rounded-full font-semibold"
+              >
+                {t('onboardingFinish')}
+              </button>
             </div>
 
             {/* Mirae Icon */}

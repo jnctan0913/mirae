@@ -53,7 +53,7 @@ export default function Stage0Page() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const router = useRouter();
-  const { userId, progress: userProgress } = useUserStore();
+  const { userId, progress: userProgress, completeStage } = useUserStore();
   const { t, language } = useI18n();
   const viewResultsLabel =
     language === 'ko' ? '\uC9C4\uB2E8 \uACB0\uACFC \uBCF4\uAE30' : 'View results';
@@ -67,6 +67,7 @@ export default function Stage0Page() {
 
   const progressPercent = ((currentQ + 1) / questions.length) * 100;
   const isLast = currentQ === questions.length - 1;
+  const isQuestionnaireComplete = Object.keys(answers).length >= questions.length;
 
   const handleSelect = (optionId: string) => {
     const qId = question.id;
@@ -79,14 +80,18 @@ export default function Stage0Page() {
 
     if (currentQ < questions.length - 1) {
       setCurrentQ((prev) => Math.min(prev + 1, questions.length - 1));
+    } else {
+      completeStage(0);
     }
   };
 
   const handleViewResults = () => {
+    completeStage(0);
     router.push('/stage0/result');
   };
 
   const handleViewSummary = () => {
+    completeStage(0);
     router.push('/stage0/result');
   };
 
@@ -173,7 +178,7 @@ export default function Stage0Page() {
 
           <button
             onClick={handleViewSummary}
-            disabled={!userProgress.stage0Complete}
+            disabled={!isQuestionnaireComplete && !userProgress.stage0Complete}
             className="px-6 py-3 rounded-full border border-white/70 bg-white/70 text-slate-700 font-semibold hover:bg-white/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {viewSummaryLabel}
