@@ -8,6 +8,7 @@ import { CheckCircle, Lock, Circle, ChevronLeft, ChevronRight, Sprout } from 'lu
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
 import { MiraeCharacter, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
+import { storage } from '@/lib/utils/storage';
 
 const stages = [
   { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0', letter: 'S', promptKey: 'journeyPromptStrengths' },
@@ -18,6 +19,14 @@ const stages = [
   { id: 5, nameKey: 'stage5Name', descriptionKey: 'stage5Description', path: '/collection', letter: '+', promptKey: 'journeyPromptStoryboard' },
 ];
 
+const academicStages = [
+  { id: 'pre-year-1', label: 'Pre-Year 1' },
+  { id: 'year-1-sem-1', label: 'Year 1 Semester 1' },
+  { id: 'year-1-sem-2', label: 'Year 1 Semester 2' },
+  { id: 'year-2-sem-1', label: 'Year 2 Semester 1' },
+  { id: 'year-2-sem-2', label: 'Year 2 Semester 2' },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,6 +34,7 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('');
   const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
   const [cardCount, setCardCount] = useState(0);
+  const [academicStage, setAcademicStage] = useState<string | null>(null);
   const { t } = useI18n();
 
   useEffect(() => {
@@ -60,6 +70,11 @@ export default function DashboardPage() {
         const unlockedCount = cards.filter((c: any) => c.unlocked).length;
         setCardCount(unlockedCount);
       }
+
+      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+      if (typeof profile.academicStage === 'string') {
+        setAcademicStage(profile.academicStage);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, setUserId, userId]);
@@ -78,6 +93,11 @@ export default function DashboardPage() {
         const cards = JSON.parse(savedCards);
         const unlockedCount = cards.filter((c: any) => c.unlocked).length;
         setCardCount(unlockedCount);
+      }
+
+      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+      if (typeof profile.academicStage === 'string') {
+        setAcademicStage(profile.academicStage);
       }
     };
 
@@ -148,6 +168,7 @@ export default function DashboardPage() {
 
   const viewingStageStatus = getStageStatus(viewingStageId);
   const isViewingStageLocked = viewingStageStatus === 'locked';
+  const activeAcademicStage = academicStages.find((stage) => stage.id === academicStage);
 
   const handlePreviousStage = () => {
     if (canNavigateToPrevious) {
@@ -171,7 +192,7 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="h-screen px-6 pt-20 pb-6 bg-cover bg-center bg-no-repeat overflow-hidden"
+      className="relative h-screen px-6 pt-20 pb-6 bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{ backgroundImage: "url('/asset/Background.png')" }}
     >
       <div className="max-w-6xl mx-auto h-full flex flex-col space-y-4">
@@ -525,6 +546,13 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="absolute bottom-6 right-6 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lg backdrop-blur-lg">
+        <p className="text-[10px] uppercase tracking-wide text-slate-500">Academic placement</p>
+        <p className="text-sm font-semibold text-slate-800">
+          {activeAcademicStage ? activeAcademicStage.label : 'Not set'}
+        </p>
       </div>
     </div>
   );
