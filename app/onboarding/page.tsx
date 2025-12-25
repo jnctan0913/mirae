@@ -7,7 +7,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
 import { Sprout } from 'lucide-react';
-import { OnboardingChat } from '@/components/onboarding/OnboardingChat';
+import { SmartOnboardingChat } from '@/components/onboarding/SmartOnboardingChat';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
 
 export default function OnboardingPage() {
@@ -17,8 +17,6 @@ export default function OnboardingPage() {
   const { state } = useOnboarding();
   const [userName, setUserName] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [inputEnabled, setInputEnabled] = useState(false);
-  const [inputPlaceholder, setInputPlaceholder] = useState('Share a thought, or skip if you like');
 
   const onboardingDoneKey = (userId: string) => `user_${userId}_onboardingDone`;
 
@@ -44,18 +42,6 @@ export default function OnboardingPage() {
       }
     }
   }, [router, setUserId]);
-
-  // Listen for input state updates from phases
-  useEffect(() => {
-    const handleInputState = (e: CustomEvent) => {
-      const { needsInput, placeholder } = e.detail;
-      setInputEnabled(needsInput);
-      setInputPlaceholder(placeholder || t('onboardingPlaceholder'));
-    };
-
-    window.addEventListener('onboardingInputState', handleInputState as EventListener);
-    return () => window.removeEventListener('onboardingInputState', handleInputState as EventListener);
-  }, [t]);
 
   const handleFinish = () => {
     const user = getUser();
@@ -93,7 +79,12 @@ export default function OnboardingPage() {
 
             {/* Chat Messages Area - Scrollable */}
             <div className="relative flex-1 min-h-0 overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
-              <OnboardingChat onComplete={handleFinish} onInputSubmit={setInputValue} />
+              <SmartOnboardingChat
+                onComplete={handleFinish}
+                onInputChange={setInputValue}
+                inputValue={inputValue}
+                onSend={() => window.dispatchEvent(new Event('onboardingSmartSend'))}
+              />
             </div>
 
             {/* Input Area - Fixed at bottom */}
@@ -131,34 +122,24 @@ export default function OnboardingPage() {
                   <input
                     type="text"
                     value={inputValue}
-                    onChange={(e) => setInputEnabled && setInputValue(e.target.value)}
+                    onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && inputValue.trim() && inputEnabled) {
-                        // Trigger submit through the chat component
-                        window.dispatchEvent(new CustomEvent('onboardingSubmit', { detail: inputValue }));
-                        setInputValue('');
+                      if (e.key === 'Enter' && inputValue.trim()) {
+                        window.dispatchEvent(new Event('onboardingSmartSend'));
                       }
                     }}
-                    placeholder={inputPlaceholder}
-                    disabled={!inputEnabled}
-                    className={`w-full rounded-full pl-14 pr-4 py-3 text-sm sm:text-base focus:outline-none shadow-sm transition-all ${
-                      inputEnabled 
-                        ? 'bg-white/95 border-2 border-slate-300 focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF]' 
-                        : 'bg-slate-100/50 border-2 border-slate-200 text-slate-400 cursor-not-allowed'
-                    }`}
+                    placeholder={t('onboardingPlaceholder')}
+                    className="w-full rounded-full pl-14 pr-4 py-3 bg-white/95 border-2 border-slate-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF] shadow-sm"
                   />
                 </div>
                 <button
                   onClick={() => {
-                    if (inputValue.trim() && inputEnabled) {
-                      window.dispatchEvent(new CustomEvent('onboardingSubmit', { detail: inputValue }));
-                      setInputValue('');
+                    if (inputValue.trim()) {
+                      window.dispatchEvent(new Event('onboardingSmartSend'));
                     }
                   }}
-                  disabled={!inputEnabled || !inputValue.trim()}
-                  className={`soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold transition-all ${
-                    !inputEnabled || !inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  disabled={!inputValue.trim()}
+                  className="soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {t('stage3Send')}
                 </button>
