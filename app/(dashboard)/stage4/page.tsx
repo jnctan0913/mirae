@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
+import { useI18n } from '@/lib/i18n';
 
 type Candidate = {
   id: string;
@@ -38,6 +39,8 @@ type MatchSnapshot = {
   majorWinner: Candidate | null;
   universityWinner: Candidate | null;
 };
+
+const BASE_PATH = '/Mirae.ai';
 
 const MAJOR_CANDIDATES: Candidate[] = [
   {
@@ -293,40 +296,44 @@ const buildUniversitiesForMajor = (major: Candidate): Candidate[] =>
     details: [...university.details, `Popular track: ${major.name}`],
   }));
 
-const getMatchReasons = (candidate: Candidate, mode: 'major' | 'university'): string[] => {
+const getMatchReasons = (
+  candidate: Candidate,
+  mode: 'major' | 'university',
+  t: (key: string, vars?: Record<string, string | number>) => string
+): string[] => {
   const reasons: string[] = [];
 
   if (mode === 'major') {
     if (candidate.matchPercent !== undefined) {
-      reasons.push(`Strong alignment (${candidate.matchPercent}%)`);
+      reasons.push(t('stage4MatchAlignment', { value: candidate.matchPercent }));
     }
     if (candidate.careers?.length) {
-      reasons.push(`Career fit: ${candidate.careers[0]}`);
+      reasons.push(t('stage4MatchCareer', { value: candidate.careers[0] }));
     }
     if (candidate.coreCourses?.length) {
-      reasons.push(`Core course: ${candidate.coreCourses[0]}`);
+      reasons.push(t('stage4MatchCourse', { value: candidate.coreCourses[0] }));
     }
     if (candidate.workloadStyle) {
-      reasons.push(`Workload: ${candidate.workloadStyle}`);
+      reasons.push(t('stage4MatchWorkload', { value: candidate.workloadStyle }));
     }
     if (candidate.collaboration) {
-      reasons.push(`Collaboration: ${candidate.collaboration}`);
+      reasons.push(t('stage4MatchCollaboration', { value: candidate.collaboration }));
     }
   } else {
     if (candidate.internshipPipeline) {
-      reasons.push(`Internships: ${candidate.internshipPipeline}`);
+      reasons.push(t('stage4MatchInternships', { value: candidate.internshipPipeline }));
     }
     if (candidate.aidStrength) {
-      reasons.push(`Aid strength: ${candidate.aidStrength}`);
+      reasons.push(t('stage4MatchAid', { value: candidate.aidStrength }));
     }
     if (candidate.campusVibe) {
-      reasons.push(`Campus vibe: ${candidate.campusVibe}`);
+      reasons.push(t('stage4MatchVibe', { value: candidate.campusVibe }));
     }
     if (candidate.exchange) {
-      reasons.push(`Exchange: ${candidate.exchange}`);
+      reasons.push(t('stage4MatchExchange', { value: candidate.exchange }));
     }
     if (candidate.selectivity) {
-      reasons.push(`Selectivity: ${candidate.selectivity}`);
+      reasons.push(t('stage4MatchSelectivity', { value: candidate.selectivity }));
     }
   }
 
@@ -345,6 +352,7 @@ export default function Stage4Page() {
   const [history, setHistory] = useState<MatchSnapshot[]>([]);
   const router = useRouter();
   const { completeStage } = useUserStore();
+  const { t } = useI18n();
 
   const startMajorTournament = () => {
     setPhase('major');
@@ -464,28 +472,40 @@ export default function Stage4Page() {
         />
 
         <div className="mb-6 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/80">Stage 4</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/80">{t('stage4Label')}</p>
           <h1 className="text-3xl sm:text-4xl font-semibold text-white drop-shadow">
-            Tournament Bracket
+            {t('stage4TournamentTitle')}
           </h1>
         </div>
 
         {phase === 'intro' && (
           <div className="bg-white/80 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center border border-white/60">
+            <div className="mb-6">
+              <img
+                src={`${BASE_PATH}/asset/Stage_option.png`}
+                alt={t('stage4IntroImageAlt')}
+                className="mx-auto h-40 w-full max-w-md rounded-3xl object-cover shadow-md"
+                loading="lazy"
+              />
+            </div>
             <p className="text-gray-700 mb-6 text-base">
-              First, pick the best major. Then compare universities that offer it.
+              {t('stage4Intro')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-6">
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 shadow-md">
-                <h2 className="text-lg font-semibold mb-2 text-slate-800">Major Tournament</h2>
+                <h2 className="text-lg font-semibold mb-2 text-slate-800">
+                  {t('stage4MajorTitle')}
+                </h2>
                 <p className="text-sm text-slate-600">
-                  8 candidates based on your interests, passions, and courses.
+                  {t('stage4MajorDesc')}
                 </p>
               </div>
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 shadow-md">
-                <h2 className="text-lg font-semibold mb-2 text-slate-800">University Tournament</h2>
+                <h2 className="text-lg font-semibold mb-2 text-slate-800">
+                  {t('stage4UniversityTitle')}
+                </h2>
                 <p className="text-sm text-slate-600">
-                  8 universities that offer the winning major.
+                  {t('stage4UniversityDesc')}
                 </p>
               </div>
             </div>
@@ -493,7 +513,7 @@ export default function Stage4Page() {
               onClick={startMajorTournament}
               className="px-6 py-3 rounded-full font-medium text-slate-800 bg-white/90 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 ease-out"
             >
-              Start Tournament
+              {t('stage4Start')}
             </button>
           </div>
         )}
@@ -503,21 +523,23 @@ export default function Stage4Page() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70">
-                  {mode === 'major' ? 'Major Tournament' : 'University Tournament'}
+                  {mode === 'major' ? t('stage4MajorTitle') : t('stage4UniversityTitle')}
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-semibold text-white drop-shadow">
-                  Round {round} of {TOTAL_ROUNDS}
+                  {t('stage4RoundLabel', { round, total: TOTAL_ROUNDS })}
                 </h2>
                 <p className="text-sm text-white/80">
-                  Match {matchIndex + 1} of {totalMatches}
+                  {t('stage4MatchLabel', { current: matchIndex + 1, total: totalMatches })}
                 </p>
               </div>
               <div className="text-sm text-white/80 bg-white/20 border border-white/30 rounded-full px-4 py-1">
-                Winners locked in this round: {nextRoundCandidates.length}
+                {t('stage4WinnersLocked', { value: nextRoundCandidates.length })}
               </div>
             </div>
 
-            <div className="text-center text-white/80 text-sm">Pick the winner to advance</div>
+            <div className="text-center text-white/80 text-sm">
+              {t('stage4PickWinner')}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {currentPair.map((candidate) => (
@@ -528,69 +550,87 @@ export default function Stage4Page() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-xl font-semibold text-slate-800">{candidate.name}</h3>
-                    <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Pick</span>
+                    <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      {t('stage4PickLabel')}
+                    </span>
                   </div>
                   {mode === 'major' && candidate.matchPercent !== undefined && (
                     <p className="text-sm text-slate-700 font-medium mb-2">
-                      Match score: {candidate.matchPercent}%
+                      {t('stage4MatchScore', { value: candidate.matchPercent })}
                     </p>
                   )}
                   {mode === 'major' && candidate.careers && (
                     <p className="text-sm text-slate-600 mb-1">
-                      Careers: {candidate.careers.join(', ')}
+                      {t('stage4Careers', { value: candidate.careers.join(', ') })}
                     </p>
                   )}
                   {mode === 'major' && candidate.coreCourses && (
                     <p className="text-sm text-slate-600 mb-1">
-                      Core courses: {candidate.coreCourses.join(', ')}
+                      {t('stage4CoreCourses', { value: candidate.coreCourses.join(', ') })}
                     </p>
                   )}
                   {mode === 'major' && candidate.workloadStyle && (
                     <p className="text-sm text-slate-600 mb-1">
-                      Workload: {candidate.workloadStyle}
+                      {t('stage4Workload', { value: candidate.workloadStyle })}
                     </p>
                   )}
                   {mode === 'major' && candidate.portfolio && (
                     <p className="text-sm text-slate-600 mb-1">
-                      Portfolio: {candidate.portfolio}
+                      {t('stage4Portfolio', { value: candidate.portfolio })}
                     </p>
                   )}
                   {mode === 'major' && candidate.collaboration && (
                     <p className="text-sm text-slate-600 mb-1">
-                      Collaboration: {candidate.collaboration}
+                      {t('stage4Collaboration', { value: candidate.collaboration })}
                     </p>
                   )}
                   {mode === 'major' && candidate.pace && (
-                    <p className="text-sm text-slate-600 mb-3">Pace: {candidate.pace}</p>
+                    <p className="text-sm text-slate-600 mb-3">
+                      {t('stage4Pace', { value: candidate.pace })}
+                    </p>
                   )}
                   {mode === 'university' && candidate.location && (
-                    <p className="text-sm text-slate-600 mb-1">Location: {candidate.location}</p>
+                    <p className="text-sm text-slate-600 mb-1">
+                      {t('stage4Location', { value: candidate.location })}
+                    </p>
                   )}
                   {mode === 'university' && candidate.scholarships?.length && (
                     <p className="text-sm text-slate-600 mb-3">
-                      Scholarships: {candidate.scholarships.join(', ')}
+                      {t('stage4Scholarships', { value: candidate.scholarships.join(', ') })}
                     </p>
                   )}
                   {mode === 'university' && (
                     <div className="text-sm text-slate-600 mb-3 space-y-1">
-                      {candidate.tuitionRange && <p>Tuition: {candidate.tuitionRange}</p>}
-                      {candidate.aidStrength && <p>Financial aid: {candidate.aidStrength}</p>}
-                      {candidate.internshipPipeline && (
-                        <p>Internships: {candidate.internshipPipeline}</p>
+                      {candidate.tuitionRange && (
+                        <p>{t('stage4Tuition', { value: candidate.tuitionRange })}</p>
                       )}
-                      {candidate.selectivity && <p>Selectivity: {candidate.selectivity}</p>}
-                      {candidate.campusVibe && <p>Campus vibe: {candidate.campusVibe}</p>}
-                      {candidate.housing && <p>Housing: {candidate.housing}</p>}
-                      {candidate.exchange && <p>Exchange: {candidate.exchange}</p>}
+                      {candidate.aidStrength && (
+                        <p>{t('stage4FinancialAid', { value: candidate.aidStrength })}</p>
+                      )}
+                      {candidate.internshipPipeline && (
+                        <p>{t('stage4Internships', { value: candidate.internshipPipeline })}</p>
+                      )}
+                      {candidate.selectivity && (
+                        <p>{t('stage4Selectivity', { value: candidate.selectivity })}</p>
+                      )}
+                      {candidate.campusVibe && (
+                        <p>{t('stage4CampusVibe', { value: candidate.campusVibe })}</p>
+                      )}
+                      {candidate.housing && (
+                        <p>{t('stage4Housing', { value: candidate.housing })}</p>
+                      )}
+                      {candidate.exchange && (
+                        <p>{t('stage4Exchange', { value: candidate.exchange })}</p>
+                      )}
                     </div>
                   )}
                   <p className="text-sm text-slate-600 mb-4">{candidate.summary}</p>
                   <div className="mb-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">
-                      Why this matchup
+                      {t('stage4WhyMatchup')}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {getMatchReasons(candidate, mode).map((reason) => (
+                      {getMatchReasons(candidate, mode, t).map((reason) => (
                         <span
                           key={reason}
                           className="text-xs text-slate-700 bg-white/70 border border-white/70 rounded-full px-3 py-1 shadow-sm"
@@ -620,18 +660,18 @@ export default function Stage4Page() {
                 onClick={resetTournament}
                 className="text-sm text-white/80 hover:text-white"
               >
-                Restart tournament
+                {t('stage4Restart')}
               </button>
               <button
                 onClick={handleUndo}
                 className="text-sm text-white/80 hover:text-white disabled:text-white/40"
                 disabled={history.length === 0}
               >
-                Undo last pick
+                {t('stage4Undo')}
               </button>
               {majorWinner && mode === 'university' && (
                 <div className="text-sm text-white/90">
-                  Current major: <span className="font-semibold">{majorWinner.name}</span>
+                  {t('stage4CurrentMajor', { value: majorWinner.name })}
                 </div>
               )}
             </div>
@@ -639,19 +679,52 @@ export default function Stage4Page() {
         )}
 
         {phase === 'result' && majorWinner && universityWinner && (
-          <div className="bg-white/85 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center space-y-6 border border-white/60">
+          <div className="relative overflow-hidden bg-white/85 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center space-y-6 border border-white/60">
+            <div className="confetti pointer-events-none absolute inset-0">
+              {Array.from({ length: 14 }).map((_, index) => (
+                <span
+                  key={index}
+                  style={{
+                    left: `${(index + 1) * 6}%`,
+                    animationDelay: `${(index % 7) * 0.15}s`,
+                    background:
+                      index % 3 === 0
+                        ? '#C7B9FF'
+                        : index % 3 === 1
+                          ? '#F4A9C8'
+                          : '#9BCBFF',
+                  }}
+                />
+              ))}
+            </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Final Results</p>
-              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">Your winning path</h2>
+              <img
+                src={`${BASE_PATH}/asset/Stage_evolve.png`}
+                alt={t('stage4ResultImageAlt')}
+                className="mx-auto h-36 w-full max-w-md rounded-3xl object-cover shadow-md"
+                loading="lazy"
+              />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                {t('stage4FinalResults')}
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">
+                {t('stage4WinningPath')}
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 text-left shadow-md">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Major</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                  {t('stage4MajorLabel')}
+                </p>
                 <h3 className="text-lg font-semibold text-slate-800">{majorWinner.name}</h3>
                 <p className="text-sm text-slate-600 mt-2">{majorWinner.summary}</p>
               </div>
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 text-left shadow-md">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">University</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                  {t('stage4UniversityLabel')}
+                </p>
                 <h3 className="text-lg font-semibold text-slate-800">{universityWinner.name}</h3>
                 <p className="text-sm text-slate-600 mt-2">{universityWinner.summary}</p>
               </div>
@@ -661,18 +734,43 @@ export default function Stage4Page() {
                 onClick={handleComplete}
                 className="px-6 py-3 rounded-full font-medium text-slate-800 bg-white/90 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 ease-out"
               >
-                Save and return to dashboard
+                {t('stage4SaveReturn')}
               </button>
               <button
                 onClick={resetTournament}
                 className="px-6 py-3 rounded-full border border-white/70 text-slate-700 bg-white/70 hover:bg-white/90 shadow-md transition-all duration-300 ease-out"
               >
-                Run another tournament
+                {t('stage4RunAnother')}
               </button>
             </div>
           </div>
         )}
       </div>
+      <style jsx>{`
+        .confetti span {
+          position: absolute;
+          top: -10%;
+          width: 10px;
+          height: 18px;
+          opacity: 0.7;
+          border-radius: 6px;
+          animation: confetti-fall 3.6s ease-out infinite;
+        }
+
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateY(120vh) rotate(220deg);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
