@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { useUserStore } from '@/lib/stores/userStore';
@@ -223,30 +223,6 @@ const domainTagBonus: Record<string, string[]> = {
   health: ['meaning', 'impact'],
 };
 
-const tagReasons: Record<string, RoleLocale> = {
-  analysis: { ko: '분석 성향', en: 'Analytical' },
-  logic: { ko: '논리 중심', en: 'Logic-first' },
-  creativity: { ko: '창의적 발상', en: 'Creative ideas' },
-  research: { ko: '탐구 지향', en: 'Research-driven' },
-  social: { ko: '사람 중심', en: 'People-first' },
-  collaboration: { ko: '협업 선호', en: 'Collaborative' },
-  impact: { ko: '임팩트 지향', en: 'Impact-driven' },
-  meaning: { ko: '의미 추구', en: 'Meaningful work' },
-  structure: { ko: '체계적', en: 'Structured' },
-  ambiguity: { ko: '열린 문제 선호', en: 'Open-ended' },
-  growth: { ko: '성장 지향', en: 'Growth-minded' },
-  mastery: { ko: '전문성 집중', en: 'Mastery-focused' },
-  practice: { ko: '실습 선호', en: 'Hands-on' },
-  skill: { ko: '기술형', en: 'Skill-building' },
-  'social-value': { ko: '사회적 가치', en: 'Social value' },
-  fairness: { ko: '공정성 민감', en: 'Fairness-driven' },
-  stability: { ko: '안정 지향', en: 'Stability' },
-  change: { ko: '변화 수용', en: 'Change-friendly' },
-  recognition: { ko: '인정 동기', en: 'Recognition-driven' },
-  curiosity: { ko: '호기심', en: 'Curiosity' },
-  discussion: { ko: '대화 중심', en: 'Discussion' },
-  support: { ko: '지원 요청', en: 'Support-seeking' },
-};
 
 export default function Stage0ResultPage() {
   const router = useRouter();
@@ -254,6 +230,7 @@ export default function Stage0ResultPage() {
   const { userId, completeStage } = useUserStore();
   const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
   const answers = (profile.questionnaireAnswers as Record<string, string[]>) ?? {};
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
 
   const normalizedAnswers = useMemo(() => {
     const result: Record<string, string> = {};
@@ -285,6 +262,11 @@ export default function Stage0ResultPage() {
       .slice(0, 5)
       .map(([tag]) => tag);
   }, [tagCounts]);
+
+  const topSignalDetails = useMemo(
+    () => topSignals.map((tag) => ({ tag, count: tagCounts[tag] ?? 0 })),
+    [topSignals, tagCounts],
+  );
 
   const recommendedRoles = useMemo(() => {
     const uniqueTags = Array.from(new Set(Object.values(normalizedAnswers)));
@@ -361,20 +343,249 @@ export default function Stage0ResultPage() {
     return null;
   }
 
-  const headingText =
-    language === 'ko' ? 'Stage 0 진단 결과' : 'Stage 0 Diagnostic Summary';
-  const subtitleText =
+  const primaryTag = topSignals[0];
+  const secondaryTag = topSignals[1];
+  const primaryLabel = primaryTag ? tagLabels[primaryTag]?.[language as Language] : null;
+  const secondaryLabel = secondaryTag ? tagLabels[secondaryTag]?.[language as Language] : null;
+
+  const personaLabel = language === 'ko' ? '?? ????' : 'Student persona';
+  const personaAdjectives: Record<string, RoleLocale> = {
+    curiosity: { ko: '??? ??', en: 'Curious' },
+    creativity: { ko: '????', en: 'Creative' },
+    analysis: { ko: '????', en: 'Analytical' },
+    social: { ko: '????', en: 'Empathic' },
+    structure: { ko: '????', en: 'Structured' },
+    impact: { ko: '??? ????', en: 'Impact-driven' },
+    meaning: { ko: '??? ??', en: 'Purposeful' },
+    growth: { ko: '?? ????', en: 'Growth-minded' },
+    mastery: { ko: '??? ????', en: 'Mastery-focused' },
+    autonomy: { ko: '????', en: 'Independent' },
+    collaboration: { ko: '????', en: 'Collaborative' },
+    research: { ko: '????', en: 'Investigative' },
+    discussion: { ko: '??? ???', en: 'Communicative' },
+    practice: { ko: '???', en: 'Hands-on' },
+    logic: { ko: '????', en: 'Logical' },
+    intuition: { ko: '????', en: 'Intuitive' },
+    ambiguity: { ko: '?? ????', en: 'Open-ended' },
+    stability: { ko: '????', en: 'Steady' },
+    change: { ko: '??? ??', en: 'Change-ready' },
+  };
+  const personaNouns: Record<string, RoleLocale> = {
+    curiosity: { ko: '???', en: 'Explorer' },
+    creativity: { ko: '?????', en: 'Creator' },
+    analysis: { ko: '???', en: 'Analyst' },
+    social: { ko: '???', en: 'Connector' },
+    structure: { ko: '???', en: 'Strategist' },
+    impact: { ko: '???', en: 'Changer' },
+    meaning: { ko: '???', en: 'Seeker' },
+    growth: { ko: '??', en: 'Builder' },
+    mastery: { ko: '???', en: 'Specialist' },
+    autonomy: { ko: '?????', en: 'Navigator' },
+    collaboration: { ko: '????', en: 'Teammate' },
+    research: { ko: '???', en: 'Researcher' },
+    discussion: { ko: '??????', en: 'Communicator' },
+    practice: { ko: '???', en: 'Maker' },
+    logic: { ko: '???', en: 'Designer' },
+    intuition: { ko: '????', en: 'Visionary' },
+    ambiguity: { ko: '???', en: 'Pioneer' },
+    stability: { ko: '???', en: 'Stabilizer' },
+    change: { ko: '???', en: 'Catalyst' },
+  };
+  const personaTitle =
+    [primaryTag, secondaryTag]
+      .map((tag, index) =>
+        index === 0
+          ? personaAdjectives[tag ?? '']?.[language as Language]
+          : personaNouns[tag ?? '']?.[language as Language],
+      )
+      .filter(Boolean)
+      .join(' ') || (language === 'ko' ? '?? ?? ????' : 'Emerging persona');
+  const personaSummary =
+    primaryLabel && secondaryLabel
+      ? language === 'ko'
+        ? `${primaryLabel}?(?) ???? ${secondaryLabel} ??? ?? ????.`
+        : `You lead with ${primaryLabel} and lean on ${secondaryLabel} when making choices.`
+      : language === 'ko'
+        ? '?? ??? ???? ????? ??? ?????.'
+        : 'A quick snapshot of your learning and career tendencies.';
+  const personaStyleMap: Record<
+    string,
+    { card: string; aura: string; ring: string; accent: string }
+  > = {
+    curiosity: {
+      card: 'from-amber-300/80 via-white/50 to-rose-300/80',
+      aura: 'from-amber-200/70 via-rose-200/60 to-white/40',
+      ring: 'ring-amber-200/70',
+      accent: 'text-amber-600',
+    },
+    creativity: {
+      card: 'from-rose-300/80 via-white/50 to-orange-300/80',
+      aura: 'from-rose-200/70 via-orange-200/60 to-white/40',
+      ring: 'ring-rose-200/70',
+      accent: 'text-rose-600',
+    },
+    analysis: {
+      card: 'from-slate-300/80 via-white/50 to-sky-300/80',
+      aura: 'from-slate-200/70 via-sky-200/60 to-white/40',
+      ring: 'ring-slate-200/70',
+      accent: 'text-slate-600',
+    },
+    social: {
+      card: 'from-emerald-300/80 via-white/50 to-teal-300/80',
+      aura: 'from-emerald-200/70 via-teal-200/60 to-white/40',
+      ring: 'ring-emerald-200/70',
+      accent: 'text-emerald-600',
+    },
+    structure: {
+      card: 'from-indigo-300/80 via-white/50 to-sky-300/80',
+      aura: 'from-indigo-200/70 via-sky-200/60 to-white/40',
+      ring: 'ring-indigo-200/70',
+      accent: 'text-indigo-600',
+    },
+    impact: {
+      card: 'from-lime-300/80 via-white/50 to-emerald-300/80',
+      aura: 'from-lime-200/70 via-emerald-200/60 to-white/40',
+      ring: 'ring-lime-200/70',
+      accent: 'text-lime-600',
+    },
+    meaning: {
+      card: 'from-violet-300/80 via-white/50 to-fuchsia-300/80',
+      aura: 'from-violet-200/70 via-fuchsia-200/60 to-white/40',
+      ring: 'ring-violet-200/70',
+      accent: 'text-violet-600',
+    },
+    growth: {
+      card: 'from-teal-300/80 via-white/50 to-cyan-300/80',
+      aura: 'from-teal-200/70 via-cyan-200/60 to-white/40',
+      ring: 'ring-teal-200/70',
+      accent: 'text-teal-600',
+    },
+    mastery: {
+      card: 'from-blue-300/80 via-white/50 to-indigo-300/80',
+      aura: 'from-blue-200/70 via-indigo-200/60 to-white/40',
+      ring: 'ring-blue-200/70',
+      accent: 'text-blue-600',
+    },
+    autonomy: {
+      card: 'from-sky-300/80 via-white/50 to-emerald-300/80',
+      aura: 'from-sky-200/70 via-emerald-200/60 to-white/40',
+      ring: 'ring-sky-200/70',
+      accent: 'text-sky-600',
+    },
+    collaboration: {
+      card: 'from-emerald-300/80 via-white/50 to-lime-300/80',
+      aura: 'from-emerald-200/70 via-lime-200/60 to-white/40',
+      ring: 'ring-emerald-200/70',
+      accent: 'text-emerald-600',
+    },
+    research: {
+      card: 'from-cyan-300/80 via-white/50 to-sky-300/80',
+      aura: 'from-cyan-200/70 via-sky-200/60 to-white/40',
+      ring: 'ring-cyan-200/70',
+      accent: 'text-cyan-600',
+    },
+    discussion: {
+      card: 'from-fuchsia-300/80 via-white/50 to-rose-300/80',
+      aura: 'from-fuchsia-200/70 via-rose-200/60 to-white/40',
+      ring: 'ring-fuchsia-200/70',
+      accent: 'text-fuchsia-600',
+    },
+    practice: {
+      card: 'from-orange-300/80 via-white/50 to-amber-300/80',
+      aura: 'from-orange-200/70 via-amber-200/60 to-white/40',
+      ring: 'ring-orange-200/70',
+      accent: 'text-orange-600',
+    },
+    logic: {
+      card: 'from-slate-300/80 via-white/50 to-indigo-300/80',
+      aura: 'from-slate-200/70 via-indigo-200/60 to-white/40',
+      ring: 'ring-slate-200/70',
+      accent: 'text-slate-600',
+    },
+    intuition: {
+      card: 'from-rose-300/80 via-white/50 to-fuchsia-300/80',
+      aura: 'from-rose-200/70 via-fuchsia-200/60 to-white/40',
+      ring: 'ring-rose-200/70',
+      accent: 'text-rose-600',
+    },
+    ambiguity: {
+      card: 'from-amber-300/80 via-white/50 to-lime-300/80',
+      aura: 'from-amber-200/70 via-lime-200/60 to-white/40',
+      ring: 'ring-amber-200/70',
+      accent: 'text-amber-600',
+    },
+    stability: {
+      card: 'from-slate-300/80 via-white/50 to-stone-300/80',
+      aura: 'from-slate-200/70 via-stone-200/60 to-white/40',
+      ring: 'ring-stone-200/70',
+      accent: 'text-stone-600',
+    },
+    change: {
+      card: 'from-emerald-300/80 via-white/50 to-amber-300/80',
+      aura: 'from-emerald-200/70 via-amber-200/60 to-white/40',
+      ring: 'ring-emerald-200/70',
+      accent: 'text-emerald-600',
+    },
+    default: {
+      card: 'from-emerald-300/80 via-white/50 to-sky-300/80',
+      aura: 'from-emerald-200/70 via-sky-200/60 to-white/40',
+      ring: 'ring-emerald-200/70',
+      accent: 'text-emerald-600',
+    },
+  };
+  const personaStyle =
+    personaStyleMap[primaryTag ?? ''] ?? personaStyleMap.default;
+  const personaEmojiMap: Record<string, string> = {
+    curiosity: '🧭',
+    creativity: '🎨',
+    analysis: '🧠',
+    social: '🤝',
+    structure: '📏',
+    impact: '⚡',
+    meaning: '✨',
+    growth: '🌱',
+    mastery: '🏅',
+    autonomy: '🧭',
+    collaboration: '🧩',
+    research: '🔍',
+    discussion: '💬',
+    practice: '🛠️',
+    logic: '🧩',
+    intuition: '🔮',
+    ambiguity: '🌫️',
+    stability: '🛡️',
+    change: '⚡',
+  };
+  const personaEmoji = personaEmojiMap[primaryTag ?? ''] ?? '✨';
+
+  const signalLabel = language === 'ko' ? '???? ??' : 'Signature signals';
+  const signalRankLabel = language === 'ko' ? '??' : 'Signal';
+  const picksLabel = language === 'ko' ? '??' : 'picks';
+  const personaHighlightsLabel = language === 'ko' ? '??? ?? ??' : 'At-a-glance cues';
+  const nextTitle = language === 'ko' ? '?? ??' : 'Next steps';
+  const nextHint =
     language === 'ko'
-      ? '당신의 선택을 바탕으로 핵심 성향과 Stage 1 추천 역할을 정리했어요.'
-      : 'Based on your answers, here is a clear picture of your current profile and Stage 1 role picks.';
-  const signalLabel = language === 'ko' ? '핵심 신호' : 'Key signals';
-  const recommendationTitle = language === 'ko' ? 'Stage 1 추천 역할 카드' : 'Recommended Stage 1 role cards';
-  const recommendationHint =
+      ? '??? ??? ? ????? ??? Stage 1? ?????.'
+      : 'Review your signals, then return to the dashboard to start Stage 1.';
+  const insightsTitle = language === 'ko' ? '?? ????' : 'Detailed insights';
+  const insightsHint =
     language === 'ko'
-      ? 'Stage 1에서 아래 5개의 역할 카드부터 시작해 보세요.'
-      : 'Start Stage 1 with these five role cards.';
+      ? '? ?? ??? ??? ?? ??? ?????.'
+      : 'Expand to see the detailed interpretation of each question.';
+  const insightsToggleLabel = insightsExpanded
+    ? language === 'ko'
+      ? '??'
+      : 'Collapse'
+    : language === 'ko'
+      ? '???'
+      : 'Expand';
   const finishLabel =
     language === 'ko' ? '대시보드로 이동' : 'Return to dashboard';
+  const personaHighlights = [
+    { label: language === 'ko' ? '???' : 'Energy', insight: getInsight('Q1')?.body },
+    { label: language === 'ko' ? '??' : 'Flow', insight: getInsight('Q4')?.body },
+    { label: language === 'ko' ? '??' : 'Learning', insight: getInsight('Q8')?.body },
+  ].filter((item) => item.insight);
 
   return (
     <div
@@ -384,108 +595,164 @@ export default function Stage0ResultPage() {
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none soft-glow" />
-          <div className="relative space-y-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">{headingText}</p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{subtitleText}</h1>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <span className="text-xs font-semibold text-slate-500">{signalLabel}</span>
-              {topSignals.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 rounded-full text-xs bg-white/80 border border-white/70 text-slate-700"
-                >
-                  {tagLabels[tag]?.[language as Language] ?? tag}
-                </span>
-              ))}
+          <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+            <div className={`rounded-3xl border border-white/70 bg-gradient-to-br ${personaStyle.card} p-6 sm:p-7 shadow-[0_18px_45px_-30px_rgba(15,23,42,0.35)]`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <p className={`text-xs uppercase tracking-wide ${personaStyle.accent}`}>{personaLabel}</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{personaTitle}</h1>
+                  <p className="text-sm text-slate-600">{personaSummary}</p>
+                </div>
+                <div className="flex flex-col items-end gap-3">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+                    <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${personaStyle.aura} blur-2xl`} />
+                    <div
+                      className={`relative flex h-full w-full items-center justify-center rounded-full border border-white/80 bg-white/80 ring-1 ${personaStyle.ring}`}
+                    >
+                      <img
+                        src="/asset/Mirae_Icon1.png"
+                        alt="Persona icon"
+                        className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+                      />
+                    </div>
+                    <div className="pointer-events-none absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-base shadow-sm">
+                      {personaEmoji}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/80 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                    Stage 0
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {topSignals.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 rounded-full text-xs bg-white/90 border border-white/70 text-slate-700"
+                  >
+                    {tagLabels[tag]?.[language as Language] ?? tag}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-5">
+                <p className="text-xs uppercase tracking-wide text-slate-500">{personaHighlightsLabel}</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  {personaHighlights.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-2xl border border-white/70 bg-white/90 p-3 shadow-sm"
+                    >
+                      <p className="text-xs uppercase tracking-wide text-slate-500">{item.label}</p>
+                      <p className="text-sm text-slate-700 mt-2 leading-relaxed">{item.insight}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/70 bg-white/80 p-5 sm:p-6">
+              <p className="text-xs uppercase tracking-wide text-slate-500">{signalLabel}</p>
+              <div className="mt-4 space-y-3">
+                {topSignalDetails.map((signal, index) => {
+                  const label = tagLabels[signal.tag]?.[language as Language] ?? signal.tag;
+                  const width = Math.min(100, 40 + signal.count * 12);
+
+                  return (
+                    <div
+                      key={signal.tag}
+                      className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span className="uppercase tracking-wide">
+                          {signalRankLabel} {index + 1}
+                        </span>
+                        <span>
+                          {signal.count} {picksLabel}
+                        </span>
+                      </div>
+                      <p className="text-base font-semibold text-slate-800 mt-1">{label}</p>
+                      <div className="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-emerald-400/80"
+                          style={{ width: `${width}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
-            {sectionGroups.map((group) => (
-              <div key={group.title.en} className="glass-card rounded-3xl p-6 sm:p-7 relative">
-                <div className="absolute inset-0 pointer-events-none soft-glow" />
-                <div className="relative space-y-4">
-                  <h2 className="text-lg font-semibold text-slate-800">
-                    {group.title[language as Language]}
-                  </h2>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {group.ids.map((id) => {
-                      const insight = getInsight(id);
-                      if (!insight) return null;
-                      return (
-                        <div
-                          key={id}
-                          className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm"
-                        >
-                          <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">
-                            {insight.title}
-                          </p>
-                          <p className="text-sm text-slate-700 leading-relaxed">{insight.body}</p>
-                        </div>
-                      );
-                    })}
+            <div className="glass-card rounded-3xl p-6 sm:p-7 relative">
+              <div className="absolute inset-0 pointer-events-none soft-glow" />
+              <div className="relative space-y-6">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-800">{insightsTitle}</h2>
+                    <p className="text-sm text-slate-600">{insightsHint}</p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setInsightsExpanded((prev) => !prev)}
+                    className="rounded-full border border-white/70 bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                  >
+                    {insightsToggleLabel}
+                  </button>
                 </div>
+                {insightsExpanded && (
+                  <div className="space-y-6">
+                    {sectionGroups.map((group) => (
+                      <div key={group.title.en} className="space-y-4">
+                        <h2 className="text-lg font-semibold text-slate-800">
+                          {group.title[language as Language]}
+                        </h2>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {group.ids.map((id) => {
+                            const insight = getInsight(id);
+                            if (!insight) return null;
+                            return (
+                              <div
+                                key={id}
+                                className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm"
+                              >
+                                <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                                  {insight.title}
+                                </p>
+                                <p className="text-sm text-slate-700 leading-relaxed">
+                                  {insight.body}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+
               </div>
-            ))}
+            </div>
           </div>
 
           <div className="space-y-6">
             <div className="glass-card rounded-3xl p-6 sm:p-7 relative">
               <div className="absolute inset-0 pointer-events-none soft-glow" />
-              <div className="relative space-y-4">
-                <h2 className="text-lg font-semibold text-slate-800">{recommendationTitle}</h2>
-                <p className="text-sm text-slate-600">{recommendationHint}</p>
-                <div className="space-y-3">
-                  {recommendedRoles.map((entry) => {
-                    const role = entry.role;
-                    const roleTitle = role.title[language as Language];
-                    const roleTagline = role.tagline[language as Language];
-                    const domain = role.domain[language as Language];
-                    const reasonTags = entry.matchedTags.length
-                      ? entry.matchedTags
-                      : topSignals.slice(0, 2);
-
-                    return (
-                      <div
-                        key={role.id}
-                        className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-xs uppercase tracking-wide text-slate-500">{domain}</p>
-                            <p className="text-base font-semibold text-slate-800">{roleTitle}</p>
-                          </div>
-                          <span className="text-xs font-semibold text-emerald-600 bg-emerald-50/80 px-3 py-1 rounded-full">
-                            Match
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-600 mt-2">{roleTagline}</p>
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {reasonTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-2.5 py-1 rounded-full text-xs bg-white/80 border border-white/70 text-slate-700"
-                            >
-                              {tagReasons[tag]?.[language as Language] ?? tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="relative space-y-3">
+                <h2 className="text-lg font-semibold text-slate-800">{nextTitle}</h2>
+                <p className="text-sm text-slate-600">{nextHint}</p>
+                <button
+                  onClick={handleFinish}
+                  className="soft-button w-full py-3 rounded-full text-sm sm:text-base font-semibold mt-2"
+                >
+                  {finishLabel}
+                </button>
               </div>
             </div>
-
-            <button
-              onClick={handleFinish}
-              className="soft-button w-full py-3 rounded-full text-sm sm:text-base font-semibold"
-            >
-              {finishLabel}
-            </button>
           </div>
         </div>
       </div>
