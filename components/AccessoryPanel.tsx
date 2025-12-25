@@ -64,6 +64,11 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
     onAccessoryChange(newEquipped);
   };
 
+  const handleResetAll = () => {
+    // Remove all equipped accessories
+    onAccessoryChange({});
+  };
+
   const unlockedCount = ACCESSORIES.filter((acc) =>
     isAccessoryUnlocked(acc, cardCount, completedStages)
   ).length;
@@ -231,9 +236,19 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
 
               {/* Footer */}
               <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between items-center">
-                <p className="text-xs text-slate-500">
-                  {unlockedCount} of {ACCESSORIES.length} unlocked
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-xs text-slate-500">
+                    {unlockedCount} of {ACCESSORIES.length} unlocked
+                  </p>
+                  {Object.keys(equippedAccessories).length > 0 && (
+                    <button
+                      onClick={handleResetAll}
+                      className="px-4 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100 transition-colors"
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
                 <button
                   onClick={() => externalOnClose ? externalOnClose() : setInternalIsOpen(false)}
                   className="px-6 py-2 rounded-full bg-slate-800 text-white font-medium hover:bg-slate-700 transition"
