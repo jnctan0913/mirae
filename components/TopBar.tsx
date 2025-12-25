@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
-import { ensureUserProfile, getUserProfile } from '@/lib/userProfile';
+import { ensureUserProfile, getUserProfile, resetUserProfile } from '@/lib/userProfile';
 
 export default function TopBar() {
   const router = useRouter();
@@ -76,6 +76,13 @@ export default function TopBar() {
     reset();
     router.push('/login');
     router.refresh();
+  };
+
+  const handleResetProfile = () => {
+    resetUserProfile();
+    reset();
+    handleCloseSettings();
+    router.replace('/onboarding');
   };
 
   const handleCloseSettings = () => {
@@ -171,6 +178,13 @@ export default function TopBar() {
                   <span className="rounded-full bg-slate-50 px-3 py-1">{t('settingsStatus')}</span>
                 </div>
               </div>
+
+              <button
+                onClick={handleResetProfile}
+                className="w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition"
+              >
+                Reset profile data
+              </button>
 
               <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm flex items-center justify-between">
                 <div>

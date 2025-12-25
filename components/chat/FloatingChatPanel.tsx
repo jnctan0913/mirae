@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { X, Send, Sparkles } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
@@ -46,15 +46,20 @@ export const FloatingChatPanel: React.FC<FloatingChatPanelProps> = ({
     }
   }, [isOpen]);
 
+  const welcomeMessage = useMemo(() => t('chatWelcome'), [language, t]);
+
   // Update welcome message when language changes
   useEffect(() => {
     setMessages((prev) => {
       if (prev.length === 1 && prev[0].role === 'assistant') {
-        return [{ ...prev[0], content: t('chatWelcome') }];
+        if (prev[0].content === welcomeMessage) {
+          return prev;
+        }
+        return [{ ...prev[0], content: welcomeMessage }];
       }
       return prev;
     });
-  }, [language, t]);
+  }, [welcomeMessage]);
 
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;

@@ -5,7 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
-import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
+import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 import rolesData from '@/lib/data/roles.json';
 
 type RoleLocale = { en: string; ko: string };
@@ -222,6 +222,84 @@ export default function Stage1Page() {
     }, 650);
   };
 
+  const commitStage1Results = (liked: string[]) => {
+    if (liked.length === 0) return;
+    const profile = getUserProfile();
+    const existingCards = (profile.collection?.cards as Record<string, unknown>[]) ?? [];
+    const existingIds = new Set(
+      existingCards.map((card) => (card as { id?: string }).id).filter(Boolean)
+    );
+    const nextCards = [
+      ...existingCards,
+      ...liked
+        .filter((roleId) => !existingIds.has(`stage1-role-${roleId}`))
+        .map((roleId) => {
+          const role = roles.find((item) => item.id === roleId);
+          const title = role ? role.title.en : roleId;
+          const description = role ? role.tagline.en : 'Role Roulette favorite';
+          return {
+            id: `stage1-role-${roleId}`,
+            stage: 'C',
+            type: 'CuriosityThread',
+            title,
+            description,
+            rarity: 'Common',
+            unlocked: true,
+            tags: [roleId],
+            createdFrom: 'Stage 1: Role Roulette',
+          };
+        }),
+    ];
+
+    const existingLogs = profile.activityLogs ?? [];
+    const hasStage1Log = existingLogs.some((log) => log.id === 'stage1-complete');
+    const today = new Date().toISOString().slice(0, 10);
+    const nextLogs = hasStage1Log
+      ? existingLogs
+      : [
+          ...existingLogs,
+          {
+            id: 'stage1-complete',
+            date: today,
+            title: 'Completed Stage 1 role roulette',
+            scopeStage: 'C',
+            activityType: 'MiraeActivity',
+            source: 'Mirae',
+            shortReflection: liked.slice(0, 3).join(', '),
+          },
+        ];
+
+    const nextReport = profile.report ?? {};
+    const nextGrowth =
+      nextReport.growthText && nextReport.growthText.length > 0
+        ? nextReport.growthText
+        : liked.length > 0
+          ? `Role Roulette favorites: ${liked.slice(0, 3).join(', ')}.`
+          : '';
+
+    updateUserProfile({
+      likedRoles: liked,
+      collection: {
+        ...profile.collection,
+        cards: nextCards,
+      },
+      customCardTags: {
+        ...profile.customCardTags,
+        ...Object.fromEntries(liked.map((roleId) => [`stage1-role-${roleId}`, [roleId]])),
+      },
+      activityLogs: nextLogs,
+      report: {
+        ...nextReport,
+        growthText: nextGrowth,
+      },
+      reportSources: {
+        ...profile.reportSources,
+        growthText: profile.reportSources?.growthText ?? 'stage1',
+      },
+    });
+    updateProfileAnalytics(nextLogs);
+  };
+
   const handleSwipe = (direction: 'left' | 'right', withShimmer = true) => {
     if (isSettling) return;
     if (isFlipped) return;
@@ -244,15 +322,17 @@ export default function Stage1Page() {
         roleSwipes: nextSwipes,
         likedRoles: Array.from(new Set(liked)),
       });
+      return Array.from(new Set(liked));
     };
 
     const finalizeSwipe = () => {
-      persistSwipe();
+      const liked = persistSwipe();
 
       if (currentIndex < rolesToShow.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      completeStage(1);
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        completeStage(1);
+        commitStage1Results(liked);
         router.push('/stage1/summary');
       }
 

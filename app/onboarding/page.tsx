@@ -9,11 +9,11 @@ import Image from 'next/image';
 import { Sprout } from 'lucide-react';
 import { SmartOnboardingChat } from '@/components/onboarding/SmartOnboardingChat';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
-import { getUserProfile, updateProfileFromOnboarding, updateUserProfile } from '@/lib/userProfile';
+import { getUserProfile, resetUserProfile, updateProfileFromOnboarding, updateUserProfile } from '@/lib/userProfile';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { setUserId } = useUserStore();
+  const { reset, setUserId } = useUserStore();
   const { t } = useI18n();
   const { state, advancePhase, setStudentContextData, setKeywords } = useOnboarding();
   const [userName, setUserName] = useState('');
@@ -31,9 +31,15 @@ export default function OnboardingPage() {
     if (typeof window !== 'undefined') {
       // Allow ?reset=true to view onboarding again
       const urlParams = new URLSearchParams(window.location.search);
-      const reset = urlParams.get('reset');
-      if (reset === 'true') {
-        updateUserProfile({ onboardingCompleted: false });
+      const resetParam = urlParams.get('reset');
+      if (resetParam === 'true' || resetParam === 'full') {
+        if (resetParam === 'full') {
+          resetUserProfile();
+          reset();
+        } else {
+          updateUserProfile({ onboardingCompleted: false });
+        }
+        router.replace('/onboarding');
         return;
       }
       if (profile.onboardingCompleted) {
@@ -47,6 +53,62 @@ export default function OnboardingPage() {
     if (!user) {
       router.push('/login');
       return;
+    }
+    const profile = getUserProfile();
+    const context = profile.onboarding ?? {};
+    const hasContextCard = (
+      profile.collection?.cards as Record<string, unknown>[] | undefined
+    )?.some(
+      (card) => (card as { id?: string }).id === 'onboarding-context'
+    );
+    if (
+      !hasContextCard &&
+      (context.yearLevel || context.currentSemester || context.courseSelectionStatus)
+    ) {
+      const yearLabel =
+        context.yearLevel === 'year1'
+          ? 'Year 1'
+          : context.yearLevel === 'year2'
+            ? 'Year 2'
+            : context.yearLevel === 'year3'
+              ? 'Year 3'
+              : '';
+      const semLabel =
+        context.currentSemester === 'sem2'
+          ? 'Semester 2'
+          : context.currentSemester === 'sem1'
+            ? 'Semester 1'
+            : '';
+      const statusLabel =
+        context.courseSelectionStatus === 'picked'
+          ? 'Courses picked'
+          : context.courseSelectionStatus === 'deciding'
+            ? 'Still deciding'
+            : context.courseSelectionStatus === 'reconsidering'
+              ? 'Reconsidering choices'
+              : '';
+      const descriptionParts = [yearLabel, semLabel, statusLabel, context.currentFeeling].filter(Boolean);
+      const contextCard = {
+        id: 'onboarding-context',
+        stage: 'S',
+        type: 'ValueSignal',
+        title: 'Current context',
+        description: descriptionParts.join(' · '),
+        rarity: 'Common',
+        unlocked: true,
+        tags: [],
+        createdFrom: 'Onboarding',
+      };
+      const nextCards = [
+        ...(((profile.collection?.cards as Record<string, unknown>[]) ?? [])),
+        contextCard,
+      ];
+      updateUserProfile({
+        collection: {
+          ...profile.collection,
+          cards: nextCards,
+        },
+      });
     }
     updateUserProfile({ onboardingCompleted: true });
     router.push('/dashboard');

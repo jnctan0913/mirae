@@ -66,41 +66,15 @@ const activityTypeLabels: Record<ActivityLog['activityType'], string> = {
   ExternalWork: 'External work',
 };
 
-const buildExecutiveReflection = (logs: ActivityLog[]) => {
-  if (logs.length === 0) {
-    return {
-      focus: 'Your journey will show up here once you begin logging activities.',
-      change: 'As activities collect, Mirae will surface what is consistent and what is evolving.',
-      surprise: 'Small steps over time create the clearest story.',
-    };
-  }
-
-  const typeCounts = logs.reduce<Record<string, number>>((acc, log) => {
-    acc[log.activityType] = (acc[log.activityType] || 0) + 1;
-    return acc;
-  }, {});
-
-  const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] as ActivityLog['activityType'];
-  const focus = topType
-    ? `Your archive leans toward ${activityTypeLabels[topType].toLowerCase()}, showing steady attention in that space.`
-    : 'Your archive is still emerging, but patterns are beginning to appear.';
-
-  const sorted = logs.slice().sort((a, b) => a.date.localeCompare(b.date));
-  const earlyStages = sorted.slice(0, 3).map((log) => log.scopeStage);
-  const laterStages = sorted.slice(-3).map((log) => log.scopeStage);
-  const change = earlyStages.join('') !== laterStages.join('')
-    ? 'Over time, your focus shifts and expands, suggesting you explore broadly before narrowing.'
-    : 'Your focus stays steady, showing consistent engagement with your core interests.';
-
-  return {
-    focus,
-    change,
-    surprise: 'Mirae often notices quieter progress, like reflection notes and revisits that you might not highlight yourself.',
-  };
-};
-
-const buildObservedTendencies = (logs: ActivityLog[], cards: IdentityCardSummary[]) => {
+const buildObservedTendencies = (
+  logs: ActivityLog[],
+  cards: IdentityCardSummary[],
+  profileInsights: string[] = []
+) => {
   const tendencies = new Set<string>();
+  profileInsights.forEach((insight) => {
+    tendencies.add(insight);
+  });
   const unlockedStrengths = cards.filter((card) => card.unlocked && (card.type === 'StrengthPattern' || card.type === 'ThenVsNow'));
   if (unlockedStrengths.length > 0) {
     tendencies.add('Often reflects on how strengths show up in different settings.');
@@ -223,20 +197,6 @@ const buildProofSpacing = (experiences: ReturnType<typeof buildExperiences>) => 
   });
 };
 
-const buildDirectionRationale = (logs: ActivityLog[]) => {
-  const hasProject = logs.some((log) => log.activityType === 'Project' || log.activityType === 'Club');
-  const hasStudy = logs.some((log) => log.activityType === 'Study');
-  return {
-    environment: hasProject
-      ? 'Prefers environments where learning is applied through projects and collaborative work.'
-      : 'Prefers environments that balance structured guidance with room for reflection.',
-    explore: hasStudy
-      ? 'Wants to deepen foundations while connecting them to real-world questions.'
-      : 'Wants to keep exploring before committing to a narrow specialization.',
-    flexibility: 'Values programs that allow cross-disciplinary exploration without pressure to specialize too early.',
-  };
-};
-
 const EditableBlock = ({
   label,
   value,
@@ -300,9 +260,26 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
   const proofSpacing = useMemo(() => buildProofSpacing(experiences), [experiences]);
   const radarMetrics = useMemo(() => buildRadarMetrics(logs), [logs]);
   const dateBounds = useMemo(() => getDateBounds(logs), [logs]);
-  const observedTendencies = useMemo(() => buildObservedTendencies(logs, cards), [logs, cards]);
-  const rationale = useMemo(() => buildDirectionRationale(logs), [logs]);
-  const executive = useMemo(() => buildExecutiveReflection(logs), [logs]);
+  const profile = getUserProfile();
+  const stage0Insights = (() => {
+    const groups = profile.stage0Profile?.insightGroups;
+    const grouped = [
+      ...(groups?.curiosity ?? []),
+      ...(groups?.values ?? []),
+      ...(groups?.learning ?? []),
+      ...(groups?.currentState ?? []),
+    ].filter(Boolean);
+    if (grouped.length > 0) return grouped;
+    const raw = profile.stage0Profile?.insights
+      ? Object.values(profile.stage0Profile.insights).map((insight) => insight.body)
+      : [];
+    return raw;
+  })();
+  const observedTendencies = useMemo(
+    () => buildObservedTendencies(logs, cards, stage0Insights),
+    [logs, cards, stage0Insights]
+  );
+  const programFit = profile.programFit;
 
   // Load equipped accessories from profile
   const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
@@ -327,19 +304,31 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
     }
   }, []);
 
-  const profile = getUserProfile();
   const [executiveText, setExecutiveText] = useState(
-    profile.report?.executiveText ??
-      `${executive.focus}\n\n${executive.change}\n\n${executive.surprise}`
+    profile.report?.executiveText ?? ''
   );
   const [growthText, setGrowthText] = useState(
-    profile.report?.growthText ??
-      'Early activities show curiosity and experimenting. Later entries show more clarity in direction and confidence in choices.'
+    profile.report?.growthText ?? ''
   );
   const [directionText, setDirectionText] = useState(
-    profile.report?.directionText ??
-      `Learning environment: ${rationale.environment}\n\nDepth to explore: ${rationale.explore}\n\nFlexibility: ${rationale.flexibility}`
+    profile.report?.directionText ?? ''
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleProfileUpdate = () => {
+      const latest = getUserProfile();
+      setExecutiveText(latest.report?.executiveText ?? '');
+      setGrowthText(latest.report?.growthText ?? '');
+      setDirectionText(latest.report?.directionText ?? '');
+      if (latest.avatar?.equippedAccessories) {
+        setEquippedAccessories(latest.avatar.equippedAccessories);
+      }
+    };
+
+    window.addEventListener('miraeProfileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('miraeProfileUpdated', handleProfileUpdate);
+  }, [directionText, executiveText, growthText]);
 
   const handleExecutiveChange = (value: string) => {
     setExecutiveText(value);
@@ -764,14 +753,22 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
                 <p className="text-sm text-slate-400">Add proof moments to visualize spacing.</p>
               )}
             </div>
-            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-              <p className="text-sm font-semibold text-slate-700 mb-2">Program fit</p>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li>Learning environment: {rationale.environment}</li>
-                <li>Depth to explore: {rationale.explore}</li>
-                <li>Flexibility: {rationale.flexibility}</li>
-              </ul>
-            </div>
+            {programFit && (programFit.environment || programFit.explore || programFit.flexibility) && (
+              <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Program fit</p>
+                <ul className="space-y-2 text-sm text-slate-600">
+                  {programFit.environment && (
+                    <li>Learning environment: {programFit.environment}</li>
+                  )}
+                  {programFit.explore && (
+                    <li>Depth to explore: {programFit.explore}</li>
+                  )}
+                  {programFit.flexibility && (
+                    <li>Flexibility: {programFit.flexibility}</li>
+                  )}
+                </ul>
+              </div>
+            )}
             <div className="rounded-2xl border border-white/50 bg-white/80 p-4 sm:col-span-2">
               <p className="text-sm font-semibold text-slate-700 mb-2">Key reflections</p>
               {reflections.length > 0 ? (

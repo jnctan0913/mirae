@@ -80,6 +80,13 @@ export const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ onFinish }
                 })}
               </p>
             )}
+            {state.studentData.currentSemester && (
+              <p>
+                🗓️ {t('onboardingInfoSemester', {
+                  value: state.studentData.currentSemester === 'sem2' ? '2' : '1',
+                })}
+              </p>
+            )}
             {state.studentData.courseSelectionStatus && (
               <p>
                 ✏️ {state.studentData.courseSelectionStatus === 'picked'

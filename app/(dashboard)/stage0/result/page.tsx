@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { useUserStore } from '@/lib/stores/userStore';
-import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
+import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 import questionnaire from '@/lib/data/questionnaire.json';
 import rolesData from '@/lib/data/roles.json';
 
@@ -323,7 +323,139 @@ export default function Stage0ResultPage() {
     };
   };
 
+  const insightById = useMemo(() => {
+    const map: Record<string, { title: string; body: string }> = {};
+    questionIds.forEach((id) => {
+      const insight = getInsight(id);
+      if (insight) map[id] = insight;
+    });
+    return map;
+  }, [language, normalizedAnswers]);
+
+  const getInsightBodies = (ids: string[], limit = 3) => {
+    return ids
+      .map((id) => insightById[id]?.body)
+      .filter(Boolean)
+      .slice(0, limit) as string[];
+  };
+
+  const getInsightTags = (ids: string[]) => {
+    const tags = ids
+      .map((id) => normalizedAnswers[id])
+      .filter(Boolean)
+      .map((tag) => tagLabels[tag]?.[language as Language] ?? tag);
+    return Array.from(new Set(tags));
+  };
+
   const handleFinish = () => {
+    const profileCards = (profile.collection?.cards as Record<string, unknown>[] | undefined) ?? [];
+    const existingCardIndex = profileCards.findIndex(
+      (card) => (card as { id?: string }).id === 'stage0-summary'
+    );
+    const descriptionText = primaryLabel
+      ? secondaryLabel
+        ? language === 'ko'
+          ? `${primaryLabel} 성향에 ${secondaryLabel} 신호가 더해져 있어요.`
+          : `${primaryLabel} with ${secondaryLabel} support.`
+        : language === 'ko'
+          ? `${primaryLabel} 신호가 가장 강하게 나타나요.`
+          : `${primaryLabel} stands out in your responses.`
+      : null;
+    const newCard = primaryLabel && descriptionText
+      ? {
+          id: 'stage0-summary',
+          stage: 'S',
+          type: 'StrengthPattern',
+          title: primaryLabel,
+          description: descriptionText,
+          rarity: 'Common',
+          unlocked: true,
+          tags: topSignals,
+          createdFrom: 'Stage 0: Strength Discovery',
+        }
+      : null;
+    const curiosityInsights = getInsightBodies(['Q1', 'Q4'], 2);
+    const learningInsights = getInsightBodies(['Q7', 'Q8', 'Q15'], 3);
+    const valuesInsights = getInsightBodies(['Q5', 'Q9', 'Q10', 'Q13'], 3);
+    const decisionInsights = getInsightBodies(['Q2', 'Q3', 'Q11'], 2);
+    const resilienceInsights = getInsightBodies(['Q6', 'Q12'], 2);
+    const currentStateInsights = getInsightBodies(['Q14'], 1);
+
+    const curiosityCard = curiosityInsights.length
+      ? {
+          id: 'stage0-curiosity',
+          stage: 'C',
+          type: 'CuriosityThread',
+          title: language === 'ko' ? '에너지 & 몰입' : 'Energy & Flow',
+          description: curiosityInsights.join(' · '),
+          rarity: 'Common',
+          unlocked: true,
+          tags: getInsightTags(['Q1', 'Q4']),
+          createdFrom: 'Stage 0: Motivation & Flow',
+        }
+      : null;
+    const learningCard = learningInsights.length
+      ? {
+          id: 'stage0-learning',
+          stage: 'O',
+          type: 'Experience',
+          title: language === 'ko' ? '학습 환경' : 'Learning Environment',
+          description: learningInsights.join(' · '),
+          rarity: 'Common',
+          unlocked: true,
+          tags: getInsightTags(['Q7', 'Q8', 'Q15']),
+          createdFrom: 'Stage 0: Learning Style',
+        }
+      : null;
+    const valuesCard = valuesInsights.length
+      ? {
+          id: 'stage0-values',
+          stage: 'O',
+          type: 'ValueSignal',
+          title: language === 'ko' ? '가치 신호' : 'Values Signals',
+          description: valuesInsights.join(' · '),
+          rarity: 'Common',
+          unlocked: true,
+          tags: getInsightTags(['Q5', 'Q9', 'Q10', 'Q13']),
+          createdFrom: 'Stage 0: Values & Fit',
+        }
+      : null;
+
+    const incomingCards = [newCard, curiosityCard, learningCard, valuesCard].filter(
+      Boolean
+    ) as Record<string, unknown>[];
+    const removeIds = new Set(
+      incomingCards.map((card) => (card as { id?: string }).id)
+    );
+    const nextCards = [
+      ...profileCards.filter(
+        (card, index) =>
+          index !== existingCardIndex &&
+          !removeIds.has((card as { id?: string }).id)
+      ),
+      ...incomingCards,
+    ];
+    const today = new Date().toISOString().slice(0, 10);
+    const existingLogs = profile.activityLogs ?? [];
+    const hasStage0Log = existingLogs.some((log) => log.id === 'stage0-complete');
+    const nextLogs = hasStage0Log
+      ? existingLogs
+      : [
+          ...existingLogs,
+          {
+            id: 'stage0-complete',
+            date: today,
+            title:
+              language === 'ko'
+                ? 'Stage 0 진단을 완료했어요'
+                : 'Completed Stage 0 reflection',
+            scopeStage: 'S',
+            activityType: 'MiraeActivity',
+            source: 'Mirae',
+            shortReflection: primaryLabel ?? undefined,
+          },
+        ];
+
     updateUserProfile({
       id: userId ?? 'demo-user',
       questionnaireAnswers: answers,
@@ -331,7 +463,61 @@ export default function Stage0ResultPage() {
         tagCounts,
         recommendedRoles: recommendedRoles.map((entry) => entry.role.id),
       },
+      stage0Profile: {
+        primaryTag: primaryTag ?? undefined,
+        secondaryTag: secondaryTag ?? undefined,
+        topSignals,
+        persona: {
+          label: personaTitle,
+          description: personaSummary,
+        },
+        insights: insightById,
+        insightGroups: {
+          curiosity: curiosityInsights,
+          values: valuesInsights,
+          learning: learningInsights,
+          decisions: decisionInsights,
+          resilience: resilienceInsights,
+          currentState: currentStateInsights,
+        },
+        valuesSignals: valuesInsights,
+      },
+      collection: {
+        ...profile.collection,
+        cards: nextCards,
+      },
+      customCardTags: {
+        ...profile.customCardTags,
+        ...(newCard ? { [newCard.id]: topSignals } : {}),
+        ...(curiosityCard ? { [curiosityCard.id]: curiosityCard.tags } : {}),
+        ...(learningCard ? { [learningCard.id]: learningCard.tags } : {}),
+        ...(valuesCard ? { [valuesCard.id]: valuesCard.tags } : {}),
+      },
+      activityLogs: nextLogs,
+      report: {
+        executiveText: primaryLabel
+          ? language === 'ko'
+            ? `핵심 신호: ${primaryLabel}${secondaryLabel ? `, 보조 신호: ${secondaryLabel}` : ''}`
+            : `Primary signal: ${primaryLabel}${secondaryLabel ? `, supported by ${secondaryLabel}` : ''}`
+          : '',
+        growthText: topSignals.length
+          ? language === 'ko'
+            ? `주요 신호: ${topSignals.slice(0, 3).join(', ')}`
+            : `Key signals noted: ${topSignals.slice(0, 3).join(', ')}.`
+          : '',
+        directionText: valuesInsights.length
+          ? language === 'ko'
+            ? `중요 가치: ${valuesInsights.join(' / ')}`
+            : `Values that matter: ${valuesInsights.join(' / ')}`
+          : '',
+      },
+      reportSources: {
+        executiveText: 'stage0',
+        growthText: 'stage0',
+        directionText: valuesInsights.length ? 'stage0' : '',
+      },
     });
+    updateProfileAnalytics(nextLogs);
 
     completeStage(0);
     router.push('/dashboard');

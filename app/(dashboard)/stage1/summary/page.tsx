@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
-import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
+import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 import rolesData from '@/lib/data/roles.json';
 
 type RoleLocale = { en: string; ko: string };
@@ -42,8 +42,80 @@ export default function Stage1SummaryPage() {
     const uniqueLiked = Array.from(new Set(liked));
     setLikedRoleIds(uniqueLiked);
 
-    if (uniqueLiked.length > 0 && storedLiked.length === 0) {
-      updateUserProfile({ likedRoles: uniqueLiked });
+    if (uniqueLiked.length > 0) {
+      const existingCards = (profile.collection?.cards as Record<string, unknown>[]) ?? [];
+      const existingIds = new Set(
+        existingCards.map((card) => (card as { id?: string }).id).filter(Boolean)
+      );
+      const nextCards = [
+        ...existingCards,
+        ...uniqueLiked
+          .filter((roleId) => !existingIds.has(`stage1-role-${roleId}`))
+          .map((roleId) => {
+            const role = roles.find((item) => item.id === roleId);
+            const title = role ? role.title.en : roleId;
+            const description = role ? role.tagline.en : 'Role Roulette favorite';
+            return {
+              id: `stage1-role-${roleId}`,
+              stage: 'C',
+              type: 'CuriosityThread',
+              title,
+              description,
+              rarity: 'Common',
+              unlocked: true,
+              tags: [roleId],
+              createdFrom: 'Stage 1: Role Roulette',
+            };
+          }),
+      ];
+
+      const existingLogs = profile.activityLogs ?? [];
+      const hasStage1Log = existingLogs.some((log) => log.id === 'stage1-complete');
+      const today = new Date().toISOString().slice(0, 10);
+      const nextLogs = hasStage1Log
+        ? existingLogs
+        : [
+            ...existingLogs,
+            {
+              id: 'stage1-complete',
+              date: today,
+              title: 'Completed Stage 1 role roulette',
+              scopeStage: 'C',
+              activityType: 'MiraeActivity',
+              source: 'Mirae',
+              shortReflection: uniqueLiked.slice(0, 3).join(', '),
+            },
+          ];
+
+      const nextReport = profile.report ?? {};
+      const nextGrowth =
+        nextReport.growthText && nextReport.growthText.length > 0
+          ? nextReport.growthText
+          : uniqueLiked.length > 0
+            ? `Role Roulette favorites: ${uniqueLiked.slice(0, 3).join(', ')}.`
+            : '';
+
+      updateUserProfile({
+        likedRoles: uniqueLiked,
+        collection: {
+          ...profile.collection,
+          cards: nextCards,
+        },
+        customCardTags: {
+          ...profile.customCardTags,
+          ...Object.fromEntries(uniqueLiked.map((roleId) => [`stage1-role-${roleId}`, [roleId]])),
+        },
+        activityLogs: nextLogs,
+        report: {
+          ...nextReport,
+          growthText: nextGrowth,
+        },
+        reportSources: {
+          ...profile.reportSources,
+          growthText: profile.reportSources?.growthText ?? 'stage1',
+        },
+      });
+      updateProfileAnalytics(nextLogs);
     }
   }, []);
 

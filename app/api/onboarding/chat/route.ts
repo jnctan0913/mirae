@@ -9,9 +9,10 @@ const SYSTEM_PROMPT = `You are Mirae, a warm and supportive AI assistant helping
 
 Your goal is to have a natural, friendly conversation while gathering key information:
 1. What year they are in (고1, 고2, or 고3)
-2. Their course selection status (already picked, still deciding, or reconsidering)
-3. What they're feeling about their choices (if uncertain)
-4. Their interests, strengths, or concerns
+2. Which semester they are in (1학기 or 2학기)
+3. Their course selection status (already picked, still deciding, or reconsidering)
+4. What they're feeling about their choices (if uncertain)
+5. Their interests, strengths, or concerns
 
 Guidelines:
 - Be conversational and empathetic, not interrogative
@@ -22,7 +23,7 @@ Guidelines:
 - Use casual, friendly language
 - Never mention that you're collecting data - just have a genuine conversation
 - When you have enough context, naturally transition to "I think I have a good sense of where you're at. Ready to explore together?"
-- Ask in this order unless already known: year level → course selection status → (if deciding or reconsidering) what feels hard or uncertain → broader interests/strengths
+- Ask in this order unless already known: year level → semester → course selection status → (if deciding or reconsidering) what feels hard or uncertain → broader interests/strengths
 
 Remember: This is their private space. Be supportive, non-judgmental, and encouraging.`;
 
@@ -35,6 +36,7 @@ const CONTEXT_TOOL = {
       type: 'object',
       properties: {
         yearLevel: { type: 'string', enum: ['year1', 'year2', 'year3'] },
+        currentSemester: { type: 'string', enum: ['sem1', 'sem2'] },
         courseSelectionStatus: { type: 'string', enum: ['picked', 'deciding', 'reconsidering'] },
         currentFeeling: { type: 'string' }
       }
@@ -66,11 +68,13 @@ export async function POST(req: NextRequest) {
     const { messages, context, language = 'ko' } = await req.json();
     const knownContext = {
       yearLevel: context?.yearLevel ?? null,
+      currentSemester: context?.currentSemester ?? null,
       courseSelectionStatus: context?.courseSelectionStatus ?? null,
       currentFeeling: context?.currentFeeling ?? null,
     };
     const missingContext = [
       !knownContext.yearLevel ? 'yearLevel' : null,
+      !knownContext.currentSemester ? 'currentSemester' : null,
       !knownContext.courseSelectionStatus ? 'courseSelectionStatus' : null,
       knownContext.courseSelectionStatus &&
       knownContext.courseSelectionStatus !== 'picked' &&
@@ -99,7 +103,7 @@ export async function POST(req: NextRequest) {
           role: 'system',
           content: `Known context: ${JSON.stringify(knownContext)}. Missing in order: ${missingContext.join(
             ', '
-          ) || 'none'}. Ask for the next missing item in this order: yearLevel → courseSelectionStatus → (if deciding/reconsidering) currentFeeling. If all required fields are present, shift to interests/strengths and invite them to continue to the journey.`
+          ) || 'none'}. Ask for the next missing item in this order: yearLevel → currentSemester → courseSelectionStatus → (if deciding/reconsidering) currentFeeling. If all required fields are present, shift to interests/strengths and invite them to continue to the journey.`
         },
         ...messages,
       ],

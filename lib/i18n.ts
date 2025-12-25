@@ -55,6 +55,7 @@ const messages: Record<Language, Messages> = {
     onboardingUploadCancel: '취소',
     onboardingKeywordsEmpty: '대화하면서 키워드가 생성될 거예요...',
     onboardingInfoTitle: '내 정보',
+    onboardingInfoSemester: '학기 {value}',
     // Floating Chat
     chatWelcome: '안녕! 언제든지 궁금한 점이나 고민을 물어봐. 함께 이야기하며 길을 찾아갈게.',
     chatSubtitle: '언제든 도와줄게요',
@@ -327,6 +328,7 @@ const messages: Record<Language, Messages> = {
     onboardingUploadCancel: 'Cancel',
     onboardingKeywordsEmpty: 'Keywords will appear as we chat...',
     onboardingInfoTitle: 'Your info',
+    onboardingInfoSemester: 'Semester {value}',
     // Floating Chat
     chatWelcome: 'Hi! Feel free to ask me anything or share what\'s on your mind. Let\'s explore together.',
     chatSubtitle: 'Here to help anytime',

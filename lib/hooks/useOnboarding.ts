@@ -9,6 +9,7 @@ export function useOnboarding() {
     currentPhase: 'welcome',
     studentData: {
       yearLevel: null,
+      currentSemester: null,
       courseSelectionStatus: null,
       currentFeeling: null
     },

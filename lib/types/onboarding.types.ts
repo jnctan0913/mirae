@@ -2,6 +2,7 @@ export interface OnboardingState {
   currentPhase: 'welcome' | 'context' | 'upload' | 'keywords' | 'start';
   studentData: {
     yearLevel: 'year1' | 'year2' | 'year3' | null;
+    currentSemester: 'sem1' | 'sem2' | null;
     courseSelectionStatus: 'picked' | 'deciding' | 'reconsidering' | null;
     currentFeeling: string | null;
   };
@@ -36,7 +37,7 @@ export interface OptionButton {
 
 export interface StudentContextData {
   yearLevel: 'year1' | 'year2' | 'year3';
+  currentSemester?: 'sem1' | 'sem2';
   courseSelectionStatus: 'picked' | 'deciding' | 'reconsidering';
   currentFeeling?: string;
 }
-

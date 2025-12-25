@@ -22,6 +22,7 @@ export type TriggerReason = 'exploration' | 'reflection' | 'doubt' | 'pressure' 
 
 export type OnboardingContext = {
   yearLevel?: 'year1' | 'year2' | 'year3';
+  currentSemester?: 'sem1' | 'sem2';
   courseSelectionStatus?: 'picked' | 'deciding' | 'reconsidering';
   currentFeeling?: string;
   keywords?: string[];
@@ -54,7 +55,25 @@ export type UserProfile = {
     growthText?: string;
     directionText?: string;
   };
+  journeyNarrative?: {
+    title?: string;
+    summary?: string;
+    highlights?: string[];
+    focus?: string;
+    nextStep?: string;
+  };
+  programFit?: {
+    environment?: string;
+    explore?: string;
+    flexibility?: string;
+  };
   reflections?: Record<string, string>;
+  customCardTags?: Record<string, string[]>;
+  reportSources?: {
+    executiveText?: string;
+    growthText?: string;
+    directionText?: string;
+  };
   avatar?: {
     collectedCards?: string[];
     equippedAccessories?: Record<string, string>;
@@ -92,7 +111,29 @@ export type UserProfile = {
     };
   };
   questionnaireAnswers?: Record<string, string[]>;
-  stage0Summary?: { recommendedRoles?: string[] };
+  stage0Summary?: {
+    recommendedRoles?: string[];
+    tagCounts?: Record<string, number>;
+  };
+  stage0Profile?: {
+    primaryTag?: string;
+    secondaryTag?: string;
+    topSignals?: string[];
+    persona?: {
+      label?: string;
+      description?: string;
+    };
+    insights?: Record<string, { title: string; body: string }>;
+    insightGroups?: {
+      curiosity?: string[];
+      values?: string[];
+      learning?: string[];
+      decisions?: string[];
+      resilience?: string[];
+      currentState?: string[];
+    };
+    valuesSignals?: string[];
+  };
   likedRoles?: string[];
   onboardingCompleted?: boolean;
   activityLogs?: ActivityLogEntry[];
@@ -108,43 +149,31 @@ const PROFILE_KEY = 'userProfile';
 
 const DEFAULT_PROFILE: UserProfile = {
   id: 'demo-user',
-  name: 'Eunseo',
+  name: '',
   yearLevel: 1,
-  selectionStatus: 'in_progress',
-  triggerReason: 'pressure',
-  currentSemester: '2025-Spring',
-  academicStage: 'year-1-sem-1',
-  courses: ['Biology', 'World History', 'English Writing'],
-  keywords: [
-    'Thinks carefully before deciding',
-    'Wants clarity without pressure',
-    'Sensitive to evaluation',
-    'Reflective decision-maker',
-  ],
+  selectionStatus: 'not_started',
+  triggerReason: 'general',
+  currentSemester: null,
+  academicStage: null,
+  courses: [],
+  keywords: [],
   strengths: {
-    energizers: ['Deep reflection', 'Organizing thoughts', 'Listening'],
-    joys: ['Learning through discussion', 'Connecting ideas'],
+    energizers: [],
+    joys: [],
   },
-  strengthTags: ['empathy', 'organization'],
-  interests: ['Humanities', 'Life sciences', 'Social impact'],
-  onboarding: {
-    yearLevel: 'year1',
-    courseSelectionStatus: 'deciding',
-    currentFeeling: 'Worried about making the wrong choice and being judged.',
-  },
-  report: {
-    executiveText:
-      "I'm not avoiding decisions. I want to think carefully before choosing, so I can trust my reasons.",
-    growthText:
-      'My anxiety has become a starting point for reflection. I organize my thoughts before acting.',
-    directionText:
-      'Learning environment: I do best in thoughtful, low-pressure spaces.\n\nDepth to explore: I want to verify fit through experience.\n\nFlexibility: I need room to adjust as I learn.',
-  },
+  strengthTags: [],
+  interests: [],
+  onboarding: {},
   avatar: {
-    collectedCards: ['S_StrengthPattern_01', 'C_CuriosityThread_01'],
+    collectedCards: [],
     equippedAccessories: {},
     customizerSelectedAccessories: [],
   },
+  collection: {
+    viewMode: 'collection',
+    cards: [],
+  },
+  customCardTags: {},
   stage5: {
     timeline: '3-years',
   },
@@ -182,6 +211,41 @@ const mergeProfile = (base: UserProfile, updates: Partial<UserProfile>): UserPro
   return merged;
 };
 
+const isLegacySeedProfile = (profile: UserProfile) => {
+  const hasSeedReport =
+    profile.report?.executiveText ===
+    "I'm not avoiding decisions. I want to think carefully before choosing, so I can trust my reasons.";
+  const hasSeedCard = Array.isArray(profile.collection?.cards)
+    ? profile.collection.cards.some(
+        (card) =>
+          (card as { id?: string; title?: string }).id === 'card-1' &&
+          (card as { title?: string }).title === 'Pattern Recognition'
+      )
+    : false;
+  const hasSeedLog = Array.isArray(profile.activityLogs)
+    ? profile.activityLogs.some(
+        (log) =>
+          log.id === 'log-1' &&
+          log.title === 'Reflected on strengths after Stage 0'
+      )
+    : false;
+
+  return (hasSeedReport && hasSeedCard) || (hasSeedCard && hasSeedLog);
+};
+
+const stripLegacySeedData = (profile: UserProfile): UserProfile => ({
+  ...profile,
+  report: undefined,
+  journeyNarrative: undefined,
+  programFit: undefined,
+  collection: {
+    viewMode: profile.collection?.viewMode ?? 'collection',
+    cards: [],
+  },
+  customCardTags: {},
+  activityLogs: [],
+});
+
 export const ensureUserProfile = (): UserProfile => {
   const existing = storage.get<UserProfile>(PROFILE_KEY, null);
   if (!existing) {
@@ -189,7 +253,8 @@ export const ensureUserProfile = (): UserProfile => {
     return DEFAULT_PROFILE;
   }
 
-  const merged = mergeProfile(DEFAULT_PROFILE, existing);
+  const cleaned = isLegacySeedProfile(existing) ? stripLegacySeedData(existing) : existing;
+  const merged = mergeProfile(DEFAULT_PROFILE, cleaned);
   storage.set(PROFILE_KEY, merged);
   return merged;
 };
@@ -202,7 +267,18 @@ export const updateUserProfile = (updates: Partial<UserProfile>): UserProfile =>
   const current = ensureUserProfile();
   const merged = mergeProfile(current, updates);
   storage.set(PROFILE_KEY, merged);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('miraeProfileUpdated'));
+  }
   return merged;
+};
+
+export const resetUserProfile = (): UserProfile => {
+  storage.set(PROFILE_KEY, DEFAULT_PROFILE);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('miraeProfileUpdated'));
+  }
+  return DEFAULT_PROFILE;
 };
 
 export const updateProfileFromOnboarding = (context: Partial<OnboardingContext>) => {
@@ -210,6 +286,11 @@ export const updateProfileFromOnboarding = (context: Partial<OnboardingContext>)
     year1: 1,
     year2: 2,
     year3: 3,
+  };
+  const stageMap: Record<NonNullable<OnboardingContext['yearLevel']>, string> = {
+    year1: 'year-1-sem-1',
+    year2: 'year-2-sem-1',
+    year3: 'year-3-sem-1',
   };
   const statusMap: Record<
     NonNullable<OnboardingContext['courseSelectionStatus']>,
@@ -226,6 +307,13 @@ export const updateProfileFromOnboarding = (context: Partial<OnboardingContext>)
 
   if (context.yearLevel) {
     updates.yearLevel = yearMap[context.yearLevel];
+    updates.academicStage = stageMap[context.yearLevel];
+  }
+  if (context.currentSemester) {
+    updates.currentSemester = context.currentSemester;
+    if (context.yearLevel) {
+      updates.academicStage = `year-${yearMap[context.yearLevel]}-sem-${context.currentSemester === 'sem2' ? '2' : '1'}`;
+    }
   }
   if (context.courseSelectionStatus) {
     updates.selectionStatus = statusMap[context.courseSelectionStatus];

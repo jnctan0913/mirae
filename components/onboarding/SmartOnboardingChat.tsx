@@ -13,6 +13,7 @@ interface SmartOnboardingChatProps {
   onComplete: () => void;
   onContextUpdate: (data: Partial<{
     yearLevel: 'year1' | 'year2' | 'year3';
+    currentSemester: 'sem1' | 'sem2';
     courseSelectionStatus: 'picked' | 'deciding' | 'reconsidering';
     currentFeeling: string;
   }>) => void;
@@ -39,6 +40,7 @@ export const SmartOnboardingChat: React.FC<SmartOnboardingChatProps> = ({
   const [conversationCount, setConversationCount] = useState(0);
   const [contextData, setContextData] = useState<{
     yearLevel?: 'year1' | 'year2' | 'year3';
+    currentSemester?: 'sem1' | 'sem2';
     courseSelectionStatus?: 'picked' | 'deciding' | 'reconsidering';
     currentFeeling?: string;
   }>({});
@@ -94,7 +96,7 @@ export const SmartOnboardingChat: React.FC<SmartOnboardingChatProps> = ({
           const nextContext = { ...latestContext, ...payload.context };
           latestContext = nextContext;
           setContextData(nextContext);
-          onContextUpdate(payload.context);
+          onContextUpdate(nextContext);
         }
 
         // Handle extracted keywords

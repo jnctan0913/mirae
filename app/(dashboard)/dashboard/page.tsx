@@ -25,6 +25,8 @@ const academicStages = [
   { id: 'year-1-sem-2', label: 'Year 1 Semester 2' },
   { id: 'year-2-sem-1', label: 'Year 2 Semester 1' },
   { id: 'year-2-sem-2', label: 'Year 2 Semester 2' },
+  { id: 'year-3-sem-1', label: 'Year 3 Semester 1' },
+  { id: 'year-3-sem-2', label: 'Year 3 Semester 2' },
 ];
 
 export default function DashboardPage() {
