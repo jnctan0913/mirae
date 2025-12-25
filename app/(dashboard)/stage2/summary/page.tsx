@@ -185,8 +185,7 @@ export default function Stage2SummaryPage() {
   const [docKeywords, setDocKeywords] = useState<string[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    const profile = getUserProfile();
+  const syncProfile = (profile: ReturnType<typeof getUserProfile>) => {
     setSelection(profile.stage2Selection ?? null);
     const rawStrengths = (profile as unknown as { strengths?: string[] }).strengths;
     const strengthTags = Array.isArray(rawStrengths)
@@ -252,6 +251,16 @@ export default function Stage2SummaryPage() {
     } else {
       setDocKeywords([]);
     }
+  };
+
+  useEffect(() => {
+    syncProfile(getUserProfile());
+    if (typeof window !== 'undefined') {
+      const handleProfileUpdate = () => syncProfile(getUserProfile());
+      window.addEventListener('miraeProfileUpdated', handleProfileUpdate);
+      return () => window.removeEventListener('miraeProfileUpdated', handleProfileUpdate);
+    }
+    return undefined;
   }, []);
 
   const courseLookup = useMemo(() => {

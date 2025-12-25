@@ -131,8 +131,8 @@ const messages: Record<Language, Messages> = {
     // Stage 2
     stage2Title: '과목 선택 설계',
     stage2Subjects: '과목 목록',
-    stage2Anchor: '안전한 선택',
-    stage2Signal: '탐색 신호',
+    stage2Anchor: '핵심 과목',
+    stage2Signal: '선택 과목',
     stage2AnchorCount: '({count}/6 선택됨)',
     stage2SignalCount: '({count}/6 선택됨)',
     stage2Save: '저장하기',
@@ -404,8 +404,8 @@ const messages: Record<Language, Messages> = {
     // Stage 2
     stage2Title: 'Course Selection Builder',
     stage2Subjects: 'Subjects',
-    stage2Anchor: 'Anchor Choices',
-    stage2Signal: 'Signal Choices',
+    stage2Anchor: 'Core Courses',
+    stage2Signal: 'Elective Courses',
     stage2AnchorCount: '({count}/6 selected)',
     stage2SignalCount: '({count}/6 selected)',
     stage2Save: 'Save selection',

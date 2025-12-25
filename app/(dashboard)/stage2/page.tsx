@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import coursesData from '@/lib/data/courses-descriptions.json';
-import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
+import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
 
 type CourseCategory = 'general' | 'career' | 'interdisciplinary';
 
@@ -694,15 +694,23 @@ export default function Stage2Page() {
     setSignal((prev) => prev.filter((item) => item !== key));
   };
 
-  const addToAnchorLabel = language === 'ko' ? '필수과목에 추가' : 'Add to Required';
+  const handleSelectSuggestion = (suggestion: (typeof suggestions)[number]) => {
+    setFocusedCourseKey(suggestion.key);
+    setSelectedSubjectId(suggestion.subject.id);
+    setSelectedCategory(suggestion.category);
+    const subjectCategory = subjectCategories[suggestion.subject.id] ?? 'all';
+    setSelectedSubjectCategory(subjectCategory);
+  };
+
+  const addToAnchorLabel = language === 'ko' ? '핵심 과목에 추가' : 'Add to Core Courses';
   const addToSignalLabel =
-    language === 'ko' ? '관심·성향 선택과목에 추가' : 'Add to Electives';
+    language === 'ko' ? '선택 과목에 추가' : 'Add to Elective Courses';
   const removeLabel = language === 'ko' ? '제거' : 'Remove';
   const searchPlaceholder = language === 'ko' ? '과목 검색' : 'Search courses';
   const subjectTitle = language === 'ko' ? '과목' : 'Subjects';
   const noCoursesLabel = language === 'ko' ? '표시할 과목이 없어요.' : 'No courses to show.';
   const allLabel = language === 'ko' ? '전체' : 'All';
-  const suggestionTitle = language === 'ko' ? '추천 과목' : 'Suggested for you';
+  const suggestionTitle = language === 'ko' ? '추천' : 'Recommended';
   const suggestionEmpty = language === 'ko'
     ? '추천 신호가 없어요. Stage 0/1 또는 온보딩 키워드를 먼저 채워주세요.'
     : 'No recommendation signals yet. Complete Stage 0/1 or add onboarding keywords.';
@@ -724,6 +732,8 @@ export default function Stage2Page() {
   const radarEmptyLabel =
     language === 'ko' ? 'No courses to show here.' : 'No courses to show here.';
   const viewSummaryLabel = language === 'ko' ? '요약 보기' : 'View summary';
+  const courseDetailsLabel = language === 'ko' ? '과목 상세' : 'Course details';
+  const selectedCourseLabel = language === 'ko' ? '선택됨' : 'Selected';
 
   const getDescription = (course: CourseLabel) => {
     const description = language === 'ko' ? course.description?.kr : course.description?.en;
@@ -758,14 +768,114 @@ export default function Stage2Page() {
       .map((key) => courseLookup.get(key))
       .filter((course): course is CourseLookupItem => !!course)
       .map((course) => (language === 'ko' ? course.kr : course.en));
+    const profile = getUserProfile();
+    const existingCards = (profile.collection?.cards as Record<string, unknown>[]) ?? [];
+    const coreLabel = language === 'ko' ? '핵심 과목' : 'Core course';
+    const electiveLabel = language === 'ko' ? '선택 과목' : 'Elective course';
+    const courseCards = Array.from(new Set([...anchor, ...signal]))
+      .map((key) => {
+        const course = courseLookup.get(key);
+        if (!course) return null;
+        const title = language === 'ko' ? course.kr : course.en;
+        const subject = language === 'ko' ? course.subjectKr : course.subjectEn;
+        const isCore = anchor.includes(key);
+        const descriptor = isCore ? coreLabel : electiveLabel;
+        return {
+          id: `stage2-course-${key}`,
+          stage: 'O',
+          type: 'Experience',
+          title,
+          description: `${subject} · ${descriptor}`,
+          rarity: 'Common',
+          unlocked: true,
+          tags: [isCore ? 'core' : 'elective'],
+          createdFrom: 'Stage 2: Course Roadmap',
+        };
+      })
+      .filter(Boolean) as Record<string, unknown>[];
+    const nextCards = [
+      ...existingCards.filter(
+        (card) => !(card as { id?: string }).id?.startsWith('stage2-course-')
+      ),
+      ...courseCards,
+    ];
+    const existingLogs = profile.activityLogs ?? [];
+    const hasStage2Log = existingLogs.some((log) => log.id === 'stage2-complete');
+    const today = new Date().toISOString().slice(0, 10);
+    const coreCount = anchor.length;
+    const electiveCount = signal.length;
+    const shortReflection =
+      language === 'ko'
+        ? `핵심 ${coreCount}개, 선택 ${electiveCount}개 선택함.`
+        : `Selected ${coreCount} core and ${electiveCount} elective courses.`;
+    const nextLogs = hasStage2Log
+      ? existingLogs.map((log) =>
+          log.id === 'stage2-complete'
+            ? {
+                ...log,
+                date: today,
+                shortReflection,
+                title:
+                  language === 'ko'
+                    ? 'Stage 2 과목 선택을 완료했어요'
+                    : 'Completed Stage 2 course selection',
+              }
+            : log
+        )
+      : [
+          ...existingLogs,
+          {
+            id: 'stage2-complete',
+            date: today,
+            title:
+              language === 'ko'
+                ? 'Stage 2 과목 선택을 완료했어요'
+                : 'Completed Stage 2 course selection',
+            scopeStage: 'O',
+            activityType: 'MiraeActivity',
+            source: 'Mirae',
+            shortReflection,
+          },
+        ];
+    const nextReport = profile.report ?? {};
+    const nextGrowth =
+      nextReport.growthText && nextReport.growthText.length > 0
+        ? nextReport.growthText
+        : language === 'ko'
+          ? `과목 설계: 핵심 ${coreCount}개, 선택 ${electiveCount}개 구성.`
+          : `Course roadmap: ${coreCount} core, ${electiveCount} elective.`;
+
     const profileUpdates: Parameters<typeof updateUserProfile>[0] = {
       stage2Selection,
       selectionStatus: 'completed',
+      collection: {
+        ...profile.collection,
+        cards: nextCards,
+      },
+      customCardTags: {
+        ...profile.customCardTags,
+        ...Object.fromEntries(
+          courseCards.map((card) => [
+            (card as { id: string }).id,
+            (card as { tags?: string[] }).tags ?? [],
+          ])
+        ),
+      },
+      activityLogs: nextLogs,
+      report: {
+        ...nextReport,
+        growthText: nextGrowth,
+      },
+      reportSources: {
+        ...profile.reportSources,
+        growthText: profile.reportSources?.growthText ?? 'stage2',
+      },
     };
     if (selectedCourseLabels.length > 0) {
       profileUpdates.courses = selectedCourseLabels;
     }
     updateUserProfile(profileUpdates);
+    updateProfileAnalytics(nextLogs);
     completeStage(2);
     router.push('/stage2/summary');
   };
@@ -844,14 +954,6 @@ export default function Stage2Page() {
             </h1>
             <p className="mt-1 text-sm text-slate-600">{radarSubtitle}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => router.push('/stage2/summary')}
-            disabled={!progress.stage2Complete}
-            className="rounded-full border border-white/60 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-700 shadow-[0_12px_30px_rgba(155,203,255,0.35)] transition hover:bg-white/90 disabled:opacity-50"
-          >
-            {viewSummaryLabel}
-          </button>
         </div>
 
         {/* Horizontal subject filters */}
@@ -977,6 +1079,7 @@ export default function Stage2Page() {
                     {radarItems.map((item) => {
                       const courseLabel = language === 'ko' ? item.course.kr : item.course.en;
                       const isSelected = selectedKeys.has(item.key);
+                      const isFocused = item.key === focusedCourseKey;
                       const orbStyle = {
                         left: '50%',
                         top: '50%',
@@ -998,23 +1101,31 @@ export default function Stage2Page() {
                           aria-label={courseLabel}
                         >
                           <span
-                            className={`flex h-9 w-9 items-center justify-center rounded-full ${orbGlow} transition-transform duration-200 ease-out group-hover:scale-110 ${
+                            className={`relative flex h-9 w-9 items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110 ${
                               isSelected
                                 ? 'ring-2 ring-[#9BCBFF]/80 ring-offset-2 ring-offset-white/80'
                                 : ''
-                            }`}
+                            } ${isFocused ? 'radar-bob' : ''}`}
                           >
                             {item.isRecommended ? (
                               <span className="relative flex h-9 w-9 items-center justify-center">
-                                <span className="absolute inset-0 rounded-full bg-[#FFD1A8] blur-[2px]" />
+                                <span
+                                  className={`absolute inset-0 rounded-full blur-[2px] ${
+                                    isSelected ? 'bg-[#F4A9C8]' : 'bg-[#FFD1A8]'
+                                  }`}
+                                />
                                 <svg
                                   viewBox="0 0 100 100"
-                                  className="relative h-9 w-9 text-[#FFD1A8] drop-shadow-[0_0_12px_rgba(244,169,200,0.75)] star-twinkle"
+                                  className={`relative h-9 w-9 star-twinkle ${
+                                    isSelected
+                                      ? 'text-[#F4A9C8] drop-shadow-[0_0_14px_rgba(244,169,200,0.9)]'
+                                      : 'text-[#FFD1A8] drop-shadow-[0_0_12px_rgba(244,169,200,0.75)]'
+                                  }`}
                                 >
                                   <polygon
                                     points="50,5 61,38 96,38 67,58 78,91 50,70 22,91 33,58 4,38 39,38"
                                     fill="currentColor"
-                                    stroke="#F4A9C8"
+                                    stroke={isSelected ? '#9BCBFF' : '#F4A9C8'}
                                     strokeWidth="4"
                                   />
                                 </svg>
@@ -1040,13 +1151,16 @@ export default function Stage2Page() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="text-[11px] uppercase tracking-[0.3em] text-[#9BCBFF]">
-                            {focusedCourse.isRecommended
-                              ? radarLegendRecommended
-                              : radarLegendExplore}
+                            {courseDetailsLabel}
                           </p>
-                          <h3 className="mt-2 text-lg font-semibold text-slate-800">
-                            {focusedCourseLabel}
-                          </h3>
+                          <div className="mt-2 flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-slate-800">
+                              {focusedCourseLabel}
+                            </h3>
+                            <span className="rounded-full border border-[#9BCBFF]/60 bg-[#9BCBFF]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                              {selectedCourseLabel}
+                            </span>
+                          </div>
                           <p className="text-xs text-slate-600">{focusedSubjectLabel}</p>
                         </div>
                         {renderInfoButton(getDescription(focusedCourse.course))}
@@ -1119,86 +1233,42 @@ export default function Stage2Page() {
                 <h2 className="text-lg font-semibold text-slate-800">{suggestionTitle}</h2>
                 <p className="mt-1 text-xs text-slate-600">{suggestionSubtitle}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowSuggestions((prev) => !prev)}
-                className="rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-white/90"
-              >
-                {showSuggestions ? suggestionToggleLabel : suggestionToggleOpenLabel}
-              </button>
             </div>
 
-            {showSuggestions && (
-              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-                {displaySuggestions.length === 0 && (
-                  <p className="text-sm text-slate-500">{suggestionEmpty}</p>
-                )}
-                {displaySuggestions.map((suggestion) => {
-                  const subjectLabel =
-                    language === 'ko'
-                      ? suggestion.subject.subject_kr
-                      : suggestion.subject.subject_en;
-                  const courseLabel =
-                    language === 'ko' ? suggestion.label.kr : suggestion.label.en;
-                  const recommendedBucket = getRecommendedBucket(
-                    suggestion.category,
-                    suggestion.score
-                  );
-                  return (
-                    <div
-                      key={suggestion.key}
-                      className="rounded-2xl border border-white/60 bg-white/75 p-4 shadow-[0_16px_30px_rgba(155,203,255,0.35)]"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
-                          <p className="text-xs text-slate-500">{subjectLabel}</p>
-                        </div>
-                        {renderInfoButton(getDescription(suggestion.label))}
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+              {displaySuggestions.length === 0 && (
+                <p className="text-sm text-slate-500">{suggestionEmpty}</p>
+              )}
+              {displaySuggestions.map((suggestion) => {
+                const subjectLabel =
+                  language === 'ko'
+                    ? suggestion.subject.subject_kr
+                    : suggestion.subject.subject_en;
+                const courseLabel =
+                  language === 'ko' ? suggestion.label.kr : suggestion.label.en;
+                const isActive = suggestion.key === focusedCourseKey;
+                return (
+                  <button
+                    type="button"
+                    key={suggestion.key}
+                    onClick={() => handleSelectSuggestion(suggestion)}
+                    className={`w-full text-left rounded-2xl border p-4 shadow-[0_16px_30px_rgba(155,203,255,0.35)] transition hover:shadow-[0_18px_40px_rgba(155,203,255,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9BCBFF]/60 ${
+                      isActive
+                        ? 'border-[#9BCBFF]/70 bg-white shadow-[0_18px_40px_rgba(155,203,255,0.5)]'
+                        : 'border-white/60 bg-white/75 hover:bg-white/90'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{courseLabel}</p>
+                        <p className="text-xs text-slate-500">{subjectLabel}</p>
                       </div>
-                      {suggestion.reasons.size > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {Array.from(suggestion.reasons).map((reason) => (
-                            <span
-                              key={reason}
-                              className="rounded-full border border-[#BEEDE3]/60 bg-[#BEEDE3]/50 px-2 py-1 text-[11px] text-slate-700"
-                            >
-                              {reason}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => addToAnchor(suggestion.key)}
-                          disabled={anchor.length >= maxBucketSize}
-                          className={`rounded-full border px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
-                            recommendedBucket === 'anchor'
-                              ? 'border-[#9BCBFF]/60 bg-[#9BCBFF]/30 text-slate-700 shadow-[0_0_16px_rgba(155,203,255,0.6)]'
-                              : 'border-white/60 bg-white/70 text-slate-600 hover:bg-white/90'
-                          }`}
-                        >
-                          {addToAnchorLabel}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => addToSignal(suggestion.key)}
-                          disabled={signal.length >= maxBucketSize}
-                          className={`rounded-full border px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
-                            recommendedBucket === 'signal'
-                              ? 'border-[#F4A9C8]/60 bg-[#F4A9C8]/30 text-slate-700 shadow-[0_0_16px_rgba(244,169,200,0.6)]'
-                              : 'border-white/60 bg-white/70 text-slate-600 hover:bg-white/90'
-                          }`}
-                        >
-                          {addToSignalLabel}
-                        </button>
-                      </div>
+                      {renderInfoButton(getDescription(suggestion.label))}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </button>
+                );
+              })}
+            </div>
           </section>
         </div>
 
@@ -1208,7 +1278,7 @@ export default function Stage2Page() {
               <div className="rounded-[28px] border border-[#9BCBFF]/60 bg-white/70 p-6 shadow-[0_24px_50px_-40px_rgba(155,203,255,0.55)] backdrop-blur">
                 <div className="mb-4">
                   <h2 className="font-semibold text-slate-800">{t('stage2Anchor')}</h2>
-                  <p className="mt-1 text-xs text-slate-600">{t('stage2AnchorHelper')}</p>
+                  <p className="mt-1 text-xs text-slate-600" />
                 </div>
                 <div className="space-y-2 min-h-[200px]">
                   {anchor.map((key) => {
@@ -1249,7 +1319,7 @@ export default function Stage2Page() {
               <div className="rounded-[28px] border border-[#F4A9C8]/60 bg-white/70 p-6 shadow-[0_24px_50px_-40px_rgba(244,169,200,0.55)] backdrop-blur">
                 <div className="mb-4">
                   <h2 className="font-semibold text-slate-800">{t('stage2Signal')}</h2>
-                  <p className="mt-1 text-xs text-slate-600">{t('stage2SignalHelper')}</p>
+                  <p className="mt-1 text-xs text-slate-600" />
                 </div>
                 <div className="space-y-2 min-h-[200px]">
                   {signal.map((key) => {
@@ -1383,6 +1453,10 @@ export default function Stage2Page() {
           animation: starTwinkle 3.6s ease-in-out infinite;
         }
 
+        .orb-pulse {
+          animation: orbPulse 2s ease-in-out infinite;
+        }
+
         @keyframes starTwinkle {
           0%,
           100% {
@@ -1403,6 +1477,18 @@ export default function Stage2Page() {
           50% {
             transform: translate(-50%, -50%)
               translate(calc(var(--orb-x) + 1.5%), calc(var(--orb-y) - 1.5%));
+          }
+        }
+
+        @keyframes orbPulse {
+          0%,
+          100% {
+            opacity: 0.6;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.15);
           }
         }
       `}</style>

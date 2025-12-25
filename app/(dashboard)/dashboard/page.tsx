@@ -177,7 +177,7 @@ export default function DashboardPage() {
           {/* Mirae Character */}
           <button
             onClick={() => router.push('/collection')}
-            className="absolute -top-8 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
+            className="absolute -top-12 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
             title="View your collection"
             type="button"
           >
