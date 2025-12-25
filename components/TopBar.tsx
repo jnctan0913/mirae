@@ -17,6 +17,7 @@ export default function TopBar() {
   const [userEmail, setUserEmail] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const isAuthPage = useMemo(
     () => pathname?.startsWith('/login') || pathname?.startsWith('/signup'),
@@ -24,6 +25,11 @@ export default function TopBar() {
   );
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const user = getUser();
     if (user?.name) {
       setUserInitial(user.name.slice(0, 1));
@@ -34,7 +40,7 @@ export default function TopBar() {
     if (user?.email) {
       setUserEmail(user.email);
     }
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {

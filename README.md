@@ -19,14 +19,15 @@ This repository contains documentation for the SCOPE+ project. The project struc
 
 ```
 .
-+-- README.md                    # This file - project overview
-+-- REVISED_24HR_PLAN.md         # 24-hour MVP development plan
-+-- REVISED_APP_BLUEPRINT.md     # Complete product architecture blueprint
-+-- AGENTS.md                    # Repository guidelines
-+-- docs/
-    +-- PRD.md                   # Product Requirements Document
-    +-- PROBLEM.md              # Problem statement and context
-    +-- SOLUTION.md             # Solution architecture and design
+├── README.md                    # This file - project overview
+├── REVISED_24HR_PLAN.md         # 24-hour MVP development plan
+├── REVISED_APP_BLUEPRINT.md     # Complete product architecture blueprint
+├── AGENTS.md                    # Repository guidelines
+└── docs/
+    ├── PRD.md                   # Product Requirements Document
+    ├── PROBLEM.md              # Problem statement and context
+    ├── SOLUTION.md             # Solution architecture and design
+    └── ONBOARDING.md           # Onboarding flow implementation guide
 ```
 
 ### Application Structure
@@ -149,6 +150,7 @@ See `REVISED_APP_BLUEPRINT.md` for the complete product architecture, including:
 - **PRD.md**: Product requirements and goals
 - **PROBLEM.md**: Problem statement, constraints, and user needs
 - **SOLUTION.md**: Proposed solution details and rationale
+- **ONBOARDING.md**: Onboarding flow implementation guide with technical specifications
 
 ---
 
