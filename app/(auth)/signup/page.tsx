@@ -35,9 +35,13 @@ export default function SignupPage() {
       <div className="bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/60">
         <div className="flex justify-center mb-4">
           <img
-            src="/asset/Mirae_word.webp"
+            src="/asset/Mirae_Word_Only.png"
             alt="Mirae"
             className="h-12 object-contain"
+            onError={(e) => {
+              // Fallback if image doesn't load
+              console.error('Image failed to load:', e.currentTarget.src);
+            }}
           />
         </div>
         <p className="text-slate-600 text-center mb-8">

@@ -9,7 +9,10 @@ export const metadata: Metadata = {
   title: 'Mirae - 진로 탐색 플랫폼',
   description: 'Dashboard-based, multi-stage, AI-powered career exploration for Korean high school students',
   icons: {
-    icon: '/asset/Mirae_Icon1.png',
+    icon: [
+      { url: '/asset/Mirae_Icon1.png', type: 'image/png' },
+    ],
+    apple: '/asset/Mirae_Icon1.png',
   },
 }
 
