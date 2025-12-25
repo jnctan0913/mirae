@@ -4,13 +4,13 @@ const USERS = [
     id: '1',
     email: 'student1@test.com',
     password: 'password123',
-    name: '김민수',
+    name: 'Eunseo',
   },
   {
     id: '2',
     email: 'student2@test.com',
     password: 'password123',
-    name: '이지은',
+    name: 'Eunseo',
   },
 ];
 

@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
+import { ensureUserProfile, getUserProfile } from '@/lib/userProfile';
 
 export default function TopBar() {
   const router = useRouter();
@@ -26,16 +27,22 @@ export default function TopBar() {
 
   useEffect(() => {
     setMounted(true);
+    ensureUserProfile();
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
     const user = getUser();
+    const profile = getUserProfile();
     if (user?.name) {
-      setUserInitial(user.name.slice(0, 1));
-      setUserName(user.name);
+      setUserInitial(profile.name?.slice(0, 1) || user.name.slice(0, 1));
+      setUserName(profile.name || user.name);
     } else if (user?.email) {
       setUserInitial(user.email.slice(0, 1).toUpperCase());
+    }
+    if (profile.name && !user?.name) {
+      setUserInitial(profile.name.slice(0, 1));
+      setUserName(profile.name);
     }
     if (user?.email) {
       setUserEmail(user.email);

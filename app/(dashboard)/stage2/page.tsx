@@ -6,6 +6,7 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { storage } from '@/lib/utils/storage';
 import coursesData from '@/lib/data/courses-descriptions.json';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 type CourseCategory = 'general' | 'career' | 'interdisciplinary';
 
@@ -278,15 +279,13 @@ export default function Stage2Page() {
   }, [slotsStorageKey]);
 
   useEffect(() => {
-    const profile = storage.get<{
-      strengths?: string[];
-      likedRoles?: string[];
-      onboardingKeywords?: string[];
-      uploadedDocs?: string[];
-      docKeywords?: string[];
-    }>('userProfile');
-    if (profile?.strengths) {
-      setStrengths(profile.strengths);
+    const profile = getUserProfile();
+    const rawStrengths = (profile as unknown as { strengths?: string[] }).strengths;
+    const strengthTags = Array.isArray(rawStrengths)
+      ? rawStrengths
+      : profile.strengthTags ?? [];
+    if (strengthTags.length > 0) {
+      setStrengths(strengthTags);
     }
 
     const docStopWords = new Set([
@@ -317,10 +316,18 @@ export default function Stage2Page() {
         .toLowerCase()
         .split(/[^\p{L}\p{N}]+/u)
         .filter((token) => token.length >= 2 && !docStopWords.has(token));
+    const legacyProfile = profile as unknown as {
+      onboardingKeywords?: string[];
+      uploadedDocs?: string[];
+      docKeywords?: string[];
+    };
     const keywordSource = [
-      ...(profile?.onboardingKeywords ?? []),
-      ...(profile?.uploadedDocs ?? []),
-      ...(profile?.docKeywords ?? []),
+      ...(profile?.onboarding?.keywords ?? []),
+      ...(profile?.onboarding?.uploadedDocs ?? []),
+      ...(profile?.onboarding?.docKeywords ?? []),
+      ...(legacyProfile.onboardingKeywords ?? []),
+      ...(legacyProfile.uploadedDocs ?? []),
+      ...(legacyProfile.docKeywords ?? []),
     ];
     if (keywordSource.length > 0) {
       const tokens = Array.from(new Set(keywordSource.flatMap((item) => tokenize(item))));
@@ -624,6 +631,13 @@ export default function Stage2Page() {
       signal,
       savedAt: new Date().toISOString(),
     });
+    const selectedCourseLabels = Array.from(new Set([...anchor, ...signal]))
+      .map((key) => courseLookup.get(key))
+      .filter((course): course is CourseLookupItem => !!course)
+      .map((course) => (language === 'ko' ? course.kr : course.en));
+    if (selectedCourseLabels.length > 0) {
+      updateUserProfile({ courses: selectedCourseLabels, selectionStatus: 'completed' });
+    }
     completeStage(2);
     router.push('/stage2/summary');
   };

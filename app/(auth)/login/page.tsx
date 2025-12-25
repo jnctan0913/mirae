@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
+import { getUserProfile } from '@/lib/userProfile';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,8 +25,8 @@ export default function LoginPage() {
       setError(t('loginInvalid'));
       setLoading(false);
     } else {
-      const onboardingKey = `user_${result.user.id}_onboardingDone`;
-      const shouldOnboard = typeof window !== 'undefined' && localStorage.getItem(onboardingKey) !== 'true';
+      const profile = getUserProfile();
+      const shouldOnboard = !profile.onboardingCompleted;
       router.push(shouldOnboard ? '/onboarding' : '/dashboard');
       router.refresh();
     }

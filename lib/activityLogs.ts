@@ -1,3 +1,5 @@
+import { getUserProfile, updateProfileAnalytics, updateUserProfile } from '@/lib/userProfile';
+
 export type ScopeStage = 'S' | 'C' | 'O' | 'P' | 'E';
 
 export type ActivityLog = {
@@ -108,21 +110,16 @@ const buildSeedActivityLogs = (): ActivityLog[] => {
 };
 
 export const loadActivityLogs = (): ActivityLog[] => {
-  if (typeof window === 'undefined') return buildSeedActivityLogs();
-  try {
-    const raw = localStorage.getItem(ACTIVITY_LOGS_KEY);
-    if (!raw) return buildSeedActivityLogs();
-    const parsed = JSON.parse(raw) as ActivityLog[];
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return buildSeedActivityLogs();
-    }
-    return parsed;
-  } catch {
-    return buildSeedActivityLogs();
+  const profile = getUserProfile();
+  if (profile.activityLogs && profile.activityLogs.length > 0) {
+    return profile.activityLogs as ActivityLog[];
   }
+  const seeded = buildSeedActivityLogs();
+  updateUserProfile({ activityLogs: seeded });
+  return seeded;
 };
 
 export const saveActivityLogs = (logs: ActivityLog[]) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(ACTIVITY_LOGS_KEY, JSON.stringify(logs));
+  updateUserProfile({ activityLogs: logs });
+  updateProfileAnalytics(logs);
 };

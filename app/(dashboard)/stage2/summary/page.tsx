@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { storage } from '@/lib/utils/storage';
+import { getUserProfile } from '@/lib/userProfile';
 import coursesData from '@/lib/data/courses-descriptions.json';
 import rolesData from '@/lib/data/roles.json';
 
@@ -162,14 +163,14 @@ export default function Stage2SummaryPage() {
     const saved = storage.get<SavedSelection>(currentSelectionKey, null);
     setSelection(saved);
 
-    const profile = storage.get<{
-      strengths?: string[];
-      likedRoles?: string[];
-      docKeywords?: string[];
-    }>('userProfile');
-    setStrengths(profile?.strengths ?? []);
+    const profile = getUserProfile();
+    const rawStrengths = (profile as unknown as { strengths?: string[] }).strengths;
+    const strengthTags = Array.isArray(rawStrengths)
+      ? rawStrengths
+      : profile.strengthTags ?? [];
+    setStrengths(strengthTags);
     setLikedRoles(profile?.likedRoles ?? []);
-    setDocKeywords(profile?.docKeywords ?? []);
+    setDocKeywords(profile?.onboarding?.docKeywords ?? []);
   }, [currentSelectionKey]);
 
   const courseLookup = useMemo(() => {

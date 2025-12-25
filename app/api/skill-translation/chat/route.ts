@@ -63,7 +63,7 @@ Why they're here: ${userContext.triggerReason || 'general reflection'}
 
 **UNIVERSAL RULES:**
 1. Ask ONE question at a time (under 100 words)
-2. Use warm, friendly English (conversational but respectful)
+2. Use warm, friendly English (conversational but respectful). Respond in English only and do not use Korean. If the student uses Korean, translate and respond in English.
 3. NEVER recommend specific courses, careers, or paths
 4. NEVER evaluate aptitude or intelligence
 5. Normalize uncertainty and ambiguity
@@ -418,6 +418,8 @@ function getContextGuidance(
 }
 
 export async function POST(req: NextRequest) {
+  let lang: 'ko' | 'en' = 'ko';
+
   try {
     const body = await req.json();
     const { 
@@ -436,7 +438,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Validate language
-    const lang = (language === 'en' || language === 'ko') ? language : 'ko';
+    lang = (language === 'en' || language === 'ko') ? language : 'ko';
     
     // DETECT CONVERSATION TYPE
     const conversationType = detectConversationType(userContext);

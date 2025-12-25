@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { storage } from '@/lib/utils/storage';
+import { getUserProfile } from '@/lib/userProfile';
 import rolesData from '@/lib/data/roles.json';
 
 type RoleLocale = { en: string; ko: string };
@@ -42,7 +43,7 @@ export default function Stage1SummaryPage() {
     const uniqueLiked = Array.from(new Set(liked));
     setLikedRoleIds(uniqueLiked);
 
-    const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+  const profile = getUserProfile();
     storage.set('userProfile', {
       ...profile,
       likedRoles: uniqueLiked,
@@ -74,7 +75,7 @@ export default function Stage1SummaryPage() {
 
   const handleRedo = () => {
     storage.remove('roleSwipes');
-    const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+  const profile = getUserProfile();
     storage.set('userProfile', {
       ...profile,
       likedRoles: [],

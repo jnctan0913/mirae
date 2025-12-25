@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useI18n } from '@/lib/i18n';
 import { AvatarCustomizerPanel } from '@/components/avatar/AvatarCustomizerPanel';
 import type { CardId, ProgressState, AvatarConfig } from '@/components/avatar/avatarTypes';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 const ALL_CARDS: CardId[] = [
   'S_StrengthPattern_01',
@@ -16,25 +17,43 @@ const ALL_CARDS: CardId[] = [
 
 export default function AvatarLabPage() {
   const { t } = useI18n();
-  const [collectedCards, setCollectedCards] = useState<CardId[]>([
-    'S_StrengthPattern_01',
-    'C_CuriosityThread_01',
-  ]);
+  const initialCards = useMemo<CardId[]>(
+    () =>
+      (getUserProfile().avatar?.collectedCards as CardId[]) ?? [
+        'S_StrengthPattern_01',
+        'C_CuriosityThread_01',
+      ],
+    []
+  );
+  const [collectedCards, setCollectedCards] = useState<CardId[]>(initialCards);
 
   const progress: ProgressState = {
     collectedCards,
   };
 
   const toggleCard = (cardId: CardId) => {
-    setCollectedCards(prev =>
-      prev.includes(cardId)
+    setCollectedCards(prev => {
+      const next = prev.includes(cardId)
         ? prev.filter(id => id !== cardId)
-        : [...prev, cardId]
-    );
+        : [...prev, cardId];
+      updateUserProfile({
+        avatar: {
+          ...getUserProfile().avatar,
+          collectedCards: next,
+        },
+      });
+      return next;
+    });
   };
 
   const handleConfigChange = (config: AvatarConfig) => {
     console.log('Avatar config updated:', config);
+    updateUserProfile({
+      avatar: {
+        ...getUserProfile().avatar,
+        equippedAccessories: config.equippedAccessories ?? getUserProfile().avatar?.equippedAccessories,
+      },
+    });
   };
 
   return (

@@ -9,6 +9,7 @@ import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
 import { MiraeCharacter, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
 import { storage } from '@/lib/utils/storage';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 const stages = [
   { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0', letter: 'S', promptKey: 'journeyPromptStrengths' },
@@ -48,7 +49,8 @@ export default function DashboardPage() {
       setUserId(user.id);
     }
 
-    const displayName = user.name || user.email?.split('@')[0] || t('studentFallback');
+    const profile = getUserProfile();
+    const displayName = profile.name || user.name || user.email?.split('@')[0] || t('studentFallback');
     setUserName(displayName);
 
     if (typeof window !== 'undefined') {
@@ -62,16 +64,23 @@ export default function DashboardPage() {
       const savedCards = localStorage.getItem('miraePlus_cards');
       
       if (savedAccessories) {
-        setEquippedAccessories(JSON.parse(savedAccessories));
+        const parsed = JSON.parse(savedAccessories);
+        setEquippedAccessories(parsed);
+        updateUserProfile({ avatar: { ...profile.avatar, equippedAccessories: parsed } });
+      } else if (profile.avatar?.equippedAccessories) {
+        setEquippedAccessories(profile.avatar.equippedAccessories);
       }
       
       if (savedCards) {
         const cards = JSON.parse(savedCards);
         const unlockedCount = cards.filter((c: any) => c.unlocked).length;
         setCardCount(unlockedCount);
+        updateUserProfile({ collection: { ...profile.collection, cards } });
+      } else if (profile.collection?.cards) {
+        const unlockedCount = profile.collection.cards.filter((c: any) => c.unlocked).length;
+        setCardCount(unlockedCount);
       }
 
-      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
       if (typeof profile.academicStage === 'string') {
         setAcademicStage(profile.academicStage);
       }
@@ -85,19 +94,27 @@ export default function DashboardPage() {
       const savedAccessories = localStorage.getItem('miraePlus_accessories');
       const savedCards = localStorage.getItem('miraePlus_cards');
       
+      const storedProfile = getUserProfile();
       if (savedAccessories) {
-        setEquippedAccessories(JSON.parse(savedAccessories));
+        const parsed = JSON.parse(savedAccessories);
+        setEquippedAccessories(parsed);
+        updateUserProfile({ avatar: { ...storedProfile.avatar, equippedAccessories: parsed } });
+      } else if (storedProfile.avatar?.equippedAccessories) {
+        setEquippedAccessories(storedProfile.avatar.equippedAccessories);
       }
       
       if (savedCards) {
         const cards = JSON.parse(savedCards);
         const unlockedCount = cards.filter((c: any) => c.unlocked).length;
         setCardCount(unlockedCount);
+        updateUserProfile({ collection: { ...storedProfile.collection, cards } });
+      } else if (storedProfile.collection?.cards) {
+        const unlockedCount = storedProfile.collection.cards.filter((c: any) => c.unlocked).length;
+        setCardCount(unlockedCount);
       }
 
-      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
-      if (typeof profile.academicStage === 'string') {
-        setAcademicStage(profile.academicStage);
+      if (typeof storedProfile.academicStage === 'string') {
+        setAcademicStage(storedProfile.academicStage);
       }
     };
 
@@ -548,7 +565,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="absolute bottom-6 right-6 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lg backdrop-blur-lg">
+      <div className="absolute bottom-6 right-24 z-30 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lg backdrop-blur-lg">
         <p className="text-[10px] uppercase tracking-wide text-slate-500">Academic placement</p>
         <p className="text-sm font-semibold text-slate-800">
           {activeAcademicStage ? activeAcademicStage.label : 'Not set'}

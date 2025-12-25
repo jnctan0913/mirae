@@ -273,4 +273,3 @@ export const AccessoryPanel: React.FC<AccessoryPanelProps> = ({
     </>
   );
 };
-

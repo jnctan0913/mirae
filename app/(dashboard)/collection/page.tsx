@@ -17,6 +17,7 @@ import {
   type EquippedAccessories,
 } from '@/components/MiraeCharacterEvolution';
 import { AccessoryPanel } from '@/components/AccessoryPanel';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 // ============= Types =============
 type Stage = 'S' | 'C' | 'O' | 'P' | 'E';
@@ -1281,26 +1282,32 @@ export default function MiraePlusStatement() {
   const [studentName, setStudentName] = useState('Student');
   const collectionScrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Load from localStorage
+  // Load from profile
   useEffect(() => {
     const user = getUser();
-    if (user?.name) {
+    const profile = getUserProfile();
+    if (profile.name) {
+      setStudentName(profile.name);
+    } else if (user?.name) {
       setStudentName(user.name);
     } else if (user?.email) {
       setStudentName(user.email.split('@')[0]);
     }
 
-    const savedReflections = localStorage.getItem('miraePlus_reflections');
-    const savedViewMode = localStorage.getItem('miraePlus_viewMode');
-    const savedAccessories = localStorage.getItem('miraePlus_accessories');
-    const savedCards = localStorage.getItem('miraePlus_cards');
+    if (profile.reflections) {
+      setReflections(profile.reflections);
+    }
 
-    if (savedReflections) setReflections(JSON.parse(savedReflections));
-    if (savedViewMode) setViewMode(savedViewMode as 'collection' | 'statement');
-    if (savedAccessories) setEquippedAccessories(JSON.parse(savedAccessories));
-    if (savedCards) {
-      const parsedCards = JSON.parse(savedCards);
-      setCards(parsedCards);
+    if (profile.collection?.viewMode) {
+      setViewMode(profile.collection.viewMode);
+    }
+
+    if (profile.avatar?.equippedAccessories) {
+      setEquippedAccessories(profile.avatar.equippedAccessories);
+    }
+
+    if (profile.collection?.cards) {
+      setCards(profile.collection.cards as IdentityCard[]);
     }
     setActivityLogs(loadActivityLogs());
   }, []);
@@ -1329,13 +1336,13 @@ export default function MiraePlusStatement() {
     if (!selectedCard) return;
     const updated = { ...reflections, [selectedCard.id]: currentReflection };
     setReflections(updated);
-    localStorage.setItem('miraePlus_reflections', JSON.stringify(updated));
+    updateUserProfile({ reflections: updated });
     setSelectedCard(null);
   };
 
   const handleViewModeChange = (mode: 'collection' | 'statement') => {
     setViewMode(mode);
-    localStorage.setItem('miraePlus_viewMode', mode);
+    updateUserProfile({ collection: { ...getUserProfile().collection, viewMode: mode } });
   };
 
   const handleDownloadStoryPdf = () => {
@@ -1350,8 +1357,10 @@ export default function MiraePlusStatement() {
   const handleAccessoryChange = (newAccessories: EquippedAccessories) => {
     console.log('Collection page: handleAccessoryChange called with:', newAccessories);
     setEquippedAccessories(newAccessories);
-    localStorage.setItem('miraePlus_accessories', JSON.stringify(newAccessories));
     console.log('Collection page: State updated, localStorage saved');
+    updateUserProfile({
+      avatar: { ...getUserProfile().avatar, equippedAccessories: newAccessories },
+    });
     
     // Dispatch custom event to notify other components
     if (typeof window !== 'undefined') {
@@ -1370,7 +1379,7 @@ export default function MiraePlusStatement() {
       card.id === cardId ? { ...card, ...updates } : card
     );
     setCards(updatedCards);
-    localStorage.setItem('miraePlus_cards', JSON.stringify(updatedCards));
+    updateUserProfile({ collection: { ...getUserProfile().collection, cards: updatedCards } });
   };
 
   const handleScrollToBottom = () => {

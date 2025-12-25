@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
 import { storage } from '@/lib/utils/storage';
+import { getUserProfile } from '@/lib/userProfile';
 import rolesData from '@/lib/data/roles.json';
 
 type RoleLocale = { en: string; ko: string };
@@ -145,7 +146,7 @@ export default function Stage1Page() {
   const shimmerTimer = useRef<number | null>(null);
   const swipeTimer = useRef<number | null>(null);
 
-  const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+  const profile = getUserProfile();
   const stage0Summary = profile.stage0Summary as { recommendedRoles?: string[] } | undefined;
   const recommendedIds = stage0Summary?.recommendedRoles ?? [];
   const recommendedRoles = recommendedIds.length
@@ -242,7 +243,7 @@ export default function Stage1Page() {
       const liked = swipes
         .filter((swipe) => swipe.swipeDirection === 'right')
         .map((swipe) => swipe.roleId);
-      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+      const profile = getUserProfile();
       storage.set('userProfile', {
         ...profile,
         likedRoles: Array.from(new Set(liked)),

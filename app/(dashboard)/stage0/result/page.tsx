@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { useUserStore } from '@/lib/stores/userStore';
 import { storage } from '@/lib/utils/storage';
+import { getUserProfile } from '@/lib/userProfile';
 import questionnaire from '@/lib/data/questionnaire.json';
 import rolesData from '@/lib/data/roles.json';
 
@@ -228,7 +229,7 @@ export default function Stage0ResultPage() {
   const router = useRouter();
   const { language } = useI18n();
   const { userId, completeStage } = useUserStore();
-  const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+  const profile = getUserProfile();
   const answers = (profile.questionnaireAnswers as Record<string, string[]>) ?? {};
   const [insightsExpanded, setInsightsExpanded] = useState(false);
 

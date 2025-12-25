@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import type { ActivityLog, ScopeStage } from '@/lib/activityLogs';
 import { MiraeCharacter, type CardType, getEvolutionMessage, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 type IdentityCardSummary = {
   id: string;
@@ -309,12 +310,19 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('miraePlus_accessories');
+      const profileState = getUserProfile();
       if (stored) {
         try {
-          setEquippedAccessories(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          setEquippedAccessories(parsed);
+          updateUserProfile({
+            avatar: { ...profileState.avatar, equippedAccessories: parsed },
+          });
         } catch (e) {
           console.error('Failed to parse accessories:', e);
         }
+      } else if (profileState.avatar?.equippedAccessories) {
+        setEquippedAccessories(profileState.avatar.equippedAccessories);
       }
       
       // Listen for accessory updates
@@ -322,7 +330,11 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
         const updated = localStorage.getItem('miraePlus_accessories');
         if (updated) {
           try {
-            setEquippedAccessories(JSON.parse(updated));
+            const parsed = JSON.parse(updated);
+            setEquippedAccessories(parsed);
+            updateUserProfile({
+              avatar: { ...getUserProfile().avatar, equippedAccessories: parsed },
+            });
           } catch (e) {
             console.error('Failed to parse updated accessories:', e);
           }
@@ -334,15 +346,34 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
     }
   }, []);
 
+  const profile = getUserProfile();
   const [executiveText, setExecutiveText] = useState(
-    `${executive.focus}\n\n${executive.change}\n\n${executive.surprise}`
+    profile.report?.executiveText ??
+      `${executive.focus}\n\n${executive.change}\n\n${executive.surprise}`
   );
   const [growthText, setGrowthText] = useState(
-    'Early activities show curiosity and experimenting. Later entries show more clarity in direction and confidence in choices.'
+    profile.report?.growthText ??
+      'Early activities show curiosity and experimenting. Later entries show more clarity in direction and confidence in choices.'
   );
   const [directionText, setDirectionText] = useState(
-    `Learning environment: ${rationale.environment}\n\nDepth to explore: ${rationale.explore}\n\nFlexibility: ${rationale.flexibility}`
+    profile.report?.directionText ??
+      `Learning environment: ${rationale.environment}\n\nDepth to explore: ${rationale.explore}\n\nFlexibility: ${rationale.flexibility}`
   );
+
+  const handleExecutiveChange = (value: string) => {
+    setExecutiveText(value);
+    updateUserProfile({ report: { ...profile.report, executiveText: value } });
+  };
+
+  const handleGrowthChange = (value: string) => {
+    setGrowthText(value);
+    updateUserProfile({ report: { ...profile.report, growthText: value } });
+  };
+
+  const handleDirectionChange = (value: string) => {
+    setDirectionText(value);
+    updateUserProfile({ report: { ...profile.report, directionText: value } });
+  };
 
   const activityCounts = useMemo(() => {
     return logs.reduce<Record<string, number>>((acc, log) => {
@@ -589,7 +620,7 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
         <EditableBlock
           label="Who I am in my own words"
           value={executiveText}
-          onChange={setExecutiveText}
+          onChange={handleExecutiveChange}
           systemGenerated
         />
       </div>
@@ -703,7 +734,7 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
           <EditableBlock
             label="How I have grown"
             value={growthText}
-            onChange={setGrowthText}
+            onChange={handleGrowthChange}
             systemGenerated
           />
         </div>
@@ -781,7 +812,7 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
         <EditableBlock
           label="Why I want to pursue this path"
           value={directionText}
-          onChange={setDirectionText}
+          onChange={handleDirectionChange}
           systemGenerated
         />
       </div>

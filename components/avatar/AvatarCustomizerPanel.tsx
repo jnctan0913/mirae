@@ -6,6 +6,7 @@ import { toPng } from 'html-to-image';
 import { AvatarComposer } from './AvatarComposer';
 import type { AccessoryId, ProgressState, AvatarConfig } from './avatarTypes';
 import { ACCESSORIES, getUnlockedAccessories, isAccessoryUnlocked, getAutoStylePreset } from './avatarRegistry';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 const STORAGE_KEY = 'mirae_avatar_config_v1';
 
@@ -24,19 +25,32 @@ export const AvatarCustomizerPanel: React.FC<AvatarCustomizerPanelProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  // Load from localStorage on mount
+  // Load from profile or localStorage on mount
   useEffect(() => {
+    const profile = getUserProfile();
+    const profileSelection = profile.avatar?.customizerSelectedAccessories ?? null;
+    if (profileSelection && profileSelection.length > 0) {
+      const unlocked = getUnlockedAccessories(progress);
+      const validSelection = profileSelection.filter((id) => unlocked.has(id));
+      setSelectedAccessories(validSelection);
+      return;
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const config: AvatarConfig = JSON.parse(saved);
-        // Only restore accessories that are still unlocked
-        const unlocked = getUnlockedAccessories(progress);
-        const validSelection = config.selectedAccessories.filter(id => unlocked.has(id));
-        setSelectedAccessories(validSelection);
-      } catch (e) {
-        console.error('Failed to load avatar config:', e);
-      }
+    if (!saved) return;
+    try {
+      const config: AvatarConfig = JSON.parse(saved);
+      const unlocked = getUnlockedAccessories(progress);
+      const validSelection = config.selectedAccessories.filter((id) => unlocked.has(id));
+      setSelectedAccessories(validSelection);
+      updateUserProfile({
+        avatar: {
+          ...profile.avatar,
+          customizerSelectedAccessories: validSelection,
+        },
+      });
+    } catch (e) {
+      console.error('Failed to load avatar config:', e);
     }
   }, [progress]);
 
@@ -45,6 +59,12 @@ export const AvatarCustomizerPanel: React.FC<AvatarCustomizerPanelProps> = ({
     const config: AvatarConfig = { selectedAccessories };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     onConfigChange?.(config);
+    updateUserProfile({
+      avatar: {
+        ...getUserProfile().avatar,
+        customizerSelectedAccessories: selectedAccessories,
+      },
+    });
   }, [selectedAccessories, onConfigChange]);
 
   const toggleAccessory = (id: AccessoryId) => {

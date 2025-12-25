@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useI18n } from '@/lib/i18n';
+import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 
 interface StoryboardPanel {
   scene: string;
@@ -16,22 +17,27 @@ interface Storyboard {
 }
 
 export default function Stage5Page() {
-  const [timeline, setTimeline] = useState('3-years');
-  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+  const profile = getUserProfile();
+  const [timeline, setTimeline] = useState(profile.stage5?.timeline ?? '3-years');
+  const [storyboard, setStoryboard] = useState<Storyboard | null>(
+    profile.stage5?.storyboard ?? null
+  );
   const router = useRouter();
   const { completeStage } = useUserStore();
   const { t } = useI18n();
 
   const handleGenerate = async () => {
     // Placeholder for storyboard generation
-    setStoryboard({
+    const nextStoryboard = {
       timeline,
       panels: [
         { scene: t('stage5Scene1'), time: t('stage5Scene1Time') },
         { scene: t('stage5Scene2'), time: t('stage5Scene2Time') },
         { scene: t('stage5Scene3'), time: t('stage5Scene3Time') },
       ],
-    });
+    };
+    setStoryboard(nextStoryboard);
+    updateUserProfile({ stage5: { timeline, storyboard: nextStoryboard } });
   };
 
   const handleComplete = () => {
@@ -54,7 +60,10 @@ export default function Stage5Page() {
             ].map((t) => (
               <button
                 key={t.id}
-                onClick={() => setTimeline(t.id)}
+                onClick={() => {
+                  setTimeline(t.id);
+                  updateUserProfile({ stage5: { ...getUserProfile().stage5, timeline: t.id } });
+                }}
                 className={`
                   w-full p-4 rounded-xl border-2 text-left transition-all
                   ${

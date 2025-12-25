@@ -12,6 +12,7 @@ import {
   TriggerReason,
 } from '@/lib/types/skillTranslation';
 import { useLanguageStore } from '@/lib/stores/languageStore';
+import { getUserProfile } from '@/lib/userProfile';
 
 // Translations
 const translations = {
@@ -39,6 +40,7 @@ export default function SkillTranslationPage() {
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguageStore();
+  const [isHydrated, setIsHydrated] = useState(false);
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -52,23 +54,17 @@ export default function SkillTranslationPage() {
   
   // Get user context - UPDATED TO INCLUDE NEW FIELDS
   const getUserContext = () => {
-    // TODO: Replace with actual user store
-    // For now, you can configure this based on your demo needs
-    
-    // EXAMPLE 1: Year 1 student who just selected courses
+    const profile = getUserProfile();
     return {
-      name: 'Min-soo',
-      yearLevel: 1 as YearLevel,
-      selectionStatus: 'completed' as SelectionStatus,
-      triggerReason: 'reflection' as TriggerReason,
-      currentSemester: '2025-Spring',
-      courses: ['디자인 사고', '데이터 분석', '미술과 삶'],
-      keywords: ['Curious explorer', 'Empathy-driven', 'Visual thinker'],
-      strengths: {
-        energizers: ['문제 해결', '사람 돕기'],
-        joys: ['창의적 작업'],
-      },
-      interests: ['UX Design', 'Social Entrepreneurship'],
+      name: profile.name,
+      yearLevel: profile.yearLevel as YearLevel,
+      selectionStatus: profile.selectionStatus as SelectionStatus,
+      triggerReason: profile.triggerReason as TriggerReason,
+      currentSemester: profile.currentSemester ?? undefined,
+      courses: profile.courses ?? [],
+      keywords: profile.keywords ?? [],
+      strengths: profile.strengths ?? { energizers: [], joys: [] },
+      interests: profile.interests ?? [],
     };
     
     /* EXAMPLE 2: Year 1 student BEFORE selection
@@ -114,12 +110,68 @@ export default function SkillTranslationPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    setIsHydrated(useLanguageStore.persist.hasHydrated());
+    const unsubscribe = useLanguageStore.persist.onFinishHydration(() => {
+      setIsHydrated(true);
+    });
+    return unsubscribe;
+  }, []);
   
   useEffect(() => {
-    if (messages.length === 0) {
-      handleSendMessage(undefined, true);
-    }
-  }, []);
+    if (!isHydrated) return;
+    const initializeChat = async () => {
+      setIsLoading(true);
+      setMessages([]);
+      setCurrentTurn(0);
+      setCurrentPhase('recap');
+      try {
+        const userContext = getUserContext();
+        const response = await fetch('/api/skill-translation/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [],
+            userContext,
+            currentTurn: 0,
+            forceRealAPI: false,
+            language,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('API request failed');
+        }
+
+        const data = await response.json();
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: data.message,
+          timestamp: new Date(),
+          source: data.source,
+        };
+
+        setMessages([assistantMessage]);
+        setCurrentTurn(data.currentTurn || 1);
+        setCurrentPhase(data.phase || 'recap');
+        setSource(data.source);
+      } catch (error) {
+        console.error('💥 Chat initialization error:', error);
+        const emergencyMessage: ChatMessage = {
+          role: 'assistant',
+          content: t.error,
+          timestamp: new Date(),
+          source: 'fallback',
+        };
+        setMessages([emergencyMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeChat();
+  }, [language, isHydrated]);
   
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
