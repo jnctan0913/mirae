@@ -1,63 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
 import { storage } from '@/lib/utils/storage';
 import { useI18n } from '@/lib/i18n';
+import questionnaire from '@/lib/data/questionnaire.json';
 
-// Placeholder questions - will be expanded
-const questions = [
-  {
-    id: 'q1',
-    questionKey: 'stage0Question',
-    type: 'multi-select',
-    options: [
-      { id: 'analytical', labelKey: 'stage0OptionAnalytical', emoji: '🧠' },
-      { id: 'creative', labelKey: 'stage0OptionCreative', emoji: '🎨' },
-      { id: 'empathy', labelKey: 'stage0OptionEmpathy', emoji: '❤️' },
-      { id: 'organization', labelKey: 'stage0OptionOrganization', emoji: '📋' },
-    ],
-  },
-];
+type Language = 'ko' | 'en';
+type QuestionnaireOption = {
+  text_en?: string;
+  text_kr?: string;
+  tag?: string;
+  position?: 'left' | 'right';
+};
+type QuestionnaireItem = {
+  id: string;
+  ui_type: 'MCQ' | 'Swipe' | 'Tournament' | 'Slider';
+  question: { en: string; kr: string };
+  options: QuestionnaireOption[];
+};
+
+type StageQuestion = {
+  id: string;
+  question: string;
+  uiType: QuestionnaireItem['ui_type'];
+  options: { id: string; label: string; position?: 'left' | 'right' }[];
+};
+
+const buildQuestions = (language: Language): StageQuestion[] =>
+  (questionnaire.questions as QuestionnaireItem[]).map((item) => {
+    const options = item.options.map((option, optionIndex) => {
+      const label = language === 'ko' ? option.text_kr : option.text_en;
+      const fallbackId = `${item.id}-${optionIndex}`;
+
+      return {
+        id: option.tag ?? fallbackId,
+        label: label ?? fallbackId,
+        position: option.position,
+      };
+    });
+
+    return {
+      id: item.id,
+      question: language === 'ko' ? item.question.kr : item.question.en,
+      uiType: item.ui_type,
+      options,
+    };
+  });
 
 export default function Stage0Page() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const router = useRouter();
-  const { userId, completeStage } = useUserStore();
-  const { t } = useI18n();
+  const { userId, progress: userProgress } = useUserStore();
+  const { t, language } = useI18n();
+  const viewResultsLabel =
+    language === 'ko' ? '\uC9C4\uB2E8 \uACB0\uACFC \uBCF4\uAE30' : 'View results';
+  const viewSummaryLabel =
+    language === 'ko' ? '\uC694\uC57D \uBCF4\uAE30' : 'View summary';
 
+  const questions = useMemo(() => buildQuestions(language as Language), [language]);
   const question = questions[currentQ];
-  const progress = ((currentQ + 1) / questions.length) * 100;
+
+  if (!question) return null;
+
+  const progressPercent = ((currentQ + 1) / questions.length) * 100;
+  const isLast = currentQ === questions.length - 1;
 
   const handleSelect = (optionId: string) => {
     const qId = question.id;
+    const updatedAnswers = { ...answers, [qId]: [optionId] };
+    setAnswers(updatedAnswers);
+    const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+    storage.set('userProfile', {
+      ...profile,
+      userId,
+      questionnaireAnswers: updatedAnswers,
+      updatedAt: new Date().toISOString(),
+    });
 
-    if (question.type === 'single-select') {
-      setAnswers({ ...answers, [qId]: [optionId] });
-    } else {
-      const current = answers[qId] || [];
-      const updated = current.includes(optionId)
-        ? current.filter((id) => id !== optionId)
-        : [...current, optionId];
-      setAnswers({ ...answers, [qId]: updated });
+    if (currentQ < questions.length - 1) {
+      setCurrentQ((prev) => Math.min(prev + 1, questions.length - 1));
     }
   };
 
-  const handleComplete = () => {
-    const strengths = answers['q1'] || [];
+  const handleViewResults = () => {
+    router.push('/stage0/result');
+  };
 
-    // Store in localStorage
-    const profileData = {
-      userId,
-      strengths,
-      completedAt: new Date().toISOString(),
-    };
-    storage.set('userProfile', profileData);
-
-    completeStage(0);
-    router.push('/dashboard');
+  const handleViewSummary = () => {
+    router.push('/stage0/result');
   };
 
   const canProceed = answers[question.id]?.length > 0;
@@ -83,12 +116,12 @@ export default function Stage0Page() {
               <p>
                 {t('stage0ProgressLabel')} {currentQ + 1} / {questions.length}
               </p>
-              <p>{Math.round(progress)}%</p>
+              <p>{Math.round(progressPercent)}%</p>
             </div>
             <div className="bg-white/70 border border-white/70 rounded-full h-3 overflow-hidden shadow-inner">
               <div
                 className="h-full bg-gradient-to-r from-[#9BCBFF] via-[#F4A9C8] to-[#BEEDE3] transition-all duration-500"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
@@ -99,10 +132,15 @@ export default function Stage0Page() {
           <div className="relative">
             <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">{t('stage0Name')}</p>
             <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-slate-900">
-              {t(question.questionKey)}
+              {question.question}
             </h2>
 
-            <div className="space-y-3">
+            <div
+              className={[
+                'gap-3',
+                question.uiType === 'Slider' ? 'grid sm:grid-cols-2' : 'flex flex-col',
+              ].join(' ')}
+            >
               {question.options.map((option) => {
                 const isSelected = answers[question.id]?.includes(option.id);
 
@@ -119,8 +157,7 @@ export default function Stage0Page() {
                     ].join(' ')}
                   >
                     <div className="flex items-center gap-3">
-                      {option.emoji && <span className="text-2xl">{option.emoji}</span>}
-                      <span className="font-semibold text-slate-800">{t(option.labelKey)}</span>
+                      <span className="font-semibold text-slate-800">{option.label}</span>
                     </div>
                   </button>
                 );
@@ -138,12 +175,22 @@ export default function Stage0Page() {
           </button>
 
           <button
-            onClick={handleComplete}
-            disabled={!canProceed}
-            className="soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            onClick={handleViewSummary}
+            disabled={!userProgress.stage0Complete}
+            className="px-6 py-3 rounded-full border border-white/70 bg-white/70 text-slate-700 font-semibold hover:bg-white/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {t('stage0Complete')}
+            {viewSummaryLabel}
           </button>
+
+          {isLast && (
+            <button
+              onClick={handleViewResults}
+              disabled={!canProceed}
+              className="soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {viewResultsLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>

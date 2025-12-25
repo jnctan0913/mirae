@@ -145,7 +145,19 @@ export default function Stage1Page() {
   const shimmerTimer = useRef<number | null>(null);
   const swipeTimer = useRef<number | null>(null);
 
-  const currentRole = roles[currentIndex];
+  const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+  const stage0Summary = profile.stage0Summary as { recommendedRoles?: string[] } | undefined;
+  const recommendedIds = stage0Summary?.recommendedRoles ?? [];
+  const recommendedRoles = recommendedIds.length
+    ? roles.filter((role) => recommendedIds.includes(role.id))
+    : [];
+  const rolesToShow = recommendedRoles.length >= 5
+    ? recommendedRoles.slice(0, 5)
+    : recommendedRoles.length > 0
+      ? recommendedRoles
+      : roles;
+
+  const currentRole = rolesToShow[currentIndex];
   const roleTitle = language === 'ko' ? currentRole.title.ko : currentRole.title.en;
   const roleTagline = language === 'ko' ? currentRole.tagline.ko : currentRole.tagline.en;
   const roleDomain = language === 'ko' ? currentRole.domain.ko : currentRole.domain.en;
@@ -176,6 +188,10 @@ export default function Stage1Page() {
     language === 'ko'
       ? '미래를 확정하는 것이 아니라, 흥미가 어디로 향하는지 살펴보는 단계예요.'
       : 'Follow your gut. You are not choosing a future yet, just noticing what feels interesting.';
+  const noticeText =
+    language === 'ko'
+      ? '\uC774 5\uAC1C \uC5ED\uD560 \uCE74\uB4DC\uB294 Stage 0 \uC9C4\uB2E8\uACFC \uC628\uBCF4\uB529 \uB3C4\uD0AC\uC744 \uBC14\uD0D5\uC73C\uB85C \uCD94\uCC9C\uB41C \uACB0\uACFC\uC5D0\uC694.'
+      : 'These 5 role cards are suggested based on your Stage 0 answers and onboarding documents.';
   const hintLeft = language === 'ko' ? '왼쪽: 패스' : 'Swipe left to pass';
   const hintRight = language === 'ko' ? '오른쪽: 좋아요' : 'Swipe right to like';
   const hintFlip = language === 'ko' ? '가운데: 뒤집기' : 'Flip for details';
@@ -184,7 +200,9 @@ export default function Stage1Page() {
       ? '버튼을 누르거나 카드에서 스와이프해 보세요. 더 알고 싶다면 뒤집기.'
       : 'Tap the buttons, swipe the card, or flip for more.';
   const viewSummaryLabel = language === 'ko' ? '요약 보기' : 'View summary';
-  const progressPercent = (currentIndex / roles.length) * 100;
+  const progressPercent = rolesToShow.length
+    ? (currentIndex / rolesToShow.length) * 100
+    : 0;
   const dragDistance = Math.hypot(dragOffset.x, dragOffset.y);
   const dragIntensity = Math.min(dragDistance / 140, 1);
   const likeOpacity =
@@ -237,7 +255,7 @@ export default function Stage1Page() {
       existingSwipes.push(swipeData);
       storage.set('roleSwipes', existingSwipes);
 
-      if (currentIndex < roles.length - 1) {
+      if (currentIndex < rolesToShow.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
         completeStage(1);
@@ -348,12 +366,15 @@ export default function Stage1Page() {
             <p className="mt-3 max-w-md text-sm text-slate-600 sm:text-base">
               {subheadingText}
             </p>
+            <p className="mt-3 max-w-md rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-slate-600 shadow-sm">
+              {noticeText}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-white/70 bg-white/75 p-4 shadow-sm backdrop-blur">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
               <span>
-                {currentIndex + 1} / {roles.length}
+                {currentIndex + 1} / {rolesToShow.length}
               </span>
               <span>{Math.round(progressPercent)}% complete</span>
             </div>
