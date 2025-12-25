@@ -74,13 +74,10 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
-<<<<<<< HEAD
-=======
         env:
           # OpenAI API key is optional for builds - the app will work without it
           # Add OPENAI_API_KEY to repository secrets if you want AI features in production
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
->>>>>>> origin/master
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
