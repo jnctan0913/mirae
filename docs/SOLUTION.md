@@ -37,8 +37,9 @@ A platform that structures career exploration into 6 progressive stages, each bu
 **Objective:** Build foundational user profile through conversational data collection
 
 **Interaction:**
-- 5-10 questions (multi-select and single-select)
-- AI chatbot asks follow-up questions
+- Survey-style question cards sourced from `lib/data/questionnaire.json`
+- MCQ, Slider, Swipe, Tournament interaction types
+- AI chatbot asks follow-up questions after the survey
 - Captures: strengths, learning style, interests, fears, decision style
 
 **Output:**

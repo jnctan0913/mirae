@@ -1,13 +1,13 @@
-# SCOPE+
+﻿# SCOPE+
 **Dashboard-Based, Multi-Stage, AI-Powered Career Exploration Platform**
 
 ---
 
 ## Overview
 
-SCOPE+ is a dashboard-based career exploration platform that guides Korean high school students through 6 progressive stages—from initial self-understanding to final course selections. Each stage combines interactive activities (swipe mechanics, drag-drop, tournaments) with chatbot-guided reflection to build toward concrete course recommendations.
+SCOPE+ is a dashboard-based career exploration platform that guides Korean high school students through 6 progressive stages - from initial self-understanding to final course selections. Each stage combines interactive activities (swipe mechanics, drag-drop, tournaments) with chatbot-guided reflection to build toward concrete course recommendations.
 
-**Core Innovation:** Gamified exploration + AI synthesis → Data-driven course roadmap
+**Core Innovation:** Gamified exploration + AI synthesis -> Data-driven course roadmap
 
 ---
 
@@ -19,14 +19,14 @@ This repository contains documentation for the SCOPE+ project. The project struc
 
 ```
 .
-├── README.md                    # This file - project overview
-├── REVISED_24HR_PLAN.md         # 24-hour MVP development plan
-├── REVISED_APP_BLUEPRINT.md     # Complete product architecture blueprint
-├── AGENTS.md                    # Repository guidelines
-└── docs/
-    ├── PRD.md                   # Product Requirements Document
-    ├── PROBLEM.md              # Problem statement and context
-    └── SOLUTION.md             # Solution architecture and design
++-- README.md                    # This file - project overview
++-- REVISED_24HR_PLAN.md         # 24-hour MVP development plan
++-- REVISED_APP_BLUEPRINT.md     # Complete product architecture blueprint
++-- AGENTS.md                    # Repository guidelines
++-- docs/
+    +-- PRD.md                   # Product Requirements Document
+    +-- PROBLEM.md              # Problem statement and context
+    +-- SOLUTION.md             # Solution architecture and design
 ```
 
 ### Application Structure
@@ -35,28 +35,28 @@ The application has been set up with the following structure:
 
 ```
 app/
-├── (auth)/
-│   ├── login/           ✅ Login page
-│   └── signup/          ✅ Signup page
-├── (dashboard)/
-│   ├── dashboard/       ✅ Main dashboard hub
-│   ├── stage0/          ✅ Initial Questionnaire
-│   ├── stage1/          ✅ Role Roulette
-│   ├── stage2/          ✅ Course Roadmap Builder
-│   ├── stage3/          ✅ Skill Translation
-│   ├── stage4/          ✅ Tournament Bracket
-│   └── stage5/          ✅ Storyboard
-├── api/
-│   ├── chat/            ✅ Chatbot API
-│   └── analyze-roles/   ✅ Role analysis API
-├── layout.tsx           ✅ Root layout
-└── page.tsx             ✅ Home page (redirects to dashboard)
++-- (auth)/
+|   +-- login/           OK Login page
+|   +-- signup/          OK Signup page
++-- (dashboard)/
+|   +-- dashboard/       OK Main dashboard hub
+|   +-- stage0/          OK Initial Questionnaire
+|   +-- stage1/          OK Role Roulette
+|   +-- stage2/          OK Course Roadmap Builder
+|   +-- stage3/          OK Skill Translation
+|   +-- stage4/          OK Tournament Bracket
+|   +-- stage5/          OK Storyboard
++-- api/
+|   +-- chat/            OK Chatbot API
+|   +-- analyze-roles/   OK Role analysis API
++-- layout.tsx           OK Root layout
++-- page.tsx             OK Home page (redirects to dashboard)
 
 lib/
-├── auth.ts              ✅ Hardcoded authentication (2 test users)
-├── openai.ts            ✅ OpenAI service functions
-└── stores/
-    └── userStore.ts     ✅ Zustand user state store
++-- auth.ts              OK Hardcoded authentication (2 test users)
++-- openai.ts            OK OpenAI service functions
++-- stores/
+    +-- userStore.ts     OK Zustand user state store
 
 components/              # To be expanded with UI components
 ```
@@ -72,7 +72,8 @@ components/              # To be expanded with UI components
 ## The 6-Stage Journey
 
 ### Stage 0: Initial Questionnaire
-Self-understanding through conversational data collection with chatbot follow-up.
+Self-understanding through survey-style question cards with chatbot follow-up.
+Question source: `lib/data/questionnaire.json` (MCQ, Slider, Swipe, Tournament).
 
 ### Stage 1: Role Roulette
 Tinder-style swipe interface to explore 50 career roles and discover interests.
@@ -153,11 +154,11 @@ See `REVISED_APP_BLUEPRINT.md` for the complete product architecture, including:
 
 ## MVP Success Criteria
 
-- ✅ One complete user journey start-to-finish
-- ✅ Data persistence across stages
-- ✅ AI chatbot functional in at least 2 stages
-- ✅ Demo-ready presentation flow
-- ✅ All 6 stages accessible and functional
+- OK One complete user journey start-to-finish
+- OK Data persistence across stages
+- OK AI chatbot functional in at least 2 stages
+- OK Demo-ready presentation flow
+- OK All 6 stages accessible and functional
 
 ---
 
