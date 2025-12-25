@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import { ChatBubble } from './shared/ChatBubble';
-import { OptionButton } from './shared/OptionButton';
 import { StudentContextData } from '@/lib/types/onboarding.types';
 
 interface ContextCollectionPhaseProps {
@@ -37,23 +35,37 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       {/* Step 1: Year Level */}
       {step === 'year' && (
         <>
-          <ChatBubble sender="mirae">
-            First—what year are you in right now?
-          </ChatBubble>
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-md bg-white/95 border-2 border-[#9BCBFF]/40 text-slate-800 rounded-tl-sm">
+              <p className="text-xs font-semibold text-[#9BCBFF] mb-1">Mirae</p>
+              <p className="text-sm sm:text-base leading-relaxed">
+                First—what year are you in right now?
+              </p>
+            </div>
+          </div>
           <div className="flex gap-3 justify-end flex-wrap">
-            <OptionButton onClick={() => handleYearSelect('year1')}>
+            <button
+              onClick={() => handleYearSelect('year1')}
+              className="rounded-full px-4 py-2 text-sm bg-gradient-to-r from-[#E5E0FF] to-[#F4E4FF] text-slate-800 font-medium shadow-md hover:-translate-y-0.5 hover:from-[#D4CEFF] hover:to-[#E8D4FF] transition-all"
+            >
               Year 1 (고1)
-            </OptionButton>
-            <OptionButton onClick={() => handleYearSelect('year2')}>
+            </button>
+            <button
+              onClick={() => handleYearSelect('year2')}
+              className="rounded-full px-4 py-2 text-sm bg-gradient-to-r from-[#E5E0FF] to-[#F4E4FF] text-slate-800 font-medium shadow-md hover:-translate-y-0.5 hover:from-[#D4CEFF] hover:to-[#E8D4FF] transition-all"
+            >
               Year 2 (고2)
-            </OptionButton>
-            <OptionButton onClick={() => handleYearSelect('year3')}>
+            </button>
+            <button
+              onClick={() => handleYearSelect('year3')}
+              className="rounded-full px-4 py-2 text-sm bg-gradient-to-r from-[#E5E0FF] to-[#F4E4FF] text-slate-800 font-medium shadow-md hover:-translate-y-0.5 hover:from-[#D4CEFF] hover:to-[#E8D4FF] transition-all"
+            >
               Year 3 (고3)
-            </OptionButton>
+            </button>
           </div>
         </>
       )}
@@ -61,26 +73,44 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
       {/* Step 2: Course Selection Status */}
       {step === 'status' && (
         <>
-          <ChatBubble sender="student">
-            Year {data.yearLevel === 'year1' ? '1' : data.yearLevel === 'year2' ? '2' : '3'}
-          </ChatBubble>
-          <ChatBubble sender="mirae">
-            Got it—Year {data.yearLevel === 'year1' ? '1' : data.yearLevel === 'year2' ? '2' : '3'}. 
-            That's when a lot starts to feel real, huh?
-            <br/><br/>
-            Have you already picked your courses for this year, 
-            or are you still thinking about it?
-          </ChatBubble>
+          <div className="flex justify-end">
+            <div className="max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-md bg-gradient-to-br from-[#E5E0FF] to-[#F4E4FF] border-2 border-[#C7B9FF]/60 text-slate-800 rounded-tr-sm">
+              <p className="text-sm sm:text-base leading-relaxed">
+                Year {data.yearLevel === 'year1' ? '1' : data.yearLevel === 'year2' ? '2' : '3'}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-md bg-white/95 border-2 border-[#9BCBFF]/40 text-slate-800 rounded-tl-sm">
+              <p className="text-xs font-semibold text-[#9BCBFF] mb-1">Mirae</p>
+              <p className="text-sm sm:text-base leading-relaxed">
+                Got it—Year {data.yearLevel === 'year1' ? '1' : data.yearLevel === 'year2' ? '2' : '3'}. 
+                That's when a lot starts to feel real, huh?
+                <br/><br/>
+                Have you already picked your courses for this year, 
+                or are you still thinking about it?
+              </p>
+            </div>
+          </div>
           <div className="flex gap-3 justify-end flex-wrap">
-            <OptionButton onClick={() => handleStatusSelect('picked')}>
+            <button
+              onClick={() => handleStatusSelect('picked')}
+              className="rounded-full px-4 py-2 text-sm bg-gradient-to-r from-[#E5E0FF] to-[#F4E4FF] text-slate-800 font-medium shadow-md hover:-translate-y-0.5 hover:from-[#D4CEFF] hover:to-[#E8D4FF] transition-all"
+            >
               Already picked
-            </OptionButton>
-            <OptionButton onClick={() => handleStatusSelect('deciding')}>
+            </button>
+            <button
+              onClick={() => handleStatusSelect('deciding')}
+              className="rounded-full px-4 py-2 text-sm bg-gradient-to-r from-[#E5E0FF] to-[#F4E4FF] text-slate-800 font-medium shadow-md hover:-translate-y-0.5 hover:from-[#D4CEFF] hover:to-[#E8D4FF] transition-all"
+            >
               Still deciding
-            </OptionButton>
-            <OptionButton onClick={() => handleStatusSelect('reconsidering')}>
+            </button>
+            <button
+              onClick={() => handleStatusSelect('reconsidering')}
+              className="rounded-full px-4 py-2 text-sm bg-gradient-to-r from-[#E5E0FF] to-[#F4E4FF] text-slate-800 font-medium shadow-md hover:-translate-y-0.5 hover:from-[#D4CEFF] hover:to-[#E8D4FF] transition-all"
+            >
               Picked, but having second thoughts
-            </OptionButton>
+            </button>
           </div>
         </>
       )}
@@ -88,22 +118,31 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
       {/* Step 3: Current Feeling (conditional) */}
       {step === 'feeling' && (
         <>
-          <ChatBubble sender="student">
-            {data.courseSelectionStatus === 'deciding' ? 'Still deciding' : 'Picked, but having second thoughts'}
-          </ChatBubble>
-          <ChatBubble sender="mirae">
-            {data.courseSelectionStatus === 'deciding' 
-              ? "That makes sense—it's a big decision. What's making it hard to decide? Is there something specific you're stuck on, or just a general 'too many options' feeling?"
-              : "Ah, the second-guessing... I hear you. What's making you wonder if you chose right? Did something happen, or is it more of a nagging feeling?"
-            }
-          </ChatBubble>
+          <div className="flex justify-end">
+            <div className="max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-md bg-gradient-to-br from-[#E5E0FF] to-[#F4E4FF] border-2 border-[#C7B9FF]/60 text-slate-800 rounded-tr-sm">
+              <p className="text-sm sm:text-base leading-relaxed">
+                {data.courseSelectionStatus === 'deciding' ? 'Still deciding' : 'Picked, but having second thoughts'}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-md bg-white/95 border-2 border-[#9BCBFF]/40 text-slate-800 rounded-tl-sm">
+              <p className="text-xs font-semibold text-[#9BCBFF] mb-1">Mirae</p>
+              <p className="text-sm sm:text-base leading-relaxed">
+                {data.courseSelectionStatus === 'deciding' 
+                  ? "That makes sense—it's a big decision. What's making it hard to decide? Is there something specific you're stuck on, or just a general 'too many options' feeling?"
+                  : "Ah, the second-guessing... I hear you. What's making you wonder if you chose right? Did something happen, or is it more of a nagging feeling?"
+                }
+              </p>
+            </div>
+          </div>
           
           {/* Free text input */}
           <div className="flex gap-2 items-end">
             <input
               type="text"
               placeholder="Share what's on your mind..."
-              className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              className="flex-1 rounded-full px-4 py-3 bg-white/95 border-2 border-slate-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF] shadow-sm"
               onKeyPress={(e) => {
                 if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                   handleFreeTextSubmit(e.currentTarget.value);
@@ -111,7 +150,7 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
               }}
             />
             <button 
-              className="px-6 py-3 bg-gradient-to-r from-pink-300 to-orange-300 rounded-2xl text-white font-medium"
+              className="px-6 py-3 bg-gradient-to-r from-pink-300 to-orange-300 rounded-full text-white font-medium shadow-md hover:-translate-y-0.5 transition-all"
               onClick={(e) => {
                 const input = e.currentTarget.previousElementSibling as HTMLInputElement;
                 if (input?.value.trim()) {
@@ -124,7 +163,6 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 };
-
