@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { getUser, signOut } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Lock, Circle, ChevronLeft, ChevronRight, Sprout } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import Image from 'next/image';
+import { MiraeCharacter, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
+import { storage } from '@/lib/utils/storage';
 
 const stages = [
   { id: 0, nameKey: 'stage0Name', descriptionKey: 'stage0Description', path: '/stage0', letter: 'S', promptKey: 'journeyPromptStrengths' },
@@ -14,13 +16,25 @@ const stages = [
   { id: 2, nameKey: 'stage2Name', descriptionKey: 'stage2Description', path: '/stage2', letter: 'O', promptKey: 'journeyPromptOptions' },
   { id: 3, nameKey: 'stage3Name', descriptionKey: 'stage3Description', path: '/stage3', letter: 'P', promptKey: 'journeyPromptProof' },
   { id: 4, nameKey: 'stage4Name', descriptionKey: 'stage4Description', path: '/stage4', letter: 'E', promptKey: 'journeyPromptEvolve' },
-  { id: 5, nameKey: 'stage5Name', descriptionKey: 'stage5Description', path: '/stage5', letter: '+', promptKey: 'journeyPromptStoryboard' },
+  { id: 5, nameKey: 'stage5Name', descriptionKey: 'stage5Description', path: '/collection', letter: '+', promptKey: 'journeyPromptStoryboard' },
+];
+
+const academicStages = [
+  { id: 'pre-year-1', label: 'Pre-Year 1' },
+  { id: 'year-1-sem-1', label: 'Year 1 Semester 1' },
+  { id: 'year-1-sem-2', label: 'Year 1 Semester 2' },
+  { id: 'year-2-sem-1', label: 'Year 2 Semester 1' },
+  { id: 'year-2-sem-2', label: 'Year 2 Semester 2' },
 ];
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { progress, userId, setUserId, reset } = useUserStore();
   const [userName, setUserName] = useState('');
+  const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
+  const [cardCount, setCardCount] = useState(0);
+  const [academicStage, setAcademicStage] = useState<string | null>(null);
   const { t } = useI18n();
 
   useEffect(() => {
@@ -42,8 +56,62 @@ export default function DashboardPage() {
       if (localStorage.getItem(onboardingKey) !== 'true') {
         router.push('/onboarding');
       }
+
+      // Load accessories and card count from localStorage
+      const savedAccessories = localStorage.getItem('miraePlus_accessories');
+      const savedCards = localStorage.getItem('miraePlus_cards');
+      
+      if (savedAccessories) {
+        setEquippedAccessories(JSON.parse(savedAccessories));
+      }
+      
+      if (savedCards) {
+        const cards = JSON.parse(savedCards);
+        const unlockedCount = cards.filter((c: any) => c.unlocked).length;
+        setCardCount(unlockedCount);
+      }
+
+      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+      if (typeof profile.academicStage === 'string') {
+        setAcademicStage(profile.academicStage);
+      }
     }
-  }, [router, setUserId, t, userId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, setUserId, userId]);
+
+  // Listen for storage changes to update accessories in real-time
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedAccessories = localStorage.getItem('miraePlus_accessories');
+      const savedCards = localStorage.getItem('miraePlus_cards');
+      
+      if (savedAccessories) {
+        setEquippedAccessories(JSON.parse(savedAccessories));
+      }
+      
+      if (savedCards) {
+        const cards = JSON.parse(savedCards);
+        const unlockedCount = cards.filter((c: any) => c.unlocked).length;
+        setCardCount(unlockedCount);
+      }
+
+      const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+      if (typeof profile.academicStage === 'string') {
+        setAcademicStage(profile.academicStage);
+      }
+    };
+
+    // Listen for storage events (cross-tab updates)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom events (same-tab updates)
+    window.addEventListener('miraeAccessoriesUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('miraeAccessoriesUpdated', handleStorageChange);
+    };
+  }, []);
 
   const handleSignOut = () => {
     signOut();
@@ -82,16 +150,25 @@ export default function DashboardPage() {
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   const viewingStage = stages.find((stage) => stage.id === viewingStageId);
 
-  // Update viewing stage when progress changes
+  // Update viewing stage when progress changes or stage query param is present
   useEffect(() => {
+    const stageParam = searchParams.get('stage');
+    if (stageParam !== null) {
+      const stageId = parseInt(stageParam, 10);
+      if (!isNaN(stageId) && stageId >= 0 && stageId < stages.length) {
+        setViewingStageId(stageId);
+        return;
+      }
+    }
     setViewingStageId(progress.currentStage);
-  }, [progress.currentStage]);
+  }, [progress.currentStage, searchParams]);
 
   const canNavigateToPrevious = viewingStageId > 0;
   const canNavigateToNext = viewingStageId < stages.length - 1;
 
   const viewingStageStatus = getStageStatus(viewingStageId);
   const isViewingStageLocked = viewingStageStatus === 'locked';
+  const activeAcademicStage = academicStages.find((stage) => stage.id === academicStage);
 
   const handlePreviousStage = () => {
     if (canNavigateToPrevious) {
@@ -115,7 +192,7 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="h-screen px-6 pt-20 pb-6 bg-cover bg-center bg-no-repeat overflow-hidden"
+      className="relative h-screen px-6 pt-20 pb-6 bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{ backgroundImage: "url('/asset/Background.png')" }}
     >
       <div className="max-w-6xl mx-auto h-full flex flex-col space-y-4">
@@ -132,15 +209,23 @@ export default function DashboardPage() {
         {/* Journey Map */}
         <div className="relative flex-shrink-0">
           {/* Mirae Character */}
-          <div className="absolute -top-8 right-20 z-10">
-            <Image
-              src="/asset/Mirae_Icon1.png"
-              alt="Mirae"
-              width={150}
-              height={150}
-              className="object-contain floating"
-            />
-          </div>
+          <button
+            onClick={() => router.push('/collection')}
+            className="absolute -top-8 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
+            title="View your collection"
+            type="button"
+          >
+            <div className="floating pointer-events-none">
+              <MiraeCharacter
+                key={JSON.stringify(equippedAccessories)}
+                cardCount={cardCount}
+                recentCardTypes={[]}
+                size={150}
+                equippedAccessories={equippedAccessories}
+              />
+            </div>
+            <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors pointer-events-none" />
+          </button>
 
           {/* Journey Path */}
           <div className="relative py-6 px-6">
@@ -189,11 +274,11 @@ export default function DashboardPage() {
                     {/* Stage Label */}
                     <div className="text-center">
                       <p className={`text-xs font-semibold transition-colors ${isViewing ? 'text-slate-800' : isCurrent ? 'text-slate-700' : 'text-slate-600'}`}>
-                        {stage.letter === 'S' ? 'S | Strength' :
+                        {stage.letter === 'S' ? 'Strength' :
                          stage.letter === 'C' ? 'Curiosity' :
-                         stage.letter === 'O' ? 'O' :
-                         stage.letter === 'P' ? 'P | Proof' :
-                         stage.letter === 'E' ? 'E | Evolve' : '+'}
+                         stage.letter === 'O' ? 'Options' :
+                         stage.letter === 'P' ? 'Proof' :
+                         stage.letter === 'E' ? 'Evolve' : '+'}
                       </p>
                       {isViewing && (
                         <p className="text-[10px] text-[#9BCBFF] font-medium animate-fade-in">{t('journeyCurrent')}</p>
@@ -256,18 +341,18 @@ export default function DashboardPage() {
                           {/* Stage Header */}
                           <div className="flex items-center gap-3">
                             <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-[#9DD5F5] to-[#7EC4F0] flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
-                              {viewingStage.letter}
+                              {viewingStage?.letter}
                             </div>
                             <div>
                               <h2 className="text-2xl font-bold text-slate-800">
-                                {t(viewingStage.nameKey)}
+                                {viewingStage && t(viewingStage.nameKey)}
                               </h2>
                             </div>
                           </div>
 
                           {/* Stage Question */}
                           <p className="text-xl text-slate-700 font-medium">
-                            {t(viewingStage.promptKey)}
+                            {viewingStage && t(viewingStage.promptKey)}
                           </p>
 
                           {/* Subtitle */}
@@ -279,13 +364,21 @@ export default function DashboardPage() {
                         {/* Bottom Grid - Button centered */}
                         <div className="flex items-center justify-center flex-1">
                           <button
-                            onClick={() => !isViewingStageLocked && router.push(viewingStage.path)}
+                            onClick={() => {
+                              if (viewingStage && !isViewingStageLocked) {
+                                console.log('Navigating to stage:', viewingStage.path);
+                                router.push(viewingStage.path);
+                              } else {
+                                console.log('Cannot navigate - locked or no stage:', { isViewingStageLocked, viewingStage });
+                              }
+                            }}
                             disabled={isViewingStageLocked}
-                            className={`py-4 px-12 rounded-full text-lg font-semibold ${
+                            className={`py-4 px-12 rounded-full text-lg font-semibold transition-all ${
                               isViewingStageLocked
                                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                : 'soft-button'
+                                : 'soft-button hover:scale-105 active:scale-95'
                             }`}
+                            type="button"
                           >
                             Start exploring
                           </button>
@@ -319,18 +412,18 @@ export default function DashboardPage() {
                               viewingStageId === 4 ? 'from-[#B19CD9] to-[#A78BCA]' :
                               'from-[#FFB6D9] to-[#FF9EC7]'
                             } flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
-                              {viewingStage.letter}
+                              {viewingStage?.letter}
                             </div>
                             <div>
                               <h2 className="text-2xl font-bold text-slate-800">
-                                {t(viewingStage.nameKey)}
+                                {viewingStage && t(viewingStage.nameKey)}
                               </h2>
                             </div>
                           </div>
 
                           {/* Stage Question */}
                           <p className="text-xl text-slate-700 font-medium">
-                            {t(viewingStage.promptKey)}
+                            {viewingStage && t(viewingStage.promptKey)}
                           </p>
 
                           {/* Subtitle */}
@@ -342,13 +435,21 @@ export default function DashboardPage() {
                         {/* Bottom Grid - Button centered */}
                         <div className="flex items-center justify-center flex-1">
                           <button
-                            onClick={() => !isViewingStageLocked && router.push(viewingStage.path)}
+                            onClick={() => {
+                              if (viewingStage && !isViewingStageLocked) {
+                                console.log('Navigating to stage:', viewingStage.path);
+                                router.push(viewingStage.path);
+                              } else {
+                                console.log('Cannot navigate - locked or no stage:', { isViewingStageLocked, viewingStage });
+                              }
+                            }}
                             disabled={isViewingStageLocked}
-                            className={`py-4 px-12 rounded-full text-lg font-semibold ${
+                            className={`py-4 px-12 rounded-full text-lg font-semibold transition-all ${
                               isViewingStageLocked
                                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                : 'soft-button'
+                                : 'soft-button hover:scale-105 active:scale-95'
                             }`}
+                            type="button"
                           >
                             Start exploring
                           </button>
@@ -445,6 +546,13 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="absolute bottom-6 right-6 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lg backdrop-blur-lg">
+        <p className="text-[10px] uppercase tracking-wide text-slate-500">Academic placement</p>
+        <p className="text-sm font-semibold text-slate-800">
+          {activeAcademicStage ? activeAcademicStage.label : 'Not set'}
+        </p>
       </div>
     </div>
   );

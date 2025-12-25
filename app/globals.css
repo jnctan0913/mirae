@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+}
+
 :root {
   --mirae-blue: #9BCBFF;
   --mirae-lavender: #C7B9FF;
@@ -94,6 +100,81 @@ body {
     radial-gradient(circle at 70% 30%, rgba(244, 169, 200, 0.25), transparent 35%),
     radial-gradient(circle at 40% 70%, rgba(190, 237, 227, 0.2), transparent 30%);
   filter: blur(30px);
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+    color: #111111;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-storybook {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    padding: 24px 32px;
+  }
+
+  .print-storybook h2 {
+    font-size: 28px;
+    margin: 0 0 12px;
+  }
+
+  .print-storybook h3 {
+    font-size: 16px;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .print-storybook ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .storybook-page {
+    page-break-after: always;
+  }
+
+  .storybook-page:last-child {
+    page-break-after: auto;
+  }
+
+  .storybook-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .storybook-kicker {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+
+  .storybook-subtitle {
+    font-size: 14px;
+    margin-top: 4px;
+    color: #555555;
+  }
+
+  .storybook-body {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 16px 0;
+    white-space: pre-line;
+  }
 }
 
 @layer utilities {

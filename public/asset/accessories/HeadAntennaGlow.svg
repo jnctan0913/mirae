@@ -1,0 +1,24 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Antenna stick -->
+  <path
+    d="M48 75 L48 25"
+    stroke="#9DD5F5"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+  <!-- Glow orb -->
+  <circle cx="48" cy="20" r="12" fill="url(#antennaGlow)" />
+  <!-- Inner highlight -->
+  <circle cx="51" cy="17" r="4" fill="white" opacity="0.6" />
+  <!-- Sparkle -->
+  <path
+    d="M62 15 L64 17 L62 19 L60 17 Z"
+    fill="#FFD675"
+  />
+  <defs>
+    <radialGradient id="antennaGlow">
+      <stop offset="0%" stop-color="#FFE5A8" />
+      <stop offset="100%" stop-color="#FFD675" />
+    </radialGradient>
+  </defs>
+</svg>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface UserProgress {
   stage0Complete: boolean;
@@ -82,6 +82,19 @@ export const useUserStore = create<UserStore>()(
           },
         })),
     }),
-    { name: 'scope-user' }
+    { 
+      name: 'scope-user',
+      storage: createJSONStorage(() => {
+        if (typeof window === 'undefined') {
+          // Return a no-op storage for SSR
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          } as any;
+        }
+        return localStorage;
+      }),
+    }
   )
 );

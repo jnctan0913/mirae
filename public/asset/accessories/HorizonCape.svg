@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cape flowing shape -->
+  <path
+    d="M30 20 Q25 45 20 70 L40 75 Q50 60 60 75 L80 70 Q75 45 70 20 Q65 25 60 28 Q55 22 50 20 Q45 22 40 28 Q35 25 30 20 Z"
+    fill="url(#capeGrad)"
+  />
+  <!-- Highlight on left side -->
+  <path
+    d="M32 25 Q28 48 24 68 L38 72 Q45 60 50 65"
+    fill="white"
+    opacity="0.15"
+  />
+  <!-- Collar/attachment -->
+  <ellipse cx="50" cy="22" rx="22" ry="5" fill="#9A8BC2" />
+  <defs>
+    <linearGradient id="capeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#B19CD9" />
+      <stop offset="50%" stop-color="#A78BCA" />
+      <stop offset="100%" stop-color="#9A7AB8" />
+    </linearGradient>
+  </defs>
+</svg>

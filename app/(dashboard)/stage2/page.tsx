@@ -46,9 +46,9 @@ type SelectionSlot = {
 
 const categories: CourseCategory[] = ['general', 'career', 'interdisciplinary'];
 const categoryLabels: Record<CourseCategory, { en: string; ko: string }> = {
-  general: { en: 'General', ko: '??' },
-  career: { en: 'Career', ko: '??' },
-  interdisciplinary: { en: 'Interdisciplinary', ko: '??' },
+  general: { en: 'General', ko: '공통' },
+  career: { en: 'Career', ko: '진로' },
+  interdisciplinary: { en: 'Interdisciplinary', ko: '융합' },
 };
 
 const maxBucketSize = 6;
@@ -83,22 +83,22 @@ const strengthSignals: Record<
   analytical: {
     keywords: ['math', 'statistics', 'data', 'science', 'physics', 'chemistry', 'algebra', 'calculus'],
     reasonEn: 'Matches your analytical strengths',
-    reasonKo: '??? ??? ? ???',
+    reasonKo: '분석적 강점과 잘 맞아요',
   },
   creative: {
     keywords: ['art', 'music', 'theater', 'literature', 'media', 'writing', 'film'],
     reasonEn: 'Supports your creative strengths',
-    reasonKo: '??? ??? ????',
+    reasonKo: '창의적 강점을 살려줘요',
   },
   empathy: {
     keywords: ['ethics', 'culture', 'psychology', 'human', 'society', 'social', 'law', 'politics', 'communication'],
     reasonEn: 'Builds on your empathy/social strengths',
-    reasonKo: '??/??? ??? ????',
+    reasonKo: '공감·사회적 강점을 키워줘요',
   },
   organization: {
     keywords: ['economics', 'law', 'politics', 'workplace', 'communication', 'planning'],
     reasonEn: 'Aligns with your organization strengths',
-    reasonKo: '??/?? ??? ? ???',
+    reasonKo: '조직·관리 강점과 잘 맞아요',
   },
 };
 
@@ -109,77 +109,77 @@ const roleSignals: Record<
   'ux-designer': {
     keywords: ['design', 'media', 'art', 'writing', 'communication'],
     reasonEn: 'Related to roles you liked (UX)',
-    reasonKo: 'Related to roles you liked (UX)',
+    reasonKo: '좋아한 역할과 연관됨 (UX)',
   },
   'data-scientist': {
     keywords: ['data', 'statistics', 'math', 'informatics', 'science', 'ai'],
     reasonEn: 'Related to roles you liked (data/AI)',
-    reasonKo: 'Related to roles you liked (data/AI)',
+    reasonKo: '좋아한 역할과 연관됨 (데이터/AI)',
   },
   'product-manager': {
     keywords: ['product', 'strategy', 'roadmap', 'business', 'user', 'market', 'growth'],
     reasonEn: 'Related to roles you liked (product)',
-    reasonKo: 'Related to roles you liked (product)',
+    reasonKo: '좋아한 역할과 연관됨 (제품)',
   },
   'software-engineer': {
     keywords: ['software', 'computer', 'programming', 'coding', 'engineering', 'systems'],
     reasonEn: 'Related to roles you liked (engineering)',
-    reasonKo: 'Related to roles you liked (engineering)',
+    reasonKo: '좋아한 역할과 연관됨 (공학)',
   },
   'robotics-engineer': {
     keywords: ['robot', 'robotics', 'automation', 'hardware', 'mechatronics', 'control'],
     reasonEn: 'Related to roles you liked (robotics)',
-    reasonKo: 'Related to roles you liked (robotics)',
+    reasonKo: '좋아한 역할과 연관됨 (로보틱스)',
   },
   'environmental-scientist': {
     keywords: ['environment', 'ecology', 'climate', 'sustainability', 'earth', 'biology'],
     reasonEn: 'Related to roles you liked (environment)',
-    reasonKo: 'Related to roles you liked (environment)',
+    reasonKo: '좋아한 역할과 연관됨 (환경)',
   },
   'biomedical-researcher': {
     keywords: ['biomedical', 'biology', 'medicine', 'health', 'genetics', 'laboratory'],
     reasonEn: 'Related to roles you liked (biomedical)',
-    reasonKo: 'Related to roles you liked (biomedical)',
+    reasonKo: '좋아한 역할과 연관됨 (바이오메디컬)',
   },
   'clinical-psychologist': {
     keywords: ['psychology', 'mental', 'therapy', 'counseling', 'behavior', 'wellbeing'],
     reasonEn: 'Related to roles you liked (psychology)',
-    reasonKo: 'Related to roles you liked (psychology)',
+    reasonKo: '좋아한 역할과 연관됨 (심리)',
   },
   'social-entrepreneur': {
     keywords: ['social', 'community', 'impact', 'entrepreneur', 'nonprofit', 'sustainability'],
     reasonEn: 'Related to roles you liked (social impact)',
-    reasonKo: 'Related to roles you liked (social impact)',
+    reasonKo: '좋아한 역할과 연관됨 (사회적 임팩트)',
   },
   'teacher-educator': {
     keywords: ['education', 'teaching', 'learning', 'pedagogy', 'curriculum', 'school'],
     reasonEn: 'Related to roles you liked (education)',
-    reasonKo: 'Related to roles you liked (education)',
+    reasonKo: '좋아한 역할과 연관됨 (교육)',
   },
   journalist: {
     keywords: ['journalism', 'media', 'reporting', 'writing', 'news', 'communication'],
     reasonEn: 'Related to roles you liked (journalism)',
-    reasonKo: 'Related to roles you liked (journalism)',
+    reasonKo: '좋아한 역할과 연관됨 (저널리즘)',
   },
   'policy-analyst': {
     keywords: ['policy', 'government', 'public', 'economics', 'regulation', 'civic'],
     reasonEn: 'Related to roles you liked (policy)',
-    reasonKo: 'Related to roles you liked (policy)',
+    reasonKo: '좋아한 역할과 연관됨 (정책)',
   },
   'brand-strategist': {
     keywords: ['brand', 'marketing', 'strategy', 'advertising', 'storytelling', 'identity'],
     reasonEn: 'Related to roles you liked (brand)',
-    reasonKo: 'Related to roles you liked (brand)',
+    reasonKo: '좋아한 역할과 연관됨 (브랜드)',
   },
   'financial-analyst': {
     keywords: ['finance', 'investment', 'accounting', 'economics', 'markets', 'business'],
     reasonEn: 'Related to roles you liked (finance)',
-    reasonKo: 'Related to roles you liked (finance)',
+    reasonKo: '좋아한 역할과 연관됨 (금융)',
   },
   'urban-planner': {
     keywords: ['urban', 'city', 'planning', 'architecture', 'infrastructure', 'transportation'],
     reasonEn: 'Related to roles you liked (urban planning)',
-    reasonKo: 'Related to roles you liked (urban planning)',
+    reasonKo: '좋아한 역할과 연관됨 (도시 계획)',
   },
 };
 
@@ -464,20 +464,20 @@ export default function Stage2Page() {
   const addToAnchorLabel = language === 'ko' ? '필수과목에 추가' : 'Add to Required';
   const addToSignalLabel =
     language === 'ko' ? '관심·성향 선택과목에 추가' : 'Add to Electives';
-  const removeLabel = language === 'ko' ? '??' : 'Remove';
-  const searchPlaceholder = language === 'ko' ? '?? ??' : 'Search courses';
-  const subjectTitle = language === 'ko' ? '??' : 'Subjects';
-  const noCoursesLabel = language === 'ko' ? '??? ??? ????.' : 'No courses to show.';
-  const allLabel = language === 'ko' ? '??' : 'All';
-  const suggestionTitle = language === 'ko' ? '?? ??' : 'Suggested for you';
+  const removeLabel = language === 'ko' ? '제거' : 'Remove';
+  const searchPlaceholder = language === 'ko' ? '과목 검색' : 'Search courses';
+  const subjectTitle = language === 'ko' ? '과목' : 'Subjects';
+  const noCoursesLabel = language === 'ko' ? '표시할 과목이 없어요.' : 'No courses to show.';
+  const allLabel = language === 'ko' ? '전체' : 'All';
+  const suggestionTitle = language === 'ko' ? '추천 과목' : 'Suggested for you';
   const suggestionEmpty = language === 'ko'
-    ? '?? ??? ???? Stage 0/1? ??? ???.'
+    ? 'Stage 0/1을 완료하면 추천을 볼 수 있어요.'
     : 'Complete Stages 0/1 to see suggestions.';
-  const suggestionToggleLabel = language === 'ko' ? '??' : 'Collapse';
-  const suggestionToggleOpenLabel = language === 'ko' ? '???' : 'Expand';
-  const infoLabel = language === 'ko' ? '?? ??' : 'View description';
+  const suggestionToggleLabel = language === 'ko' ? '접기' : 'Collapse';
+  const suggestionToggleOpenLabel = language === 'ko' ? '펼치기' : 'Expand';
+  const infoLabel = language === 'ko' ? '설명 보기' : 'View description';
   const suggestionSubtitle = language === 'ko'
-    ? 'AI ??? Stage 0/1 ???? ?? ??? ???? ?????.'
+    ? '추천은 Stage 0/1, 업로드, 현재 선택을 기반으로 해요.'
     : 'Suggestions are based on Stages 0/1, your uploads, and your current selections.';
   const viewSummaryLabel = language === 'ko' ? '요약 보기' : 'View summary';
 
@@ -714,7 +714,7 @@ export default function Stage2Page() {
                       : noCoursesLabel}
                   </h2>
                   <p className="text-sm text-slate-500">
-                    {language === 'ko' ? '????? ?????.' : 'Choose a category.'}
+                    {language === 'ko' ? '카테고리를 선택해주세요.' : 'Choose a category.'}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
