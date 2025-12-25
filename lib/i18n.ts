@@ -158,6 +158,13 @@ const messages: Record<Language, Messages> = {
     stage4RunAnother: '다른 토너먼트 진행',
     stage4CombinedTitle: '최종 조합',
     stage4CombinedSummary: '{major} 전공과 {university} 대학의 조합',
+    stage4InsightTitle: '추천 근거',
+    stage4InsightStrengths: '강점과의 연결: {value}',
+    stage4InsightRoles: '관심 역할: {value}',
+    stage4ConfidenceLabel: '확신 정도',
+    stage4ConfidenceLow: '낮음',
+    stage4ConfidenceHigh: '높음',
+    stage4ConfidenceValue: '확신 {value}%',
     stage4IntroImageAlt: '토너먼트 시작 이미지',
     stage4ResultImageAlt: '토너먼트 결과 이미지',
     specializationUxDesign: 'UX 디자인',
@@ -354,6 +361,13 @@ const messages: Record<Language, Messages> = {
     stage4RunAnother: 'Run another tournament',
     stage4CombinedTitle: 'Final pairing',
     stage4CombinedSummary: '{major} major at {university}',
+    stage4InsightTitle: 'Why this fits',
+    stage4InsightStrengths: 'Strengths match: {value}',
+    stage4InsightRoles: 'Interested roles: {value}',
+    stage4ConfidenceLabel: 'Confidence',
+    stage4ConfidenceLow: 'Low',
+    stage4ConfidenceHigh: 'High',
+    stage4ConfidenceValue: 'Confidence {value}%',
     stage4IntroImageAlt: 'Tournament start artwork',
     stage4ResultImageAlt: 'Tournament result artwork',
     specializationUxDesign: 'UX Design',
@@ -411,6 +425,8 @@ export function useI18n() {
 
   return { t, language, setLanguage, toggleLanguage };
 }
+
+
 
 
 

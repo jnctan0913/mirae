@@ -360,9 +360,12 @@ export default function Stage4Page() {
   const [universityWinner, setUniversityWinner] = useState<Candidate | null>(null);
   const [history, setHistory] = useState<MatchSnapshot[]>([]);
   const [personalizedMajors, setPersonalizedMajors] = useState<Candidate[]>(MAJOR_CANDIDATES);
+  const [confidence, setConfidence] = useState(72);
+  const [insightStrengths, setInsightStrengths] = useState<string[]>([]);
+  const [insightRoles, setInsightRoles] = useState<string[]>([]);
   const router = useRouter();
   const { completeStage, userId } = useUserStore();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const startMajorTournament = () => {
     setPhase('major');
@@ -446,6 +449,33 @@ export default function Stage4Page() {
       if (token.length >= 3) tokens.add(token);
     });
 
+    const strengthLabels = (profile?.strengths ?? [])
+      .map((strength) => {
+        switch (strength) {
+          case 'analytical':
+            return t('stage0OptionAnalytical');
+          case 'creative':
+            return t('stage0OptionCreative');
+          case 'empathy':
+            return t('stage0OptionEmpathy');
+          case 'organization':
+            return t('stage0OptionOrganization');
+          default:
+            return strength;
+        }
+      })
+      .filter(Boolean)
+      .slice(0, 3);
+
+    const roleLabels = (profile?.likedRoles ?? [])
+      .map((roleId) => (rolesData as RoleProfile[]).find((role) => role.id === roleId))
+      .map((role) => (role ? (language === 'ko' ? role.title?.ko : role.title?.en) : null))
+      .filter((label): label is string => Boolean(label))
+      .slice(0, 3);
+
+    setInsightStrengths(strengthLabels);
+    setInsightRoles(roleLabels);
+
     if (tokens.size === 0) {
       setPersonalizedMajors(MAJOR_CANDIDATES);
       return;
@@ -479,7 +509,7 @@ export default function Stage4Page() {
       .map((entry) => entry.candidate);
 
     setPersonalizedMajors(sorted);
-  }, [userId]);
+  }, [language, t, userId]);
 
   const handlePick = (winner: Candidate) => {
     setHistory((prev) => [
@@ -876,6 +906,43 @@ export default function Stage4Page() {
               </p>
               <p className="text-sm text-slate-600 mt-2">
                 {majorWinner.summary} · {universityWinner.summary}
+              </p>
+            </div>
+            {(insightStrengths.length > 0 || insightRoles.length > 0) && (
+              <div className="bg-white/70 border border-white/70 rounded-2xl p-5 text-left shadow-md">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-3">
+                  {t('stage4InsightTitle')}
+                </p>
+                {insightStrengths.length > 0 && (
+                  <p className="text-sm text-slate-700">
+                    {t('stage4InsightStrengths', { value: insightStrengths.join(', ') })}
+                  </p>
+                )}
+                {insightRoles.length > 0 && (
+                  <p className="text-sm text-slate-700 mt-2">
+                    {t('stage4InsightRoles', { value: insightRoles.join(', ') })}
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="bg-white/70 border border-white/70 rounded-2xl p-5 text-left shadow-md">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-3">
+                {t('stage4ConfidenceLabel')}
+              </p>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-slate-500">{t('stage4ConfidenceLow')}</span>
+                <input
+                  type="range"
+                  min={40}
+                  max={100}
+                  value={confidence}
+                  onChange={(event) => setConfidence(Number(event.target.value))}
+                  className="w-full accent-[#9BCBFF]"
+                />
+                <span className="text-xs text-slate-500">{t('stage4ConfidenceHigh')}</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-700">
+                {t('stage4ConfidenceValue', { value: confidence })}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
