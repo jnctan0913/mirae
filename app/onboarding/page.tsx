@@ -17,6 +17,8 @@ export default function OnboardingPage() {
   const { state } = useOnboarding();
   const [userName, setUserName] = useState('');
   const [inputValue, setInputValue] = useState('');
+  const [inputEnabled, setInputEnabled] = useState(false);
+  const [inputPlaceholder, setInputPlaceholder] = useState('Share a thought, or skip if you like');
 
   const onboardingDoneKey = (userId: string) => `user_${userId}_onboardingDone`;
 
@@ -42,6 +44,18 @@ export default function OnboardingPage() {
       }
     }
   }, [router, setUserId]);
+
+  // Listen for input state updates from phases
+  useEffect(() => {
+    const handleInputState = (e: CustomEvent) => {
+      const { needsInput, placeholder } = e.detail;
+      setInputEnabled(needsInput);
+      setInputPlaceholder(placeholder || t('onboardingPlaceholder'));
+    };
+
+    window.addEventListener('onboardingInputState', handleInputState as EventListener);
+    return () => window.removeEventListener('onboardingInputState', handleInputState as EventListener);
+  }, [t]);
 
   const handleFinish = () => {
     const user = getUser();
@@ -117,26 +131,34 @@ export default function OnboardingPage() {
                   <input
                     type="text"
                     value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
+                    onChange={(e) => setInputEnabled && setInputValue(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && inputValue.trim()) {
+                      if (e.key === 'Enter' && inputValue.trim() && inputEnabled) {
                         // Trigger submit through the chat component
                         window.dispatchEvent(new CustomEvent('onboardingSubmit', { detail: inputValue }));
                         setInputValue('');
                       }
                     }}
-                    placeholder={t('onboardingPlaceholder')}
-                    className="w-full rounded-full pl-14 pr-4 py-3 bg-white/95 border-2 border-slate-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF] shadow-sm"
+                    placeholder={inputPlaceholder}
+                    disabled={!inputEnabled}
+                    className={`w-full rounded-full pl-14 pr-4 py-3 text-sm sm:text-base focus:outline-none shadow-sm transition-all ${
+                      inputEnabled 
+                        ? 'bg-white/95 border-2 border-slate-300 focus:ring-2 focus:ring-[#C7B9FF] focus:border-[#C7B9FF]' 
+                        : 'bg-slate-100/50 border-2 border-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}
                   />
                 </div>
                 <button
                   onClick={() => {
-                    if (inputValue.trim()) {
+                    if (inputValue.trim() && inputEnabled) {
                       window.dispatchEvent(new CustomEvent('onboardingSubmit', { detail: inputValue }));
                       setInputValue('');
                     }
                   }}
-                  className="soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold"
+                  disabled={!inputEnabled || !inputValue.trim()}
+                  className={`soft-button px-6 py-3 rounded-full text-sm sm:text-base font-semibold transition-all ${
+                    !inputEnabled || !inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   {t('stage3Send')}
                 </button>

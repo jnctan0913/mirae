@@ -13,6 +13,16 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
   const [step, setStep] = React.useState<'year' | 'status' | 'feeling'>('year');
   const [data, setData] = React.useState<Partial<StudentContextData>>({});
 
+  // Notify parent about input requirements
+  React.useEffect(() => {
+    window.dispatchEvent(new CustomEvent('onboardingInputState', { 
+      detail: { 
+        needsInput: step === 'feeling',
+        placeholder: step === 'feeling' ? "Share what's on your mind..." : "Share a thought, or skip if you like"
+      } 
+    }));
+  }, [step]);
+
   // Listen for input submission from the main input field
   React.useEffect(() => {
     if (step !== 'feeling') return;
