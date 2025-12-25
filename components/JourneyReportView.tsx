@@ -313,6 +313,9 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
   const [directionText, setDirectionText] = useState(
     profile.report?.directionText ?? ''
   );
+  const [storySummaryText, setStorySummaryText] = useState(
+    profile.report?.storySummary ?? ''
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -321,6 +324,7 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
       setExecutiveText(latest.report?.executiveText ?? '');
       setGrowthText(latest.report?.growthText ?? '');
       setDirectionText(latest.report?.directionText ?? '');
+      setStorySummaryText(latest.report?.storySummary ?? '');
       if (latest.avatar?.equippedAccessories) {
         setEquippedAccessories(latest.avatar.equippedAccessories);
       }
@@ -328,7 +332,7 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
 
     window.addEventListener('miraeProfileUpdated', handleProfileUpdate);
     return () => window.removeEventListener('miraeProfileUpdated', handleProfileUpdate);
-  }, [directionText, executiveText, growthText]);
+  }, [directionText, executiveText, growthText, storySummaryText]);
 
   const handleExecutiveChange = (value: string) => {
     setExecutiveText(value);
@@ -389,6 +393,9 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
               <p className="text-sm text-slate-600 mt-2">
                 A visual story of who I am, how I have grown, and why I choose my direction.
               </p>
+              {storySummaryText && (
+                <p className="text-sm text-slate-600 mt-3">{storySummaryText}</p>
+              )}
             </div>
             <div className="rounded-2xl border border-white/50 bg-white/80 p-3">
               <div className="w-28 h-28">
@@ -595,119 +602,120 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
         />
       </div>
 
-      <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
-        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">My Growth Journey</p>
-        <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-              <p className="text-sm font-semibold text-slate-700 mb-2">Curiosity timeline</p>
-              <div className="space-y-3">
-                {timeline.length > 0 ? (
-                  timeline.map((item) => (
-                    <div key={item.month} className="rounded-xl border border-white/60 bg-white/90 p-3">
-                      <p className="text-xs font-semibold text-slate-600 mb-1">{item.month}</p>
-                      <ul className="text-xs text-slate-500 space-y-1">
-                        {item.highlights.map((highlight) => (
-                          <li key={highlight}>- {highlight}</li>
-                        ))}
-                      </ul>
+      <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
+        <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
+          <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">My Growth Journey</p>
+          <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Curiosity timeline</p>
+                <div className="space-y-3">
+                  {timeline.length > 0 ? (
+                    timeline.map((item) => (
+                      <div key={item.month} className="rounded-xl border border-white/60 bg-white/90 p-3">
+                        <p className="text-xs font-semibold text-slate-600 mb-1">{item.month}</p>
+                        <ul className="text-xs text-slate-500 space-y-1">
+                          {item.highlights.map((highlight) => (
+                            <li key={highlight}>- {highlight}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400">Log activities to build your timeline.</p>
+                  )}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Growth arc</p>
+                {weeklyCounts.length > 0 ? (
+                  <div>
+                    <svg viewBox="0 0 200 60" className="w-full h-20">
+                      <polyline
+                        fill="none"
+                        stroke="#CBD5F5"
+                        strokeWidth="2"
+                        points={weeklyCounts
+                          .map((item, index) => {
+                            const x = (index / Math.max(1, weeklyCounts.length - 1)) * 200;
+                            const y = 58 - (maxWeekly > 0 ? (item.count / maxWeekly) * 50 : 0);
+                            return `${x},${y}`;
+                          })
+                          .join(' ')}
+                      />
+                      {weeklyCounts.map((item, index) => {
+                        const x = (index / Math.max(1, weeklyCounts.length - 1)) * 200;
+                        const y = 58 - (maxWeekly > 0 ? (item.count / maxWeekly) * 50 : 0);
+                        const stage = item.stages[0] || topStage;
+                        return (
+                          <circle key={`arc-${index}`} cx={x} cy={y} r="3" fill={stage ? stageHex[stage] : '#CBD5F5'} />
+                        );
+                      })}
+                    </svg>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>{dateBounds.start}</span>
+                      <span>{dateBounds.end}</span>
                     </div>
-                  ))
+                    <p className="text-[11px] text-slate-500 mt-2">
+                      Each point is one week. Higher points mean more entries; color shows the dominant stage that week.
+                    </p>
+                  </div>
                 ) : (
-                  <p className="text-sm text-slate-400">Log activities to build your timeline.</p>
+                  <p className="text-sm text-slate-400">Add logs to see your growth arc.</p>
                 )}
               </div>
             </div>
             <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-              <p className="text-sm font-semibold text-slate-700 mb-2">Growth arc</p>
-              {weeklyCounts.length > 0 ? (
-                <div>
-                  <svg viewBox="0 0 200 60" className="w-full h-20">
-                    <polyline
-                      fill="none"
-                      stroke="#CBD5F5"
-                      strokeWidth="2"
-                      points={weeklyCounts
-                        .map((item, index) => {
-                          const x = (index / Math.max(1, weeklyCounts.length - 1)) * 200;
-                          const y = 58 - (maxWeekly > 0 ? (item.count / maxWeekly) * 50 : 0);
-                          return `${x},${y}`;
-                        })
-                        .join(' ')}
-                    />
-                    {weeklyCounts.map((item, index) => {
-                      const x = (index / Math.max(1, weeklyCounts.length - 1)) * 200;
-                      const y = 58 - (maxWeekly > 0 ? (item.count / maxWeekly) * 50 : 0);
-                      const stage = item.stages[0] || topStage;
-                      return (
-                        <circle key={`arc-${index}`} cx={x} cy={y} r="3" fill={stage ? stageHex[stage] : '#CBD5F5'} />
-                      );
-                    })}
-                  </svg>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500">
-                    <span>{dateBounds.start}</span>
-                    <span>{dateBounds.end}</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-2">
-                    Each point is one week. Higher points mean more entries; color shows the dominant stage that week.
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">Add logs to see your growth arc.</p>
-              )}
-            </div>
-          </div>
-          <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-            <p className="text-sm font-semibold text-slate-700 mb-2">Stage shifts by month</p>
-            <div className="space-y-3">
-              {stageTimeline.length > 0 ? (
-                stageTimeline.map((item) => (
-                  <div key={`shift-${item.month}`} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs text-slate-500">
-                      <span>{item.month}</span>
-                      <span>{item.total} entries</span>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Stage shifts by month</p>
+              <div className="space-y-3">
+                {stageTimeline.length > 0 ? (
+                  stageTimeline.map((item) => (
+                    <div key={`shift-${item.month}`} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span>{item.month}</span>
+                        <span>{item.total} entries</span>
+                      </div>
+                      <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
+                        {(Object.keys(item.counts) as ScopeStage[]).map((stage) => {
+                          const count = item.counts[stage];
+                          if (count === 0) return null;
+                          const width = item.total > 0 ? (count / item.total) * 100 : 0;
+                          return (
+                            <div
+                              key={`${item.month}-${stage}`}
+                              className={stageColors[stage]}
+                              style={{ width: `${width}%` }}
+                              title={`${stageLabels[stage]}: ${count}`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
+                        {(Object.keys(item.counts) as ScopeStage[]).map((stage) =>
+                          item.counts[stage] > 0 ? (
+                            <span key={`${item.month}-label-${stage}`} className="flex items-center gap-1">
+                              <span className={`h-2 w-2 rounded-full ${stageColors[stage]}`} />
+                              {stageLabels[stage]} {item.counts[stage]}
+                            </span>
+                          ) : null
+                        )}
+                      </div>
                     </div>
-                    <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
-                      {(Object.keys(item.counts) as ScopeStage[]).map((stage) => {
-                        const count = item.counts[stage];
-                        if (count === 0) return null;
-                        const width = item.total > 0 ? (count / item.total) * 100 : 0;
-                        return (
-                          <div
-                            key={`${item.month}-${stage}`}
-                            className={stageColors[stage]}
-                            style={{ width: `${width}%` }}
-                            title={`${stageLabels[stage]}: ${count}`}
-                          />
-                        );
-                      })}
-                    </div>
-                    <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      {(Object.keys(item.counts) as ScopeStage[]).map((stage) =>
-                        item.counts[stage] > 0 ? (
-                          <span key={`${item.month}-label-${stage}`} className="flex items-center gap-1">
-                            <span className={`h-2 w-2 rounded-full ${stageColors[stage]}`} />
-                            {stageLabels[stage]} {item.counts[stage]}
-                          </span>
-                        ) : null
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-400">Log activities to see how stages shift over time.</p>
-              )}
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-400">Log activities to see how stages shift over time.</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
-        <div className="mt-4">
-          <EditableBlock
-            label="How I have grown"
-            value={growthText}
-            onChange={handleGrowthChange}
-            systemGenerated
-          />
-        </div>
+
+        <EditableBlock
+          label="How I have grown"
+          value={growthText}
+          onChange={handleGrowthChange}
+          systemGenerated
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { getUser } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
+import { useI18n } from '@/lib/i18n';
 import ActivityCalendar from '@/components/ActivityCalendar';
 import JourneyReportView from '@/components/JourneyReportView';
 import { loadActivityLogs, saveActivityLogs, type ActivityLog } from '@/lib/activityLogs';
@@ -550,6 +551,7 @@ const StatementView = ({ cards, onUpdateCard }: StatementViewProps) => {
 export default function MiraePlusStatement() {
   const router = useRouter();
   const { progress } = useUserStore();
+  const { language } = useI18n();
   const [cards, setCards] = useState<IdentityCard[]>([]);
   const [viewMode, setViewMode] = useState<'collection' | 'statement'>('collection');
   const [selectedCard, setSelectedCard] = useState<IdentityCard | null>(null);
@@ -563,6 +565,15 @@ export default function MiraePlusStatement() {
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [studentName, setStudentName] = useState('Student');
   const collectionScrollRef = useRef<HTMLDivElement | null>(null);
+  const reportGenerationRef = useRef(false);
+
+  const hashString = (value: string) => {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = (hash * 31 + value.charCodeAt(i)) % 1000000007;
+    }
+    return String(hash);
+  };
 
   // Load from profile
   const syncFromProfile = () => {
@@ -669,6 +680,96 @@ export default function MiraePlusStatement() {
       saveActivityLogs(activityLogs);
     }
   }, [activityLogs]);
+
+  useEffect(() => {
+    if (!adventureOpen || adventureView !== 'report') return;
+    if (reportGenerationRef.current) return;
+    const profile = getUserProfile();
+    const lastGeneratedAt = profile.reportSources?.generatedAt;
+    const profileCards = (profile.collection?.cards ?? []) as IdentityCard[];
+    const unlockedStatementCards = profileCards.filter((card) => card.unlocked);
+    const statementSections = {
+      drawnTo: unlockedStatementCards
+        .filter((card) => card.type === 'CuriosityThread' || card.type === 'ValueSignal')
+        .map((card) => ({
+          id: card.id,
+          title: card.title,
+          description: card.description,
+          type: card.type,
+          stage: card.stage,
+        })),
+      done: unlockedStatementCards
+        .filter((card) => card.type === 'Experience' || card.type === 'ProofMoment')
+        .map((card) => ({
+          id: card.id,
+          title: card.title,
+          description: card.description,
+          type: card.type,
+          stage: card.stage,
+        })),
+      changed: unlockedStatementCards
+        .filter((card) => card.type === 'ThenVsNow' || card.type === 'StrengthPattern')
+        .map((card) => ({
+          id: card.id,
+          title: card.title,
+          description: card.description,
+          type: card.type,
+          stage: card.stage,
+        })),
+    };
+    const reportInput = JSON.stringify({
+      profile,
+      cards: profileCards,
+      statementSections,
+      logs: profile.activityLogs ?? [],
+      progress,
+      language,
+    });
+    const inputHash = hashString(reportInput);
+    const recentlyGenerated =
+      lastGeneratedAt &&
+      Date.now() - new Date(lastGeneratedAt).getTime() < 1000 * 60 * 2;
+    if (recentlyGenerated && profile.reportSources?.inputHash === inputHash) return;
+
+    reportGenerationRef.current = true;
+    fetch('/api/journey-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: reportInput,
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error('Failed to generate report');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const nextReport = {
+          ...profile.report,
+          executiveText: data.executiveText,
+          growthText: data.growthText,
+          directionText: data.directionText,
+          storySummary: data.storySummary,
+        };
+        updateUserProfile({
+          report: nextReport,
+          reportSources: {
+            ...profile.reportSources,
+            executiveText: 'ai',
+            growthText: 'ai',
+            directionText: 'ai',
+            generatedAt: new Date().toISOString(),
+            inputHash,
+          },
+        });
+      })
+      .catch(() => {
+        // Silently ignore to avoid blocking UI.
+      })
+      .finally(() => {
+        reportGenerationRef.current = false;
+      });
+  }, [adventureOpen, adventureView, language, progress]);
 
   const handleUpdateCard = (cardId: string, updates: { title?: string; description?: string }) => {
     const updatedCards = cards.map((card) =>

@@ -54,6 +54,7 @@ export type UserProfile = {
     executiveText?: string;
     growthText?: string;
     directionText?: string;
+    storySummary?: string;
   };
   journeyNarrative?: {
     title?: string;
@@ -73,6 +74,8 @@ export type UserProfile = {
     executiveText?: string;
     growthText?: string;
     directionText?: string;
+    generatedAt?: string;
+    inputHash?: string;
   };
   avatar?: {
     collectedCards?: string[];

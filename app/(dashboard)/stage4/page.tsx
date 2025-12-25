@@ -445,7 +445,7 @@ export default function Stage4Page() {
       if (token.length >= 3) tokens.add(token);
     });
 
-    const strengthLabels = (profile?.strengths ?? [])
+    const strengthLabels = strengthTags
       .map((strength) => {
         switch (strength) {
           case 'analytical':
