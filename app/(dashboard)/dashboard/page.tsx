@@ -565,7 +565,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="absolute bottom-6 right-6 z-30 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lg backdrop-blur-lg">
+      <div className="absolute bottom-6 right-24 z-30 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lg backdrop-blur-lg">
         <p className="text-[10px] uppercase tracking-wide text-slate-500">Academic placement</p>
         <p className="text-sm font-semibold text-slate-800">
           {activeAcademicStage ? activeAcademicStage.label : 'Not set'}

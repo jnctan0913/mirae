@@ -19,8 +19,6 @@ export default function OnboardingPage() {
   const [userName, setUserName] = useState('');
   const [inputValue, setInputValue] = useState('');
 
-  const onboardingDoneKey = (userId: string) => `user_${userId}_onboardingDone`;
-
   useEffect(() => {
     const user = getUser();
     if (!user) {
@@ -35,11 +33,10 @@ export default function OnboardingPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const reset = urlParams.get('reset');
       if (reset === 'true') {
-        localStorage.removeItem(onboardingDoneKey(user.id));
+        updateUserProfile({ onboardingCompleted: false });
         return;
       }
-      const done = localStorage.getItem(onboardingDoneKey(user.id));
-      if (done === 'true') {
+      if (profile.onboardingCompleted) {
         router.push('/dashboard');
       }
     }
@@ -51,7 +48,7 @@ export default function OnboardingPage() {
       router.push('/login');
       return;
     }
-    localStorage.setItem(onboardingDoneKey(user.id), 'true');
+    updateUserProfile({ onboardingCompleted: true });
     router.push('/dashboard');
   };
 

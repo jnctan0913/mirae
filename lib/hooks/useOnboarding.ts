@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { OnboardingState, StudentContextData, Keyword } from '@/lib/types/onboarding.types';
+import { updateUserProfile } from '@/lib/userProfile';
 
 export function useOnboarding() {
   const [state, setState] = useState<OnboardingState>({
@@ -56,18 +57,13 @@ export function useOnboarding() {
   }, []);
 
   const completeOnboarding = useCallback(() => {
-    // Save to localStorage (keywords only, no files)
-    const dataToSave = {
-      yearLevel: state.studentData.yearLevel,
+    updateUserProfile({
+      onboardingCompleted: true,
       keywords: state.extractedKeywords
         .filter(k => !k.isRemoved)
         .map(k => k.text),
-      onboardingCompleted: true,
-      completedAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem('mirae_user_data', JSON.stringify(dataToSave));
-    
+    });
+
     // Clear uploaded files from memory
     setState(prev => ({ ...prev, uploadedFiles: [] }));
   }, [state]);
