@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { ActivityLog, ScopeStage } from '@/lib/activityLogs';
-import { MiraeCharacter, type CardType, getEvolutionMessage } from '@/components/MiraeCharacterEvolution';
+import { MiraeCharacter, type CardType, getEvolutionMessage, type EquippedAccessories } from '@/components/MiraeCharacterEvolution';
 
 type IdentityCardSummary = {
   id: string;
@@ -212,6 +212,37 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
   const rationale = useMemo(() => buildDirectionRationale(logs), [logs]);
   const executive = useMemo(() => buildExecutiveReflection(logs), [logs]);
 
+  // Load equipped accessories from localStorage
+  const [equippedAccessories, setEquippedAccessories] = useState<EquippedAccessories>({});
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('miraePlus_accessories');
+      if (stored) {
+        try {
+          setEquippedAccessories(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse accessories:', e);
+        }
+      }
+      
+      // Listen for accessory updates
+      const handleAccessoryUpdate = () => {
+        const updated = localStorage.getItem('miraePlus_accessories');
+        if (updated) {
+          try {
+            setEquippedAccessories(JSON.parse(updated));
+          } catch (e) {
+            console.error('Failed to parse updated accessories:', e);
+          }
+        }
+      };
+      
+      window.addEventListener('miraeAccessoriesUpdated', handleAccessoryUpdate);
+      return () => window.removeEventListener('miraeAccessoriesUpdated', handleAccessoryUpdate);
+    }
+  }, []);
+
   const [executiveText, setExecutiveText] = useState(
     `${executive.focus}\n\n${executive.change}\n\n${executive.surprise}`
   );
@@ -271,7 +302,13 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
             </div>
             <div className="rounded-2xl border border-white/50 bg-white/80 p-3">
               <div className="w-28 h-28">
-                <MiraeCharacter cardCount={unlockedCards.length} recentCardTypes={unlockedCards.map((c) => c.type)} size={120} />
+                <MiraeCharacter 
+                  key={`report-${JSON.stringify(equippedAccessories)}`}
+                  cardCount={unlockedCards.length} 
+                  recentCardTypes={unlockedCards.map((c) => c.type)} 
+                  size={120}
+                  equippedAccessories={equippedAccessories}
+                />
               </div>
               <p className="text-[11px] text-slate-500 mt-2 text-center">
                 {getEvolutionMessage(
