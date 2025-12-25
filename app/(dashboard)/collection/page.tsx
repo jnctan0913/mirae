@@ -1267,6 +1267,7 @@ export default function MiraePlusStatement() {
   const [activeCategory, setActiveCategory] = useState<CollectionSection | null>(null);
   const [adventureOpen, setAdventureOpen] = useState(false);
   const [adventureView, setAdventureView] = useState<'archive' | 'report'>('archive');
+  const [adventureToolsOpen, setAdventureToolsOpen] = useState(false);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [studentName, setStudentName] = useState('Student');
   const collectionScrollRef = useRef<HTMLDivElement | null>(null);
@@ -1294,6 +1295,18 @@ export default function MiraePlusStatement() {
     }
     setActivityLogs(loadActivityLogs());
   }, []);
+
+  useEffect(() => {
+    if (!adventureOpen) {
+      setAdventureToolsOpen(false);
+      return;
+    }
+    if (adventureView === 'report') {
+      setAdventureToolsOpen(false);
+    } else {
+      setAdventureToolsOpen(true);
+    }
+  }, [adventureOpen, adventureView]);
 
   const handleCardClick = (card: IdentityCard) => {
     if (!card.unlocked) {
@@ -1688,44 +1701,57 @@ export default function MiraePlusStatement() {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() => setAdventureView('archive')}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
-                      adventureView === 'archive'
-                        ? 'bg-slate-800 text-white'
-                        : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
-                    }`}
-                  >
-                    Activity Archive
-                  </button>
-                  <button
-                    onClick={() => setAdventureView('report')}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
-                      adventureView === 'report'
-                        ? 'bg-slate-800 text-white'
-                        : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
-                    }`}
-                  >
-                    Journey Report
-                  </button>
-                  <button
-                    onClick={() => setAdventureView('report')}
-                    className="px-4 py-2 rounded-full text-xs font-semibold bg-[#9BCBFF]/90 text-slate-800 hover:bg-[#9BCBFF] transition"
-                  >
-                    View Report
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
-                    type="button"
-                  >
-                    Download PDF
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
-                    type="button"
-                  >
-                    Share link
-                  </button>
+                  {adventureView === 'report' && (
+                    <button
+                      onClick={() => setAdventureToolsOpen((open) => !open)}
+                      className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
+                      type="button"
+                    >
+                      {adventureToolsOpen ? 'Hide tools' : 'Show tools'}
+                    </button>
+                  )}
+                  {(adventureView !== 'report' || adventureToolsOpen) && (
+                    <>
+                      <button
+                        onClick={() => setAdventureView('archive')}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                          adventureView === 'archive'
+                            ? 'bg-slate-800 text-white'
+                            : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
+                        }`}
+                      >
+                        Activity Archive
+                      </button>
+                      <button
+                        onClick={() => setAdventureView('report')}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                          adventureView === 'report'
+                            ? 'bg-slate-800 text-white'
+                            : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
+                        }`}
+                      >
+                        Journey Report
+                      </button>
+                      <button
+                        onClick={() => setAdventureView('report')}
+                        className="px-4 py-2 rounded-full text-xs font-semibold bg-[#9BCBFF]/90 text-slate-800 hover:bg-[#9BCBFF] transition"
+                      >
+                        View Report
+                      </button>
+                      <button
+                        className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
+                        type="button"
+                      >
+                        Download PDF
+                      </button>
+                      <button
+                        className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
+                        type="button"
+                      >
+                        Share link
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={handleCloseAdventure}
                     className="h-9 w-9 rounded-full bg-white/70 border border-white/60 text-slate-600 hover:text-slate-800 transition"

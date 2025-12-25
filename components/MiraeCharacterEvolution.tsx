@@ -403,18 +403,35 @@ export const MiraeCharacter: React.FC<MiraeCharacterProps> = ({
     realized: <MiraeRealizedSVG />,
   };
 
-  // Get equipped accessory components
-  const capeComponent = equippedAccessories.cape ? getAccessoryById(equippedAccessories.cape)?.component : null;
-  const hatComponent = equippedAccessories.hat ? getAccessoryById(equippedAccessories.hat)?.component : null;
-  const accessoryComponent = equippedAccessories.accessory ? getAccessoryById(equippedAccessories.accessory)?.component : null;
-  const effectComponent = equippedAccessories.effect ? getAccessoryById(equippedAccessories.effect)?.component : null;
+  // Get equipped accessory IDs and render fresh components
+  const capeId = equippedAccessories.cape;
+  const hatId = equippedAccessories.hat;
+  const accessoryId = equippedAccessories.accessory;
+  const effectId = equippedAccessories.effect;
 
-  console.log('Accessory components:', {
-    cape: capeComponent ? 'yes' : 'no',
-    hat: hatComponent ? 'yes' : 'no',
-    accessory: accessoryComponent ? 'yes' : 'no',
-    effect: effectComponent ? 'yes' : 'no',
-  });
+  console.log('Equipped accessories:', { capeId, hatId, accessoryId, effectId });
+
+  // Render accessory components fresh (not from stored JSX)
+  const renderAccessory = (id: string | undefined) => {
+    if (!id) return null;
+    
+    switch (id) {
+      // Hats
+      case 'star-crown': return <StarCrownSVG key={id} />;
+      case 'flower-crown': return <FlowerCrownSVG key={id} />;
+      case 'glow-halo': return <GlowHaloSVG key={id} />;
+      // Capes
+      case 'hero-cape': return <HeroCapeSVG key={id} />;
+      case 'magic-cape': return <MagicCapeSVG key={id} />;
+      // Accessories
+      case 'book': return <BookAccessorySVG key={id} />;
+      case 'butterfly': return <ButterflyAccessorySVG key={id} />;
+      // Effects
+      case 'sparkle': return <SparkleEffectSVG key={id} />;
+      case 'rainbow': return <RainbowAuraSVG key={id} />;
+      default: return null;
+    }
+  };
 
   return (
     <motion.div
@@ -426,19 +443,19 @@ export const MiraeCharacter: React.FC<MiraeCharacterProps> = ({
       style={{ width: size, height: size }}
     >
       {/* Cape (renders behind character) */}
-      {capeComponent}
+      {renderAccessory(capeId)}
       
       {/* Main character */}
       {characterMap[state]}
       
       {/* Hat (renders on top) */}
-      {hatComponent}
+      {renderAccessory(hatId)}
       
       {/* Accessory (renders on top) */}
-      {accessoryComponent}
+      {renderAccessory(accessoryId)}
       
       {/* Effect (renders on top, no pointer events) */}
-      {effectComponent}
+      {renderAccessory(effectId)}
     </motion.div>
   );
 };

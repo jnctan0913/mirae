@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useState } from 'react';
 import type { ActivityLog, ScopeStage } from '@/lib/activityLogs';
 import { MiraeCharacter, type CardType, getEvolutionMessage } from '@/components/MiraeCharacterEvolution';

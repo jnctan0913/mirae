@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useState } from 'react';
 import type { ActivityLog, ScopeStage } from '@/lib/activityLogs';
 
@@ -115,7 +117,7 @@ export default function ActivityCalendar({ logs, onAddLog }: ActivityCalendarPro
   }, [logs]);
 
   const selectedLogs = useMemo(() => {
-    return (logsByDate[selectedDate] || []).slice().sort((a, b) => a.title.localeCompare(b.title));
+    return (logsByDate[selectedDate] || []).slice();
   }, [logsByDate, selectedDate]);
 
   const handlePreviousMonth = () => {
