@@ -1745,7 +1745,7 @@ export default function MiraePlusStatement() {
                         : 'bg-white/80 text-slate-600 border border-white/40 hover:bg-white'
                     }`}
                   >
-                    View My Story
+                    Journey Report
                   </button>
                   
                   {/* Share Dropdown */}

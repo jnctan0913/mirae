@@ -250,6 +250,11 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
     const sorted = logs.slice().sort((a, b) => a.date.localeCompare(b.date));
     return sorted.slice(-14);
   }, [logs]);
+  const totalLogs = logs.length;
+  const topStage = useMemo(() => {
+    return (Object.entries(stageCounts) as [ScopeStage, number][])
+      .sort((a, b) => b[1] - a[1])[0]?.[0];
+  }, [stageCounts]);
 
   return (
     <div className="space-y-6">
@@ -281,6 +286,75 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
                 {unlockedCards.length} cards unlocked
               </p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3 no-print">
+        <div className="rounded-3xl border border-white/50 bg-white/90 p-5 shadow-lg backdrop-blur-lg">
+          <p className="text-xs uppercase tracking-wide text-slate-500">Story highlights</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <div className="rounded-2xl border border-white/50 bg-white/80 px-4 py-3">
+              <p className="text-xs text-slate-400">Total entries</p>
+              <p className="text-xl font-semibold text-slate-700">{totalLogs}</p>
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 px-4 py-3">
+              <p className="text-xs text-slate-400">Top stage</p>
+              <p className="text-sm font-semibold text-slate-700">
+                {topStage ? stageLabels[topStage] : 'Not yet'}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 px-4 py-3">
+              <p className="text-xs text-slate-400">Focus areas</p>
+              <p className="text-sm font-semibold text-slate-700">
+                {topActivities.length > 0
+                  ? topActivities.map(([type]) => activityTypeLabels[type as ActivityLog['activityType']]).join(', ')
+                  : 'Not yet'}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-3xl border border-white/50 bg-white/90 p-5 shadow-lg backdrop-blur-lg">
+          <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Stage balance</p>
+          <div className="space-y-3">
+            {(Object.keys(stageCounts) as ScopeStage[]).map((stage) => {
+              const count = stageCounts[stage];
+              const ratio = totalLogs > 0 ? Math.round((count / totalLogs) * 100) : 0;
+              return (
+                <div key={stage}>
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>{stageLabels[stage]}</span>
+                    <span>{ratio}%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-100">
+                    <div className={`h-2 rounded-full ${stageColors[stage]}`} style={{ width: `${ratio}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="rounded-3xl border border-white/50 bg-white/90 p-5 shadow-lg backdrop-blur-lg">
+          <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Activity mix</p>
+          <div className="space-y-3">
+            {topActivities.length > 0 ? (
+              topActivities.map(([type, count]) => {
+                const ratio = totalLogs > 0 ? Math.round((count / totalLogs) * 100) : 0;
+                return (
+                  <div key={type}>
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                      <span>{activityTypeLabels[type as ActivityLog['activityType']]}</span>
+                      <span>{ratio}%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100">
+                      <div className="h-2 rounded-full bg-[#9BCBFF]" style={{ width: `${ratio}%` }} />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-sm text-slate-400">Add activities to visualize your mix.</p>
+            )}
           </div>
         </div>
       </div>

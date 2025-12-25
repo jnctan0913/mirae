@@ -433,29 +433,39 @@ export const MiraeCharacter: React.FC<MiraeCharacterProps> = ({
     }
   };
 
+  console.log('Rendering MiraeCharacter with accessories:', { capeId, hatId, accessoryId, effectId });
+
   return (
     <motion.div
       key={`${state}-${JSON.stringify(equippedAccessories)}`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className={`relative ${className}`}
+      className={`relative overflow-visible ${className}`}
       style={{ width: size, height: size }}
     >
       {/* Cape (renders behind character) */}
-      {renderAccessory(capeId)}
+      <div className="absolute inset-0 pointer-events-none">
+        {renderAccessory(capeId)}
+      </div>
       
       {/* Main character */}
       {characterMap[state]}
       
       {/* Hat (renders on top) */}
-      {renderAccessory(hatId)}
+      <div className="absolute inset-0 pointer-events-none">
+        {renderAccessory(hatId)}
+      </div>
       
       {/* Accessory (renders on top) */}
-      {renderAccessory(accessoryId)}
+      <div className="absolute inset-0 pointer-events-none">
+        {renderAccessory(accessoryId)}
+      </div>
       
       {/* Effect (renders on top, no pointer events) */}
-      {renderAccessory(effectId)}
+      <div className="absolute inset-0 pointer-events-none">
+        {renderAccessory(effectId)}
+      </div>
     </motion.div>
   );
 };
