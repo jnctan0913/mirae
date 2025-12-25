@@ -479,26 +479,26 @@ export default function Stage4Page() {
         </div>
         <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-xs">
           <span
-            className={`rounded-full px-4 py-1 text-white/90 transition ${
+            className={`rounded-full px-4 py-1 text-slate-700 transition ${
               phase === 'major' || phase === 'intro'
-                ? 'bg-white/30'
-                : 'bg-white/15'
+                ? 'bg-white/60'
+                : 'bg-white/30'
             }`}
           >
             {t('stage4MajorTitle')}
           </span>
-          <span className="text-white/60">→</span>
+          <span className="text-white/80">→</span>
           <span
-            className={`rounded-full px-4 py-1 text-white/90 transition ${
-              phase === 'university' ? 'bg-white/30' : 'bg-white/15'
+            className={`rounded-full px-4 py-1 text-slate-700 transition ${
+              phase === 'university' ? 'bg-white/60' : 'bg-white/30'
             }`}
           >
             {t('stage4UniversityTitle')}
           </span>
-          <span className="text-white/60">→</span>
+          <span className="text-white/80">→</span>
           <span
-            className={`rounded-full px-4 py-1 text-white/90 transition ${
-              phase === 'result' ? 'bg-white/30' : 'bg-white/15'
+            className={`rounded-full px-4 py-1 text-slate-700 transition ${
+              phase === 'result' ? 'bg-white/60' : 'bg-white/30'
             }`}
           >
             {t('stage4FinalResults')}
@@ -559,7 +559,7 @@ export default function Stage4Page() {
                   {t('stage4MatchLabel', { current: matchIndex + 1, total: totalMatches })}
                 </p>
               </div>
-              <div className="text-sm text-white/80 bg-white/20 border border-white/30 rounded-full px-4 py-1">
+              <div className="text-sm text-slate-700 bg-white/20 border border-white/30 rounded-full px-4 py-1">
                 {t('stage4WinnersLocked', { value: nextRoundCandidates.length })}
               </div>
             </div>
@@ -695,19 +695,19 @@ export default function Stage4Page() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <button
                 onClick={resetTournament}
-                className="text-sm text-white/80 hover:text-white"
+                className="rounded-full border border-white/60 bg-white/20 px-4 py-1 text-sm text-slate-700 shadow-sm transition hover:bg-white/35"
               >
                 {t('stage4Restart')}
               </button>
               <button
                 onClick={handleUndo}
-                className="rounded-full border border-white/60 bg-white/25 px-4 py-1 text-sm text-white/90 shadow-sm transition hover:bg-white/35 disabled:text-white/40"
+                className="rounded-full border border-white/60 bg-white/25 px-4 py-1 text-sm text-slate-700 shadow-sm transition hover:bg-white/35 disabled:text-slate-400"
                 disabled={history.length === 0}
               >
                 {t('stage4Undo')}
               </button>
               {majorWinner && mode === 'university' && (
-                <div className="text-sm text-white/90">
+                <div className="rounded-full border border-white/60 bg-white/20 px-4 py-1 text-sm text-slate-700 shadow-sm">
                   {t('stage4CurrentMajor', { value: majorWinner.name })}
                 </div>
               )}
