@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { findBestMatch } from '@/lib/fallback/patternMatcher';
-import { UserContext, detectConversationType, ConversationType } from '@/lib/types/skillTranslation';
+import { UserContext, detectConversationType, ConversationType, ConversationPhase } from '@/lib/types/skillTranslation';
 
 /**
  * Skill Translation Chat API - ADAPTIVE VERSION
@@ -483,11 +483,23 @@ export async function POST(req: NextRequest) {
         
         console.log('✅ OpenAI API success');
         
+        // Calculate phase based on turn count for demo simplicity
+        // Simplified: 3 phases instead of 5
+        // Turns 0-2: recap, Turns 3-4: articulation, Turns 5+: closing
+        const newTurn = currentTurn + 1;
+        let calculatedPhase: ConversationPhase = 'recap';
+        if (newTurn >= 5) {
+          calculatedPhase = 'closing';
+        } else if (newTurn >= 3) {
+          calculatedPhase = 'articulation';
+        }
+        
         return NextResponse.json({
           message: aiMessage,
           source: 'openai',
           conversationType,
-          currentTurn: currentTurn + 1,
+          currentTurn: newTurn,
+          phase: calculatedPhase,
           usage: (completion as any).usage,
         });
         
