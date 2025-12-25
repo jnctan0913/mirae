@@ -13,6 +13,21 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
   const [step, setStep] = React.useState<'year' | 'status' | 'feeling'>('year');
   const [data, setData] = React.useState<Partial<StudentContextData>>({});
 
+  // Listen for input submission from the main input field
+  React.useEffect(() => {
+    if (step !== 'feeling') return;
+
+    const handleSubmit = (e: CustomEvent) => {
+      const feeling = e.detail;
+      if (feeling && feeling.trim()) {
+        handleFreeTextSubmit(feeling);
+      }
+    };
+
+    window.addEventListener('onboardingSubmit', handleSubmit as EventListener);
+    return () => window.removeEventListener('onboardingSubmit', handleSubmit as EventListener);
+  }, [step, data]);
+
   const handleYearSelect = (year: 'year1' | 'year2' | 'year3') => {
     setData(prev => ({ ...prev, yearLevel: year }));
     setStep('status');
