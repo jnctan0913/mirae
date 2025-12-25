@@ -477,6 +477,33 @@ export default function Stage4Page() {
             {t('stage4TournamentTitle')}
           </h1>
         </div>
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-xs">
+          <span
+            className={`rounded-full px-4 py-1 text-white/90 transition ${
+              phase === 'major' || phase === 'intro'
+                ? 'bg-white/30'
+                : 'bg-white/15'
+            }`}
+          >
+            {t('stage4MajorTitle')}
+          </span>
+          <span className="text-white/60">→</span>
+          <span
+            className={`rounded-full px-4 py-1 text-white/90 transition ${
+              phase === 'university' ? 'bg-white/30' : 'bg-white/15'
+            }`}
+          >
+            {t('stage4UniversityTitle')}
+          </span>
+          <span className="text-white/60">→</span>
+          <span
+            className={`rounded-full px-4 py-1 text-white/90 transition ${
+              phase === 'result' ? 'bg-white/30' : 'bg-white/15'
+            }`}
+          >
+            {t('stage4FinalResults')}
+          </span>
+        </div>
 
         {phase === 'intro' && (
           <div className="bg-white/80 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center border border-white/60">
@@ -625,6 +652,16 @@ export default function Stage4Page() {
                     </div>
                   )}
                   <p className="text-sm text-slate-600 mb-4">{candidate.summary}</p>
+                  {mode === 'university' && (
+                    <a
+                      href="https://example.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mb-3 inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-white"
+                    >
+                      {t('stage4UniversitySite')}
+                    </a>
+                  )}
                   <div className="mb-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">
                       {t('stage4WhyMatchup')}
@@ -664,7 +701,7 @@ export default function Stage4Page() {
               </button>
               <button
                 onClick={handleUndo}
-                className="text-sm text-white/80 hover:text-white disabled:text-white/40"
+                className="rounded-full border border-white/60 bg-white/25 px-4 py-1 text-sm text-white/90 shadow-sm transition hover:bg-white/35 disabled:text-white/40"
                 disabled={history.length === 0}
               >
                 {t('stage4Undo')}

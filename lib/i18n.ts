@@ -135,6 +135,7 @@ const messages: Record<Language, Messages> = {
     stage4CampusVibe: '캠퍼스 분위기: {value}',
     stage4Housing: '기숙사: {value}',
     stage4Exchange: '교환 프로그램: {value}',
+    stage4UniversitySite: '대학 웹사이트',
     stage4WhyMatchup: '추천 이유',
     stage4MatchAlignment: '높은 적합도 ({value}%)',
     stage4MatchCareer: '진로 적합: {value}',
@@ -330,6 +331,7 @@ const messages: Record<Language, Messages> = {
     stage4CampusVibe: 'Campus vibe: {value}',
     stage4Housing: 'Housing: {value}',
     stage4Exchange: 'Exchange: {value}',
+    stage4UniversitySite: 'University website',
     stage4WhyMatchup: 'Why this matchup',
     stage4MatchAlignment: 'Strong alignment ({value}%)',
     stage4MatchCareer: 'Career fit: {value}',
@@ -409,6 +411,7 @@ export function useI18n() {
 
   return { t, language, setLanguage, toggleLanguage };
 }
+
 
 
 
