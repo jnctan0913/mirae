@@ -42,7 +42,7 @@ export const HAPPY_PATH_YEAR1_PRE: ConversationTurn[] = [
   
   {
     turnNumber: 4,
-    phase: 'fear_check',
+    phase: 'fit-fear',
     trigger: ['문제', '창의', '분석'],
     miraeMessage: (ctx: UserContext) => `그런 역량을 키우고 싶다는 거네요!
 
@@ -400,7 +400,7 @@ ${ctx.yearLevel}학년이 되었네요.
   
   {
     turnNumber: 4,
-    phase: 'what_changed',
+    phase: 'expectation_vs_reality',
     trigger: ['좋아하는', '맞지 않는'],
     miraeMessage: (ctx: UserContext) => `자신을 더 알아가는 과정이네요. 그게 정말 중요해요.
 
@@ -446,7 +446,7 @@ export const HAPPY_PATH_YEAR3_PRESSURE: ConversationTurn[] = [
   
   {
     turnNumber: 2,
-    phase: 'conflicting_desires',
+    phase: 'pressure_acknowledgment',
     trigger: ['부모님', '대학', '진로'],
     miraeMessage: (ctx: UserContext) => `그 압박 속에서 힘들겠어요.
 

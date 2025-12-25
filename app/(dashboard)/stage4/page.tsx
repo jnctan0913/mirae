@@ -573,8 +573,32 @@ export default function Stage4Page() {
   };
 
   const handleComplete = () => {
+    if (!majorWinner || !universityWinner) {
+      return;
+    }
+
+    const result = {
+      major: { id: majorWinner.id, name: majorWinner.name },
+      university: { id: universityWinner.id, name: universityWinner.name },
+      confidence,
+      insightStrengths,
+      insightRoles,
+      completedAt: new Date().toISOString(),
+    };
+
+    const profile = storage.get<Record<string, unknown>>('userProfile', {}) ?? {};
+    storage.set('userProfile', {
+      ...profile,
+      stage4Result: result,
+    });
+    storage.set(`stage4Result_${userId ?? 'guest'}`, result);
+
     completeStage(4);
-    router.push('/dashboard');
+    const dashboardPath = `${BASE_PATH}/dashboard`;
+    router.push(dashboardPath);
+    if (typeof window !== 'undefined') {
+      window.location.assign(dashboardPath);
+    }
   };
 
   const currentPair = roundCandidates.slice(matchIndex * 2, matchIndex * 2 + 2);

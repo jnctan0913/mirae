@@ -418,6 +418,8 @@ function getContextGuidance(
 }
 
 export async function POST(req: NextRequest) {
+  let lang: 'ko' | 'en' = 'ko';
+
   try {
     const body = await req.json();
     const { 
@@ -436,7 +438,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Validate language
-    const lang = (language === 'en' || language === 'ko') ? language : 'ko';
+    lang = (language === 'en' || language === 'ko') ? language : 'ko';
     
     // DETECT CONVERSATION TYPE
     const conversationType = detectConversationType(userContext);
