@@ -244,7 +244,7 @@ const messages: Record<Language, Messages> = {
     stage0Subtitle: 'Let\'s chat and discover together what energizes you, what brings you joy, and what you naturally gravitate toward',
     onboardingTag: 'Let\'s connect',
     onboardingTitle: 'Welcome to Mirae, {name}!',
-    onboardingSubtitle: 'This is your private space to think about school and paths.',
+    onboardingSubtitle: 'Let\'s chat & make friends. This is your private space to think about school and paths.',
     onboardingGreeting: 'Hi, I\'m Mirae. We\'ll take this one step at a time.',
     onboardingIntro: 'When you think about school or activities, what usually gives you energy?',
     onboardingQuestion1: 'Tap what resonates.',
@@ -457,7 +457,6 @@ export function useI18n() {
 
   return { t, language, setLanguage, toggleLanguage };
 }
-
 
 
 

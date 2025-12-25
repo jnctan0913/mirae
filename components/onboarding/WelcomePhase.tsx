@@ -20,9 +20,6 @@ export const WelcomePhase: React.FC<WelcomePhaseProps> = ({
         <div className="max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-md bg-white/95 border-2 border-[#9BCBFF]/40 text-slate-800 rounded-tl-sm">
           <p className="text-xs font-semibold text-[#9BCBFF] mb-1">Mirae</p>
           <div className="text-sm sm:text-base leading-relaxed space-y-3">
-            <p className="text-lg">
-              Hi! Welcome to Mirae—your private space to think about school and paths. 🌱
-            </p>
             <p className="text-gray-600">
               No one else can see what we talk about here. Not teachers, 
               not parents, not friends. Just you and me.
