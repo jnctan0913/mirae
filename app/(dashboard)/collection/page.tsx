@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Sparkles, Pencil, Edit2, Check, X as XIcon } from 'lucide-react';
+import { Lock, Sparkles, Pencil, Edit2, Check, X as XIcon, Share2, Download, Link } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { getUser } from '@/lib/auth';
@@ -1271,6 +1271,7 @@ export default function MiraePlusStatement() {
   const [activeCategory, setActiveCategory] = useState<CollectionSection | null>(null);
   const [adventureOpen, setAdventureOpen] = useState(false);
   const [adventureView, setAdventureView] = useState<'archive' | 'report'>('archive');
+  const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [studentName, setStudentName] = useState('Student');
   const collectionScrollRef = useRef<HTMLDivElement | null>(null);
@@ -1303,6 +1304,7 @@ export default function MiraePlusStatement() {
     if (!adventureOpen) {
       // Remove body class when modal closes
       document.body.classList.remove('modal-open');
+      setShareDropdownOpen(false);
       return;
     }
     // Add body class when modal opens
@@ -1735,18 +1737,53 @@ export default function MiraePlusStatement() {
                   >
                     View My Story
                   </button>
-                  <button
-                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
-                    type="button"
-                  >
-                    Download PDF
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition"
-                    type="button"
-                  >
-                    Share link
-                  </button>
+                  
+                  {/* Share Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShareDropdownOpen(!shareDropdownOpen)}
+                      className="px-4 py-2 rounded-full text-xs font-semibold bg-white/80 text-slate-600 border border-white/40 hover:bg-white transition flex items-center gap-2"
+                      type="button"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      Share
+                    </button>
+                    
+                    {shareDropdownOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40" 
+                          onClick={() => setShareDropdownOpen(false)}
+                        />
+                        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-white/40 bg-white shadow-lg z-50 overflow-hidden">
+                          <button
+                            onClick={() => {
+                              // TODO: Implement PDF download
+                              console.log('Download PDF');
+                              setShareDropdownOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition flex items-center gap-3"
+                            type="button"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download PDF
+                          </button>
+                          <button
+                            onClick={() => {
+                              // TODO: Implement share link
+                              console.log('Share link');
+                              setShareDropdownOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition flex items-center gap-3"
+                            type="button"
+                          >
+                            <Link className="w-4 h-4" />
+                            Share link
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 

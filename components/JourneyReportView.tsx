@@ -229,6 +229,22 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
     }, {});
   }, [logs]);
 
+  const topActivities = useMemo(() => {
+    return Object.entries(activityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+  }, [activityCounts]);
+
+  const stageCounts = useMemo(() => {
+    return logs.reduce<Record<ScopeStage, number>>(
+      (acc, log) => {
+        acc[log.scopeStage] = (acc[log.scopeStage] || 0) + 1;
+        return acc;
+      },
+      { S: 0, C: 0, O: 0, P: 0, E: 0 }
+    );
+  }, [logs]);
+
   const reflections = logs.filter((log) => log.shortReflection).slice(0, 4);
   const snapshotDays = useMemo(() => {
     const sorted = logs.slice().sort((a, b) => a.date.localeCompare(b.date));
@@ -240,11 +256,11 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
       <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Cover</p>
-            <h2 className="text-2xl font-semibold text-slate-800">My Learning Journey</h2>
+            <p className="text-xs uppercase tracking-wide text-slate-500">View My Story</p>
+            <h2 className="text-2xl font-semibold text-slate-800">My Story Snapshot</h2>
             <p className="text-sm text-slate-500">{studentName || 'Student'} · {formatRange(logs)}</p>
             <p className="text-sm text-slate-600 mt-2">
-              This report reflects how my interests, strengths, and experiences evolved over time.
+              A visual story of who I am, how I have grown, and why I choose my direction.
             </p>
           </div>
           <div className="rounded-2xl border border-white/50 bg-white/80 p-3">
@@ -260,133 +276,189 @@ export default function JourneyReportView({ logs, cards, studentName }: JourneyR
                 'realized'
               )}
             </p>
+            <p className="text-[11px] text-slate-400 mt-1 text-center">
+              {unlockedCards.length} cards unlocked
+            </p>
           </div>
         </div>
       </div>
 
-      <EditableBlock
-        label="Executive Reflection"
-        value={executiveText}
-        onChange={setExecutiveText}
-        systemGenerated
-      />
-
-      <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
-        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Strengths (Observed Patterns)</p>
-        <ul className="space-y-2 text-sm text-slate-600">
-          {observedTendencies.length > 0 ? (
-            observedTendencies.map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-[#9BCBFF]" />
-                <span>{item}</span>
-              </li>
-            ))
-          ) : (
-            <li className="text-slate-400">Patterns will appear as you add more logs.</li>
-          )}
-        </ul>
-      </div>
-
-      <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
-        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Curiosity & Exploration Timeline</p>
-        <div className="space-y-4">
-          {timeline.length > 0 ? (
-            timeline.map((item) => (
-              <div key={item.month} className="rounded-2xl border border-white/50 bg-white/80 p-4">
-                <p className="text-sm font-semibold text-slate-700 mb-2">{item.month}</p>
-                <ul className="text-sm text-slate-600 space-y-1">
-                  {item.highlights.map((highlight) => (
-                    <li key={highlight}>- {highlight}</li>
+      <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
+        <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
+          <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Who I Am</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Identity signals</p>
+              <ul className="space-y-2 text-sm text-slate-600">
+                {observedTendencies.length > 0 ? (
+                  observedTendencies.map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="mt-1 h-2 w-2 rounded-full bg-[#9BCBFF]" />
+                      <span>{item}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-slate-400">Patterns will appear as you add more logs.</li>
+                )}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Top activity focus</p>
+              {topActivities.length > 0 ? (
+                <ul className="space-y-2 text-sm text-slate-600">
+                  {topActivities.map(([type, count]) => (
+                    <li key={type} className="flex items-center justify-between">
+                      <span>{activityTypeLabels[type as ActivityLog['activityType']]}</span>
+                      <span className="text-slate-500">{count}</span>
+                    </li>
                   ))}
                 </ul>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-slate-400">Log activities to build your timeline.</p>
-          )}
-        </div>
-      </div>
-
-      <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
-        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Experiences & Proof</p>
-        <div className="space-y-3">
-          {experiences.length > 0 ? (
-            experiences.map((exp) => (
-              <div key={`${exp.date}-${exp.title}`} className="rounded-2xl border border-white/50 bg-white/80 p-4">
-                <p className="text-xs text-slate-500">{exp.date}</p>
-                <p className="text-sm font-semibold text-slate-700">{exp.title}</p>
-                <p className="text-sm text-slate-600 mt-1">{exp.insight}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-slate-400">Add projects or club entries to highlight proof moments.</p>
-          )}
-        </div>
-      </div>
-
-      <EditableBlock
-        label="Growth & Change (Then vs Now)"
-        value={growthText}
-        onChange={setGrowthText}
-        systemGenerated
-      />
-
-      <EditableBlock
-        label="Academic Direction Rationale"
-        value={directionText}
-        onChange={setDirectionText}
-        systemGenerated
-      />
-
-      <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
-        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Appendix</p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-            <p className="text-sm font-semibold text-slate-700 mb-2">Activity counts</p>
-            <ul className="text-xs text-slate-600 space-y-1">
-              {Object.entries(activityCounts).map(([type, count]) => (
-                <li key={type} className="flex items-center justify-between">
-                  <span>{activityTypeLabels[type as ActivityLog['activityType']]}</span>
-                  <span>{count}</span>
-                </li>
-              ))}
-            </ul>
+              ) : (
+                <p className="text-sm text-slate-400">Add activities to highlight your focus.</p>
+              )}
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4 sm:col-span-2">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Signature cards</p>
+              {unlockedCards.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {unlockedCards.slice(0, 3).map((card) => (
+                    <div key={card.id} className="rounded-xl border border-white/60 bg-white/90 p-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-400">{stageLabels[card.stage]}</p>
+                      <p className="text-sm font-semibold text-slate-700">{card.title}</p>
+                      <p className="text-xs text-slate-500 mt-1">{card.description}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">Unlock cards to see your signature strengths.</p>
+              )}
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
-            <p className="text-sm font-semibold text-slate-700 mb-2">Selected reflections</p>
-            {reflections.length > 0 ? (
-              <ul className="text-xs text-slate-600 space-y-2">
-                {reflections.map((log) => (
-                  <li key={log.id}>
-                    <span className="text-slate-500">{log.date}: </span>
-                    "{log.shortReflection}"
-                  </li>
+        </div>
+
+        <EditableBlock
+          label="Who I am in my own words"
+          value={executiveText}
+          onChange={setExecutiveText}
+          systemGenerated
+        />
+      </div>
+
+      <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">My Growth Journey</p>
+        <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Curiosity timeline</p>
+              <div className="space-y-3">
+                {timeline.length > 0 ? (
+                  timeline.map((item) => (
+                    <div key={item.month} className="rounded-xl border border-white/60 bg-white/90 p-3">
+                      <p className="text-xs font-semibold text-slate-600 mb-1">{item.month}</p>
+                      <ul className="text-xs text-slate-500 space-y-1">
+                        {item.highlights.map((highlight) => (
+                          <li key={highlight}>- {highlight}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-400">Log activities to build your timeline.</p>
+                )}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Stage momentum</p>
+              <div className="flex flex-wrap gap-2 text-xs text-slate-600">
+                {(Object.keys(stageCounts) as ScopeStage[]).map((stage) => (
+                  <div key={stage} className="flex items-center gap-2 rounded-full border border-white/60 bg-white/90 px-3 py-1">
+                    <span className={`h-2 w-2 rounded-full ${stageColors[stage]}`} />
+                    <span>{stageLabels[stage]}</span>
+                    <span className="text-slate-400">{stageCounts[stage]}</span>
+                  </div>
                 ))}
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+            <p className="text-sm font-semibold text-slate-700 mb-2">Momentum map</p>
+            <div className="grid grid-cols-7 gap-2">
+              {snapshotDays.length > 0 ? (
+                snapshotDays.map((log) => (
+                  <div
+                    key={`${log.id}-snapshot`}
+                    className={`h-6 rounded-lg ${stageColors[log.scopeStage]}`}
+                    title={`${log.date}: ${log.title}`}
+                  />
+                ))
+              ) : (
+                <p className="text-xs text-slate-400">No activity yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <EditableBlock
+            label="How I have grown"
+            value={growthText}
+            onChange={setGrowthText}
+            systemGenerated
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
+        <div className="rounded-3xl border border-white/50 bg-white/90 p-6 shadow-lg backdrop-blur-lg">
+          <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">Why I Choose This Direction</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Proof moments</p>
+              {experiences.length > 0 ? (
+                <div className="space-y-2">
+                  {experiences.map((exp) => (
+                    <div key={`${exp.date}-${exp.title}`} className="rounded-xl border border-white/60 bg-white/90 p-3">
+                      <p className="text-xs text-slate-500">{exp.date}</p>
+                      <p className="text-sm font-semibold text-slate-700">{exp.title}</p>
+                      <p className="text-xs text-slate-500 mt-1">{exp.insight}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">Add projects or club entries to highlight proof moments.</p>
+              )}
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Program fit</p>
+              <ul className="space-y-2 text-sm text-slate-600">
+                <li>Learning environment: {rationale.environment}</li>
+                <li>Depth to explore: {rationale.explore}</li>
+                <li>Flexibility: {rationale.flexibility}</li>
               </ul>
-            ) : (
-              <p className="text-xs text-slate-400">Add reflections to see them here.</p>
-            )}
+            </div>
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4 sm:col-span-2">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Key reflections</p>
+              {reflections.length > 0 ? (
+                <ul className="text-xs text-slate-600 space-y-2">
+                  {reflections.map((log) => (
+                    <li key={log.id}>
+                      <span className="text-slate-500">{log.date}: </span>
+                      "{log.shortReflection}"
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-slate-400">Add reflections to capture key moments.</p>
+              )}
+            </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-white/50 bg-white/80 p-4 mt-4">
-          <p className="text-sm font-semibold text-slate-700 mb-2">Calendar snapshot</p>
-          <div className="grid grid-cols-7 gap-2">
-            {snapshotDays.length > 0 ? (
-              snapshotDays.map((log) => (
-                <div
-                  key={`${log.id}-snapshot`}
-                  className={`h-6 rounded-lg ${stageColors[log.scopeStage]}`}
-                  title={`${log.date}: ${log.title}`}
-                />
-              ))
-            ) : (
-              <p className="text-xs text-slate-400">No activity yet.</p>
-            )}
-          </div>
-        </div>
-        <p className="text-xs text-slate-400 italic mt-4">
-          This is a living document. You can revise it anytime.
-        </p>
+
+        <EditableBlock
+          label="Why I want to pursue this path"
+          value={directionText}
+          onChange={setDirectionText}
+          systemGenerated
+        />
       </div>
     </div>
   );
