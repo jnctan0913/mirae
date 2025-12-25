@@ -182,8 +182,9 @@ export default function DashboardPage() {
             onClick={() => router.push('/collection')}
             className="absolute -top-8 right-20 z-10 cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
             title="View your collection"
+            type="button"
           >
-            <div className="floating">
+            <div className="floating pointer-events-none">
               <MiraeCharacter
                 key={JSON.stringify(equippedAccessories)}
                 cardCount={cardCount}
@@ -192,7 +193,7 @@ export default function DashboardPage() {
                 equippedAccessories={equippedAccessories}
               />
             </div>
-            <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors" />
+            <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 transition-colors pointer-events-none" />
           </button>
 
           {/* Journey Path */}
