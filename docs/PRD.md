@@ -148,7 +148,7 @@ Korean high school **Year 1-2 students (age ~15-17)** navigating course selectio
 - *Traceability:* G5, UC4
 
 **R2. Stage 0: Initial Questionnaire**  
-- *Acceptance:* User completes 5-10 questions with chatbot follow-up  
+- *Acceptance:* User completes a survey-style questionnaire (from `lib/data/questionnaire.json`) with chatbot follow-up  
 - *Traceability:* G1, UC1
 
 **R3. Stage 1: Role Roulette**  
@@ -194,7 +194,8 @@ Korean high school **Year 1-2 students (age ~15-17)** navigating course selectio
 ## 10) Stage Specifications
 
 ### Stage 0: Initial Questionnaire
-- 5-10 questions (multi-select and single-select)
+- Survey-style question cards sourced from `lib/data/questionnaire.json`
+- MCQ, Slider, Swipe, Tournament interaction types
 - Chatbot follow-up questions
 - Captures: strengths, learning style, interests, fears, decision style
 - Output: User profile baseline

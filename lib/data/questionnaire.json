@@ -1,0 +1,440 @@
+﻿{
+  "assessment_metadata": {
+    "title_en": "Career Aptitude & Interest Assessment",
+    "title_kr": "진로 적성 및 흥미 검사",
+    "categories": [
+      "Occupational Interest",
+      "Work Values",
+      "Career Development Competency",
+      "Occupational Aptitude",
+      "Career Maturity"
+    ],
+    "total_questions": 15
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "type": "energy_source",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "When do you feel the most energized?",
+        "kr": "언제 가장 에너지가 생기나요?"
+      },
+      "reveals": "Core motivation source",
+      "options": [
+        {
+          "text_en": "Solving a tricky problem",
+          "text_kr": "어려운 문제를 풀 때",
+          "tag": "curiosity"
+        },
+        {
+          "text_en": "Helping someone understand",
+          "text_kr": "누군가를 도와 설명할 때",
+          "tag": "social"
+        },
+        {
+          "text_en": "Creating something new",
+          "text_kr": "무언가를 만들어낼 때",
+          "tag": "creativity"
+        },
+        {
+          "text_en": "Organizing or planning",
+          "text_kr": "정리하고 계획할 때",
+          "tag": "structure"
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "type": "problem_solving_style",
+      "ui_type": "Swipe",
+      "question": {
+        "en": "When something works out, it’s usually because…",
+        "kr": "일이 잘 풀릴 때, 보통 그 이유는…"
+      },
+      "reveals": "Cognitive style",
+      "options": [
+        {
+          "text_en": "I analyzed it carefully",
+          "text_kr": "꼼꼼히 분석했다",
+          "tag": "analysis"
+        },
+        {
+          "text_en": "I tried many ideas",
+          "text_kr": "여러 아이디어를 시도했다",
+          "tag": "ideation"
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "type": "preference",
+      "ui_type": "Tournament",
+      "question": {
+        "en": "Which problem feels more interesting?",
+        "kr": "어떤 문제가 더 흥미롭나요?"
+      },
+      "reveals": "Structure tolerance",
+      "options": [
+        {
+          "text_en": "Clear answer problems",
+          "text_kr": "정답이 있는 문제",
+          "tag": "structure"
+        },
+        {
+          "text_en": "Open-ended questions",
+          "text_kr": "정답이 여러 개인 문제",
+          "tag": "ambiguity"
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "type": "flow_state",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "You lose track of time when you’re…",
+        "kr": "시간을 잊게 되는 순간은…"
+      },
+      "reveals": "Flow trigger",
+      "options": [
+        {
+          "text_en": "Reading or researching",
+          "text_kr": "읽거나 조사할 때",
+          "tag": "research"
+        },
+        {
+          "text_en": "Talking deeply with others",
+          "text_kr": "깊은 대화를 나눌 때",
+          "tag": "social"
+        },
+        {
+          "text_en": "Making or designing",
+          "text_kr": "만들거나 디자인할 때",
+          "tag": "creative"
+        },
+        {
+          "text_en": "Practicing a skill",
+          "text_kr": "기술을 연습할 때",
+          "tag": "skill"
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "type": "values",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "What matters most to you in the long run?",
+        "kr": "장기적으로 가장 중요한 것은?"
+      },
+      "reveals": "Core values",
+      "options": [
+        {
+          "text_en": "Helping society",
+          "text_kr": "사회에 도움이 되는 일",
+          "tag": "social-value"
+        },
+        {
+          "text_en": "Personal growth",
+          "text_kr": "나의 성장",
+          "tag": "growth"
+        },
+        {
+          "text_en": "Stability",
+          "text_kr": "안정성",
+          "tag": "stability"
+        },
+        {
+          "text_en": "Recognition",
+          "text_kr": "인정받는 것",
+          "tag": "recognition"
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "type": "resilience",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "After a failure, you usually…",
+        "kr": "실패 후 보통 나는…"
+      },
+      "reveals": "Resilience style",
+      "options": [
+        {
+          "text_en": "Analyze what went wrong",
+          "text_kr": "원인을 분석한다",
+          "tag": "resilience"
+        },
+        {
+          "text_en": "Try again differently",
+          "text_kr": "다른 방식으로 다시 시도한다",
+          "tag": "reflection"
+        },
+        {
+          "text_en": "Take time to recover",
+          "text_kr": "시간을 두고 회복한다",
+          "tag": "adaptability"
+        },
+        {
+          "text_en": "Ask for help",
+          "text_kr": "도움을 구한다",
+          "tag": "support"
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "type": "work_environment",
+      "ui_type": "Slider",
+      "question": {
+        "en": "You work best when…",
+        "kr": "나는 보통…"
+      },
+      "reveals": "Collaboration preference",
+      "options": [
+        {
+          "position": "left",
+          "text_en": "Alone",
+          "text_kr": "혼자",
+          "tag": "autonomy"
+        },
+        {
+          "position": "right",
+          "text_en": "With others",
+          "text_kr": "함께",
+          "tag": "collaboration"
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "type": "learning_style",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "Learning feels best when it’s…",
+        "kr": "공부가 가장 잘 될 때는…"
+      },
+      "reveals": "Learning style",
+      "options": [
+        {
+          "text_en": "Explained step by step",
+          "text_kr": "단계적으로 설명될 때",
+          "tag": "structure"
+        },
+        {
+          "text_en": "Hands-on and practical",
+          "text_kr": "직접 해볼 때",
+          "tag": "practice"
+        },
+        {
+          "text_en": "Discussion-based",
+          "text_kr": "토론할 때",
+          "tag": "discussion"
+        },
+        {
+          "text_en": "Self-directed",
+          "text_kr": "스스로 탐색할 때",
+          "tag": "autonomy"
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "type": "values_conflict",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "You feel most uncomfortable when…",
+        "kr": "가장 불편함을 느낄 때는…"
+      },
+      "reveals": "Justice & values",
+      "options": [
+        {
+          "text_en": "People are treated unfairly",
+          "text_kr": "불공정한 대우",
+          "tag": "fairness"
+        },
+        {
+          "text_en": "Effort is ignored",
+          "text_kr": "노력이 무시될 때",
+          "tag": "achievement"
+        },
+        {
+          "text_en": "Rules are unclear",
+          "text_kr": "기준이 불분명할 때",
+          "tag": "structure"
+        },
+        {
+          "text_en": "Change is forced suddenly",
+          "text_kr": "갑작스러운 변화",
+          "tag": "stability"
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "type": "future_vision",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "A future that attracts you feels…",
+        "kr": "끌리는 미래는…"
+      },
+      "reveals": "Future orientation",
+      "options": [
+        {
+          "text_en": "Meaningful",
+          "text_kr": "의미 있는",
+          "tag": "meaning"
+        },
+        {
+          "text_en": "Stable",
+          "text_kr": "안정적인",
+          "tag": "stability"
+        },
+        {
+          "text_en": "Flexible",
+          "text_kr": "유연한",
+          "tag": "flexibility"
+        },
+        {
+          "text_en": "Impactful",
+          "text_kr": "영향력 있는",
+          "tag": "impact"
+        }
+      ]
+    },
+    {
+      "id": "Q11",
+      "type": "decision_making",
+      "ui_type": "Swipe",
+      "question": {
+        "en": "When choosing, you rely more on…",
+        "kr": "선택할 때 더 의존하는 것은…"
+      },
+      "reveals": "Decision style",
+      "options": [
+        {
+          "text_en": "Data and logic",
+          "text_kr": "데이터와 논리",
+          "tag": "logic"
+        },
+        {
+          "text_en": "Intuition and feeling",
+          "text_kr": "직감과 감정",
+          "tag": "intuition"
+        }
+      ]
+    },
+    {
+      "id": "Q12",
+      "type": "adaptability",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "You prefer work that is…",
+        "kr": "나는 이런 일이 더 좋다"
+      },
+      "reveals": "Change tolerance",
+      "options": [
+        {
+          "text_en": "Predictable",
+          "text_kr": "예측 가능한",
+          "tag": "stability"
+        },
+        {
+          "text_en": "Constantly changing",
+          "text_kr": "계속 변하는",
+          "tag": "change"
+        }
+      ]
+    },
+    {
+      "id": "Q13",
+      "type": "achievement",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "You feel proud when…",
+        "kr": "가장 뿌듯할 때는…"
+      },
+      "reveals": "Achievement meaning",
+      "options": [
+        {
+          "text_en": "I mastered something",
+          "text_kr": "무언가를 잘 해냈을 때",
+          "tag": "mastery"
+        },
+        {
+          "text_en": "Others benefit",
+          "text_kr": "누군가에게 도움이 되었을 때",
+          "tag": "social"
+        },
+        {
+          "text_en": "I improved myself",
+          "text_kr": "내가 성장했을 때",
+          "tag": "growth"
+        },
+        {
+          "text_en": "I’m recognized",
+          "text_kr": "인정받았을 때",
+          "tag": "recognition"
+        }
+      ]
+    },
+    {
+      "id": "Q14",
+      "type": "current_state",
+      "ui_type": "MCQ",
+      "question": {
+        "en": "Right now, you feel…",
+        "kr": "지금의 나는…"
+      },
+      "reveals": "Emotional baseline",
+      "options": [
+        {
+          "text_en": "Curious but unsure",
+          "text_kr": "궁금하지만 불안",
+          "tag": "curiosity"
+        },
+        {
+          "text_en": "Pressured",
+          "text_kr": "압박을 느낌",
+          "tag": "anxiety"
+        },
+        {
+          "text_en": "Calm and steady",
+          "text_kr": "비교적 안정",
+          "tag": "stability"
+        },
+        {
+          "text_en": "Motivated",
+          "text_kr": "의욕적",
+          "tag": "motivation"
+        }
+      ]
+    },
+    {
+      "id": "Q15",
+      "type": "autonomy",
+      "ui_type": "Slider",
+      "question": {
+        "en": "You’re more comfortable with…",
+        "kr": "나는 보통…"
+      },
+      "reveals": "Structure need",
+      "options": [
+        {
+          "position": "left",
+          "text_en": "Clear guidelines",
+          "text_kr": "명확한 기준",
+          "tag": "structure"
+        },
+        {
+          "position": "right",
+          "text_en": "Full freedom",
+          "text_kr": "완전한 자유",
+          "tag": "autonomy"
+        }
+      ]
+    }
+  ]
+}

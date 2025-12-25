@@ -168,6 +168,24 @@ Build foundational user profile through conversational data collection
 - **Mixed format**: Multiple choice + text input + chatbot conversation
 - **Adaptive questioning**: AI asks follow-up questions based on responses
 
+### Strengths Discovery Survey (Stage 0)
+**Purpose:** Run a structured survey to capture strengths-related signals before the chatbot follow-ups.
+
+**Question source:** `lib/data/questionnaire.json` (survey schema with `assessment_metadata` and `questions`).
+
+**Assessment types covered:**
+- Occupational Interest
+- Work Values
+- Career Development Competency
+- Occupational Aptitude
+- Career Maturity
+
+**Interaction model:**
+1. One question per card with a progress indicator.
+2. Supported UI types: MCQ, Slider, Swipe, Tournament (as defined in the JSON).
+3. Answer capture stores selected option tags and raw choice text for later synthesis.
+4. Short confirmation screen summarizes key signals before chatbot follow-ups.
+
 ### Data Collected
 
 **1. Identity Baseline**
