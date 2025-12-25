@@ -676,8 +676,10 @@ export default function Stage2Page() {
     <div
       className="relative min-h-screen px-6 py-10 text-slate-700"
       style={{
-        background:
-          'linear-gradient(135deg, #9BCBFF 0%, #C7B9FF 25%, #F4A9C8 50%, #FFD1A8 75%, #BEEDE3 100%)',
+        backgroundImage: 'url(/asset/Background.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
       }}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

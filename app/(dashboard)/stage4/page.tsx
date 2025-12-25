@@ -598,8 +598,10 @@ export default function Stage4Page() {
     <div
       className="min-h-screen p-6 sm:p-10"
       style={{
-        background:
-          'linear-gradient(135deg, #9BCBFF 0%, #C7B9FF 25%, #F4A9C8 50%, #FFD1A8 75%, #BEEDE3 100%)',
+        backgroundImage: 'url(/asset/Background.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
       }}
     >
       <div className="relative max-w-6xl mx-auto">

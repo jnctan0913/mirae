@@ -274,7 +274,12 @@ export default function SkillTranslationPage() {
   };
   
   return (
-    <div className="min-h-screen p-6" style={{ background: 'var(--mirae-gradient)' }}>
+    <div className="min-h-screen p-6" style={{
+      backgroundImage: 'url(/asset/Background.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
       <div className="max-w-3xl mx-auto">
         
         {/* Header */}
