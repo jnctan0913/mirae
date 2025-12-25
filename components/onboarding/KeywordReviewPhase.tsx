@@ -36,7 +36,7 @@ export const KeywordReviewPhase: React.FC<KeywordReviewPhaseProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4">
       <ChatBubble sender="mirae">
         Thanks for sharing! Give me a sec to look through these... 🔍
       </ChatBubble>

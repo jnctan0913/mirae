@@ -28,7 +28,7 @@ export const DocumentUploadPhase: React.FC<DocumentUploadPhaseProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4">
       <ChatBubble sender="mirae">
         <div className="space-y-3">
           <p>One more thing—some students find it helpful to share things like:</p>

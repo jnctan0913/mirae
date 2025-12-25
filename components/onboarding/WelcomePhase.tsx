@@ -16,7 +16,7 @@ export const WelcomePhase: React.FC<WelcomePhaseProps> = ({
   const [showDetails, setShowDetails] = React.useState(false);
 
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4">
       {/* Mirae welcome message */}
       <ChatBubble sender="mirae">
         <div className="space-y-3">

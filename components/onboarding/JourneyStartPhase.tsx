@@ -12,7 +12,7 @@ export const JourneyStartPhase: React.FC<JourneyStartPhaseProps> = ({
   onBegin
 }) => {
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4">
       <ChatBubble sender="mirae">
         <div className="space-y-3">
           <p className="text-lg">

@@ -37,7 +37,7 @@ export const ContextCollectionPhase: React.FC<ContextCollectionPhaseProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4">
       {/* Step 1: Year Level */}
       {step === 'year' && (
         <>
