@@ -1,6 +1,7 @@
-import { Candidate } from '@/types/candidate';
+import { Candidate } from '@/lib/types/candidate';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Use relative path for API calls (works in both dev and production)
+const API_URL = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
 
 export interface AIRecommendationRequest {
   userSummary: string;
@@ -20,31 +21,38 @@ export interface AIRecommendationResponse {
 export const extractUserSummary = (profile: any): string => {
   const sections = [];
   
-  if (profile.stage1Summary) {
-    const stage1 = profile.stage1Summary;
-    if (stage1.personalInterests) sections.push(`Interests: ${stage1.personalInterests}`);
-    if (stage1.academicStrengths) sections.push(`Academic strengths: ${stage1.academicStrengths}`);
-    if (stage1.careerGoals) sections.push(`Career goals: ${stage1.careerGoals}`);
-    if (stage1.learningStyle) sections.push(`Learning style: ${stage1.learningStyle}`);
-    if (stage1.personalValues) sections.push(`Values: ${stage1.personalValues}`);
+  // Prioritize most relevant data - keep it concise
+  // Stage 1 - Liked roles (most important)
+  if (profile.likedRoles?.length > 0) {
+    sections.push(`Interested in: ${profile.likedRoles.slice(0, 3).join(', ')}`);
   }
   
+  // Strengths (key for matching)
   if (profile.strengthTags?.length > 0) {
-    sections.push(`Key strengths: ${profile.strengthTags.join(', ')}`);
+    sections.push(`Strengths: ${profile.strengthTags.slice(0, 3).join(', ')}`);
   }
   
+  // Stage 0 - Primary interests
+  if (profile.stage0Profile) {
+    const stage0 = profile.stage0Profile;
+    if (stage0.primaryTag) sections.push(`Primary: ${stage0.primaryTag}`);
+    if (stage0.topSignals?.length > 0) sections.push(`Signals: ${stage0.topSignals.slice(0, 2).join(', ')}`);
+  }
+  
+  // Stage 2 - Course selection (if available)
   if (profile.stage2Selection) {
     const selection = profile.stage2Selection;
-    if (selection.anchor?.length > 0) sections.push(`Anchors: ${selection.anchor.join(', ')}`);
-    if (selection.signal?.length > 0) sections.push(`Signals: ${selection.signal.join(', ')}`);
+    if (selection.anchor?.length > 0) sections.push(`Anchor: ${selection.anchor.slice(0, 2).join(', ')}`);
   }
   
-  if (profile.likedRoles?.length > 0) {
-    sections.push(`Interested roles: ${profile.likedRoles.length} roles selected`);
+  // Keywords (concise)
+  if (profile.keywords?.length > 0) {
+    sections.push(`Keywords: ${profile.keywords.slice(0, 3).join(', ')}`);
   }
   
+  // If we have no data, provide a default
   if (sections.length === 0) {
-    return "Student exploring academic and career paths in South Korea.";
+    return "Korean high school student seeking major and university recommendations.";
   }
   
   return sections.join('. ');
@@ -58,21 +66,64 @@ export const generateAIRecommendations = async (
   console.log('Summary length:', request.userSummary.length);
   console.log('Current Major:', request.currentMajor);
   
+  // Validate userSummary is not empty
+  if (!request.userSummary || request.userSummary.trim().length === 0) {
+    console.error('User summary is empty');
+    return {
+      success: false,
+      recommendations: [],
+      count: 0,
+      type: request.type,
+      error: 'User profile data is insufficient. Please complete earlier stages first.',
+    };
+  }
+
   try {
-    const response = await fetch(`${API_URL}/api/generate-recommendations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
+    const apiPath = `${API_URL}/api/generate-recommendations`;
+    console.log('Calling API:', apiPath);
+    
+    // Add timeout to fetch call (90 seconds to allow for API processing)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+    
+    let response;
+    try {
+      response = await fetch(apiPath, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Request timed out. The AI service is taking longer than expected. Please try again.');
+      }
+      throw fetchError;
+    }
+    clearTimeout(timeoutId);
 
     console.log('API Response Status:', response.status);
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error:', errorText);
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      let errorText = '';
+      let errorData = null;
+      
+      try {
+        errorText = await response.text();
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        // If parsing fails, use the text as is
+      }
+      
+      console.error('API Error Status:', response.status);
+      console.error('API Error Text:', errorText);
+      
+      // Extract more detailed error message if available
+      const errorMessage = errorData?.details || errorData?.error || `API Error: ${response.status} ${response.statusText}`;
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -80,7 +131,8 @@ export const generateAIRecommendations = async (
     
     if (!data.success) {
       console.error('API returned failure:', data.error);
-      throw new Error(data.error || 'Failed to generate recommendations');
+      const errorMessage = data.details || data.error || 'Failed to generate recommendations';
+      throw new Error(errorMessage);
     }
 
     console.log(`Received ${data.recommendations.length} recommendations`);

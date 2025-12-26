@@ -78,7 +78,14 @@ export default function Stage4Page() {
     const initializeUserData = () => {
       const profile = getUserProfile();
       const summary = extractUserSummary(profile);
-      setUserSummary(summary);
+      
+      // Ensure we have a valid summary
+      if (summary && summary.trim().length > 0) {
+        setUserSummary(summary);
+      } else {
+        // Fallback summary if profile is empty
+        setUserSummary("Korean high school student exploring academic and career paths. Seeking personalized major and university recommendations.");
+      }
       
       // Extract strengths for insights
       const strengthMap: Record<string, string> = {
@@ -108,11 +115,24 @@ export default function Stage4Page() {
     setLoading(true);
     setError(null);
     
+    // Ensure userSummary is available
+    let summaryToUse = userSummary;
+    if (!summaryToUse || summaryToUse.trim().length === 0) {
+      const profile = getUserProfile();
+      summaryToUse = extractUserSummary(profile);
+      if (!summaryToUse || summaryToUse.trim().length === 0) {
+        setError('Please complete earlier stages (Stage 0, 1, or 2) to generate personalized recommendations.');
+        setLoading(false);
+        return;
+      }
+      setUserSummary(summaryToUse);
+    }
+    
     try {
       const result = await generateAIRecommendations({
-        userSummary,
+        userSummary: summaryToUse,
         type: 'major',
-        count: 8
+        count: 6 // Reduced from 8 for faster generation
       });
       
       if (result.success && result.recommendations.length > 0) {
@@ -129,39 +149,98 @@ export default function Stage4Page() {
       }
     } catch (error) {
       console.error('Failed to start major tournament:', error);
-      setError('AI failed to generate recommendations. Please check your API key and try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Provide more helpful error messages
+      let userFriendlyError = errorMessage;
+      if (errorMessage.includes('API key')) {
+        userFriendlyError = 'OpenAI API key is invalid or missing. Please check your .env.local file.';
+      } else if (errorMessage.includes('rate limit')) {
+        userFriendlyError = 'Too many requests. Please wait a moment and try again.';
+      } else if (errorMessage.includes('timeout')) {
+        userFriendlyError = 'Request took too long. Please try again.';
+      }
+      
+      setError(`AI failed to generate recommendations: ${userFriendlyError}`);
     } finally {
       setLoading(false);
     }
   };
 
   const startUniversityTournament = async (major: Candidate) => {
+    console.log('=== Starting University Tournament ===');
+    console.log('Major:', major.name);
+    console.log('Current phase:', phase);
+    console.log('Current mode:', mode);
+    
     setLoading(true);
     setError(null);
     
+    // Set phase to university immediately to show loading state
+    setPhase('university');
+    setMode('university');
+    console.log('Phase set to university, mode set to university');
+    
+    // Ensure userSummary is available
+    let summaryToUse = userSummary;
+    if (!summaryToUse || summaryToUse.trim().length === 0) {
+      const profile = getUserProfile();
+      summaryToUse = extractUserSummary(profile);
+      if (!summaryToUse || summaryToUse.trim().length === 0) {
+        console.error('No user summary available');
+        setError('Please complete earlier stages to generate university recommendations.');
+        setLoading(false);
+        setPhase('major'); // Revert phase on error
+        return;
+      }
+      setUserSummary(summaryToUse);
+    }
+    
+    console.log('User summary length:', summaryToUse.length);
+    console.log('Calling generateAIRecommendations...');
+    
     try {
       const result = await generateAIRecommendations({
-        userSummary,
+        userSummary: summaryToUse,
         type: 'university',
         currentMajor: major.name,
-        count: 5
+        count: 4 // Reduced from 5 for faster generation
       });
       
+      console.log('API Result:', result);
+      
       if (result.success && result.recommendations.length > 0) {
-        setPhase('university');
-        setMode('university');
+        console.log('University recommendations received:', result.recommendations.length);
+        console.log('Sample university:', result.recommendations[0]);
         setRoundCandidates(result.recommendations);
         setNextRoundCandidates([]);
         setMatchIndex(0);
         setRound(1);
+        console.log('University tournament initialized successfully');
       } else {
+        console.error('University tournament failed:', result.error);
         throw new Error(result.error || 'AI failed to generate university recommendations');
       }
     } catch (error) {
-      console.error('Failed to start university tournament:', error);
-      setError('AI failed to generate university recommendations. Please try again.');
+      console.error('=== Failed to start university tournament ===');
+      console.error('Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Provide more helpful error messages
+      let userFriendlyError = errorMessage;
+      if (errorMessage.includes('API key')) {
+        userFriendlyError = 'OpenAI API key is invalid or missing. Please check your .env.local file.';
+      } else if (errorMessage.includes('rate limit')) {
+        userFriendlyError = 'Too many requests. Please wait a moment and try again.';
+      } else if (errorMessage.includes('timeout')) {
+        userFriendlyError = 'Request took too long. Please try again.';
+      }
+      
+      setError(`AI failed to generate university recommendations: ${userFriendlyError}`);
+      setPhase('major'); // Revert phase on error
     } finally {
       setLoading(false);
+      console.log('Loading set to false');
     }
   };
 
@@ -179,6 +258,9 @@ export default function Stage4Page() {
   };
 
   const handlePick = (winner: Candidate) => {
+    const calculatedTotalMatches = Math.floor(roundCandidates.length / 2);
+    console.log('handlePick called:', { mode, winner: winner.name, matchIndex, totalMatches: calculatedTotalMatches, candidatesCount: roundCandidates.length });
+    
     setHistory((prev) => [
       ...prev,
       {
@@ -194,26 +276,61 @@ export default function Stage4Page() {
     ]);
 
     const updatedWinners = [...nextRoundCandidates, winner];
-    const totalMatches = roundCandidates.length / 2;
-    const roundFinished = matchIndex + 1 >= totalMatches;
+    const totalMatches = Math.floor(roundCandidates.length / 2);
+    const currentMatchNumber = matchIndex + 1;
+    const hasUnpairedCandidate = roundCandidates.length % 2 === 1 && matchIndex === totalMatches - 1;
+    const roundFinished = currentMatchNumber >= totalMatches;
 
+    console.log('Tournament state:', { 
+      updatedWinners: updatedWinners.length, 
+      totalMatches, 
+      currentMatchNumber,
+      roundFinished, 
+      hasUnpairedCandidate,
+      mode,
+      roundCandidatesLength: roundCandidates.length
+    });
+
+    // If round is not finished, continue to next match
     if (!roundFinished) {
       setNextRoundCandidates(updatedWinners);
       setMatchIndex(matchIndex + 1);
       return;
     }
 
+    // Handle unpaired candidate (when odd number of candidates)
+    if (hasUnpairedCandidate && roundCandidates.length > 2) {
+      const unpairedCandidate = roundCandidates[roundCandidates.length - 1];
+      updatedWinners.push(unpairedCandidate);
+      console.log('Unpaired candidate added:', unpairedCandidate.name);
+    }
+
+    // Round is finished - check if we have a final winner
+    console.log('Round finished check:', { 
+      updatedWinnersLength: updatedWinners.length, 
+      mode,
+      isFinalWinner: updatedWinners.length === 1 
+    });
+    
     if (updatedWinners.length === 1) {
       if (mode === 'major') {
+        console.log('✅ Major winner selected, starting university tournament:', updatedWinners[0].name);
         setMajorWinner(updatedWinners[0]);
-        startUniversityTournament(updatedWinners[0]);
+        // Use setTimeout to ensure state updates are processed
+        setTimeout(() => {
+          console.log('🚀 Calling startUniversityTournament now');
+          startUniversityTournament(updatedWinners[0]);
+        }, 100);
       } else {
+        console.log('✅ University winner selected, showing results');
         setUniversityWinner(updatedWinners[0]);
         setPhase('result');
       }
       return;
     }
 
+    // Multiple winners remain - start next round
+    console.log('Starting next round with', updatedWinners.length, 'candidates');
     setRoundCandidates(updatedWinners);
     setNextRoundCandidates([]);
     setMatchIndex(0);
@@ -273,7 +390,8 @@ export default function Stage4Page() {
   const currentPair = roundCandidates.slice(matchIndex * 2, matchIndex * 2 + 2);
   const totalMatches = roundCandidates.length ? roundCandidates.length / 2 : 0;
 
-  if (loading) {
+  // Show loading state if loading OR if phase is university but no candidates yet
+  if (loading || (phase === 'university' && roundCandidates.length === 0 && !error)) {
     return (
       <div className="min-h-screen flex items-center justify-center"
         style={{
@@ -281,10 +399,10 @@ export default function Stage4Page() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}>
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-lg">AI is generating personalized recommendations...</p>
-          <p className="mt-2 text-sm text-white/70">Analyzing your profile and preferences</p>
+        <div className="text-white text-center max-w-md px-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="mt-4 text-lg font-medium">Generating your personalized recommendations</p>
+          <p className="mt-2 text-sm text-white/80">This will only take a moment...</p>
         </div>
       </div>
     );
@@ -311,10 +429,13 @@ export default function Stage4Page() {
         />
 
         <div className="mb-6 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/80">Stage 4: Tournament</p>
-          <h1 className="text-3xl sm:text-4xl font-semibold text-white drop-shadow">
-            AI-Powered Major & University Tournament
+          <p className="text-xs uppercase tracking-[0.3em] text-white/80 mb-2">Stage 4: Tournament</p>
+          <h1 className="text-3xl sm:text-4xl font-semibold text-white drop-shadow mb-2">
+            Choose Your Academic Path
           </h1>
+          <p className="text-sm text-white/90 max-w-2xl mx-auto">
+            Compare majors and universities in a fun tournament-style selection
+          </p>
         </div>
         <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-xs">
           <span
@@ -366,8 +487,8 @@ export default function Stage4Page() {
                 loading="lazy"
               />
             </div>
-            <p className="text-gray-700 mb-6 text-base">
-              Our AI has analyzed your profile. Now, choose your path through a tournament-style selection process.
+            <p className="text-gray-700 mb-6 text-base leading-relaxed">
+              Based on your profile, we've prepared personalized recommendations. Select your favorites through quick comparisons.
             </p>
             
             <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-left">
@@ -380,16 +501,16 @@ export default function Stage4Page() {
                 <h2 className="text-lg font-semibold mb-2 text-slate-800">
                   Major Tournament
                 </h2>
-                <p className="text-sm text-slate-600">
-                  AI will generate 8 majors based on your profile. Pick your favorites in head-to-head matchups.
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Compare 6 personalized major recommendations. Choose your favorites in quick matchups.
                 </p>
               </div>
               <div className="border border-white/70 bg-white/70 rounded-2xl p-5 shadow-md">
                 <h2 className="text-lg font-semibold mb-2 text-slate-800">
                   University Tournament
                 </h2>
-                <p className="text-sm text-slate-600">
-                  After choosing a major, AI will recommend 5 Korean universities. Select the best fit.
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  After selecting your major, compare 4 Korean universities. Find the best match for your goals.
                 </p>
               </div>
             </div>
@@ -423,6 +544,24 @@ export default function Stage4Page() {
           </div>
         )}
 
+        {phase === 'university' && roundCandidates.length === 0 && !loading && error && (
+          <div className="bg-white/80 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 text-center border border-white/60">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setPhase('major');
+                if (majorWinner) {
+                  startUniversityTournament(majorWinner);
+                }
+              }}
+              className="px-6 py-3 rounded-full font-medium text-slate-800 bg-white/90 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 ease-out"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
         {(phase === 'major' || phase === 'university') && currentPair.length === 2 && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -442,8 +581,11 @@ export default function Stage4Page() {
               </div>
             </div>
 
-            <div className="text-center text-white/80 text-sm">
-              Which option better matches your preferences?
+            <div className="text-center text-white/90 text-base font-medium mb-2">
+              Which option do you prefer?
+            </div>
+            <div className="text-center text-white/70 text-sm mb-4">
+              Click on the option that better matches your interests and goals
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -463,8 +605,8 @@ export default function Stage4Page() {
                         AI-Powered Match
                       </span>
                     </div>
-                    <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                      Pick
+                    <span className="text-xs font-medium text-blue-600">
+                      Select
                     </span>
                   </div>
                   
@@ -549,7 +691,7 @@ export default function Stage4Page() {
                   )}
                   
                   <div className="mb-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">
+                    <p className="text-xs font-medium text-slate-600 mb-2">
                       Why this matches you:
                     </p>
                     <div className="flex flex-wrap gap-2">

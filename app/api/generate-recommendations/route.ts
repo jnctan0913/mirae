@@ -13,8 +13,8 @@ try {
   if (apiKey && apiKey.startsWith('sk-')) {
     openai = new OpenAI({
       apiKey: apiKey,
-      // Add timeout for better error handling
-      timeout: 30000, // 30 seconds
+      // Increased timeout for JSON mode which can take longer
+      timeout: 60000, // 60 seconds - JSON mode with multiple recommendations needs more time
       maxRetries: 2,
     });
     console.log('OpenAI client initialized successfully');
@@ -60,74 +60,97 @@ export async function POST(request: NextRequest) {
     let prompt = '';
     
     if (type === 'major') {
-      prompt = `You are a university counselor. Based on this student profile, recommend ${count} suitable majors in South Korea:
+      prompt = `Recommend exactly ${count} Korean university majors for this student:
 
-STUDENT PROFILE:
 ${userSummary}
 
-For each major, return this exact JSON format:
+Return JSON only:
 {
-  "id": "short-id",
-  "name": "Major Name",
-  "summary": "Brief description",
-  "details": ["Point 1", "Point 2", "Point 3"],
-  "matchPercent": 85,
-  "careers": ["Career 1", "Career 2", "Career 3"],
-  "coreCourses": ["Course 1", "Course 2", "Course 3"],
-  "workloadStyle": "Description",
-  "portfolio": "Portfolio info",
-  "collaboration": "Collaboration level",
-  "pace": "Pace",
-  "imageUrl": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=500&fit=crop"
+  "recommendations": [
+    {
+      "id": "major-1",
+      "name": "Major Name",
+      "summary": "1 sentence why this fits",
+      "details": ["Point 1", "Point 2", "Point 3"],
+      "matchPercent": 85,
+      "careers": ["Career 1", "Career 2"],
+      "coreCourses": ["Course 1", "Course 2"],
+      "imageUrl": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=500&fit=crop"
+    }
+  ]
 }
 
-Return ONLY a JSON object with a "recommendations" array.`;
+Requirements: ${count} majors, matchPercent 70-95%, Korean major names, personalized summaries. JSON only.`;
     } else {
-      prompt = `You are a Korean university expert. Recommend ${count} Korean universities for this major:
+      prompt = `Recommend exactly ${count} Korean universities for ${currentMajor}:
 
-STUDENT PROFILE:
 ${userSummary}
-CHOSEN MAJOR: ${currentMajor}
 
-For each university, return this exact JSON format:
+Return JSON only:
 {
-  "id": "short-id",
-  "name": "University Name",
-  "summary": "Brief description",
-  "details": ["Feature 1", "Feature 2", "Feature 3"],
-  "location": "City, South Korea",
-  "scholarships": ["Scholarship 1", "Scholarship 2"],
-  "tuitionRange": "$$",
-  "aidStrength": "Financial aid info",
-  "internshipPipeline": "Internship info",
-  "selectivity": "Selectivity level",
-  "campusVibe": "Campus environment",
-  "housing": "Housing info",
-  "exchange": "Exchange programs",
-  "imageUrl": "https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=500&fit=crop"
+  "recommendations": [
+    {
+      "id": "univ-1",
+      "name": "University Name",
+      "summary": "1 sentence why this fits for ${currentMajor}",
+      "details": ["Feature 1", "Feature 2", "Feature 3"],
+      "location": "City, South Korea",
+      "scholarships": ["Scholarship 1", "Scholarship 2"],
+      "tuitionRange": "5-7 million KRW/year",
+      "aidStrength": "Strong/Moderate financial aid",
+      "internshipPipeline": "Strong internship opportunities",
+      "selectivity": "Highly Selective/Selective/Moderate",
+      "imageUrl": "https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=500&fit=crop"
+    }
+  ]
 }
 
-Return ONLY a JSON object with a "recommendations" array.`;
+Requirements: ${count} universities, strong ${currentMajor} programs, real Korean names, personalized. Include aidStrength and internshipPipeline. JSON only.`;
     }
 
     console.log('Sending request to OpenAI...');
+    console.log('Model: gpt-4o-mini');
+    console.log('Prompt length:', prompt.length);
 
-    // Call OpenAI with simpler settings
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Use gpt-3.5-turbo which works with all keys
-      messages: [
-        { 
-          role: "system", 
-          content: "You are a helpful assistant that returns JSON only." 
-        },
-        { 
-          role: "user", 
-          content: prompt 
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    });
+    // Call OpenAI with JSON response format for better parsing
+    // Optimized for speed: reduced tokens and temperature
+    let completion;
+    try {
+      completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Fastest model
+        messages: [
+          { 
+            role: "system", 
+            content: "Return valid JSON only. Be concise." 
+          },
+          { 
+            role: "user", 
+            content: prompt 
+          }
+        ],
+        temperature: 0.4, // Lower for faster, more deterministic responses
+        max_tokens: 1500, // Reduced for faster generation
+        response_format: { type: "json_object" }, // Ensure JSON response
+      });
+    } catch (openaiError: any) {
+      console.error('OpenAI API call failed:', openaiError);
+      console.error('Error status:', openaiError?.status);
+      console.error('Error code:', openaiError?.code);
+      console.error('Error type:', openaiError?.type);
+      
+      // Provide more specific error messages
+      if (openaiError?.status === 401) {
+        throw new Error('Invalid OpenAI API key. Please check your API key in .env.local');
+      } else if (openaiError?.status === 429) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again in a moment.');
+      } else if (openaiError?.status === 500 || openaiError?.status === 503) {
+        throw new Error('OpenAI service is temporarily unavailable. Please try again later.');
+      } else if (openaiError?.code === 'ETIMEDOUT' || openaiError?.message?.includes('timeout')) {
+        throw new Error('Request to OpenAI timed out. Please try again.');
+      } else {
+        throw new Error(`OpenAI API error: ${openaiError?.message || 'Unknown error'}`);
+      }
+    }
 
     console.log('OpenAI response received');
 
@@ -144,32 +167,72 @@ Return ONLY a JSON object with a "recommendations" array.`;
     // Try to parse the response
     let parsed;
     try {
-      // Clean the response - remove any markdown code blocks
+      // Clean the response - remove any markdown code blocks (just in case)
       const cleanedResponse = response
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
       
       parsed = JSON.parse(cleanedResponse);
+      
+      // Validate the structure
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error('Invalid response structure');
+      }
     } catch (parseError) {
       console.error('Failed to parse JSON:', parseError);
       console.error('Raw response:', response);
-      throw new Error('Invalid JSON response from AI');
+      throw new Error(`Invalid JSON response from AI: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
     }
 
-    const recommendations = parsed.recommendations || parsed;
+    // Extract recommendations array
+    const recommendations = Array.isArray(parsed.recommendations) 
+      ? parsed.recommendations 
+      : (Array.isArray(parsed) ? parsed : []);
     
     if (!Array.isArray(recommendations) || recommendations.length === 0) {
       console.error('Invalid recommendations array:', recommendations);
-      throw new Error('No valid recommendations returned');
+      console.error('Parsed object:', parsed);
+      throw new Error(`No valid recommendations returned. Expected array but got: ${typeof recommendations}`);
     }
 
-    console.log(`Generated ${recommendations.length} recommendations`);
+    // Validate each recommendation has required fields and add defaults
+    const validRecommendations = recommendations
+      .filter((rec: any) => {
+        return rec && 
+               typeof rec.id === 'string' && 
+               typeof rec.name === 'string' && 
+               typeof rec.summary === 'string';
+      })
+      .map((rec: any) => {
+        // Ensure all required fields have defaults
+        return {
+          ...rec,
+          id: rec.id || `rec-${Math.random().toString(36).substr(2, 9)}`,
+          name: rec.name || 'Unknown',
+          summary: rec.summary || 'No description available',
+          details: Array.isArray(rec.details) ? rec.details : [],
+          imageUrl: rec.imageUrl || (type === 'major' 
+            ? 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=500&fit=crop'
+            : 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=500&fit=crop'),
+          matchPercent: typeof rec.matchPercent === 'number' ? rec.matchPercent : undefined,
+        };
+      });
+
+    if (validRecommendations.length === 0) {
+      console.error('No valid recommendations after filtering');
+      throw new Error('All recommendations failed validation');
+    }
+
+    // Ensure we have at least the requested count (or as many as available)
+    const finalRecommendations = validRecommendations.slice(0, count);
+
+    console.log(`Generated ${finalRecommendations.length} valid recommendations (requested ${count})`);
 
     return NextResponse.json({ 
       success: true, 
-      recommendations,
-      count: recommendations.length,
+      recommendations: finalRecommendations,
+      count: finalRecommendations.length,
       type 
     });
 
@@ -180,10 +243,37 @@ Return ONLY a JSON object with a "recommendations" array.`;
     console.error('Error message:', error instanceof Error ? error.message : 'Unknown');
     console.error('Stack:', error instanceof Error ? error.stack : 'No stack');
     
+    // Check for specific OpenAI API errors
+    let errorMessage = 'AI service error';
+    let errorDetails = error instanceof Error ? error.message : 'Unknown error';
+    
+    if (error instanceof Error) {
+      // Check for API key errors
+      if (error.message.includes('API key') || error.message.includes('authentication')) {
+        errorMessage = 'OpenAI API key error';
+        errorDetails = 'Please check your API key configuration.';
+      }
+      // Check for rate limit errors
+      else if (error.message.includes('rate limit') || error.message.includes('429')) {
+        errorMessage = 'Rate limit exceeded';
+        errorDetails = 'Too many requests. Please try again in a moment.';
+      }
+      // Check for timeout errors
+      else if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        errorMessage = 'Request timeout';
+        errorDetails = 'The AI service took too long to respond. Please try again.';
+      }
+      // Check for invalid model errors
+      else if (error.message.includes('model') || error.message.includes('gpt-4o-mini')) {
+        errorMessage = 'Model error';
+        errorDetails = 'The AI model is not available. Please try again later.';
+      }
+    }
+    
     return NextResponse.json(
       { 
-        error: 'AI service error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
+        details: errorDetails,
         success: false
       },
       { status: 500 }
