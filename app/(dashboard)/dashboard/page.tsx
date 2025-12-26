@@ -433,7 +433,7 @@ function DashboardContent() {
                       <div className="flex items-center justify-center" style={{ width: '40%' }}>
                         {viewingStageId === 1 && (
                           <Image
-                            src="/asset/stage_curiosity.png"
+                            src="/asset/Stage_curiosity.png"
                             alt="Curiosity"
                             width={400}
                             height={300}
@@ -460,7 +460,7 @@ function DashboardContent() {
                         )}
                         {viewingStageId === 4 && (
                           <Image
-                            src="/asset/stage_evolve.png"
+                            src="/asset/Stage_evolve.png"
                             alt="Evolve"
                             width={400}
                             height={300}
@@ -469,7 +469,7 @@ function DashboardContent() {
                         )}
                         {viewingStageId === 5 && (
                           <Image
-                            src="/asset/stage_plus.png"
+                            src="/asset/Stage_plus.png"
                             alt="Storyboard"
                             width={400}
                             height={300}
