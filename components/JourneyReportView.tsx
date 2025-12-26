@@ -173,18 +173,45 @@ const buildWeeklyCounts = (logs: ActivityLog[]) => {
   }));
 };
 
-const buildRadarMetrics = (logs: ActivityLog[]) => {
-  const total = logs.length || 1;
+const buildRadarMetrics = (logs: ActivityLog[], cards: IdentityCardSummary[]) => {
   const countByType = logs.reduce<Partial<Record<ActivityLog['activityType'], number>>>((acc, log) => {
     acc[log.activityType] = (acc[log.activityType] || 0) + 1;
     return acc;
   }, {});
+  const cardCounts = cards.reduce<Record<CardType, number>>((acc, card) => {
+    acc[card.type] = (acc[card.type] || 0) + 1;
+    return acc;
+  }, {} as Record<CardType, number>);
+
+  const logWeight = 1;
+  const cardWeight = 0.6;
+  const selfStrengthsScore =
+    (countByType.Reflection || 0) * logWeight +
+    ((cardCounts.ThenVsNow || 0) + (cardCounts.StrengthPattern || 0)) * cardWeight;
+  const curiosityRolesScore =
+    (countByType.MiraeActivity || 0) * logWeight +
+    (cardCounts.CuriosityThread || 0) * cardWeight;
+  const academicPathScore =
+    (countByType.Study || 0) * logWeight + (cardCounts.Experience || 0) * cardWeight;
+  const proofExperiencesScore =
+    ((countByType.Project || 0) + (countByType.ExternalWork || 0) + (countByType.Club || 0)) *
+      logWeight +
+    (cardCounts.ProofMoment || 0) * cardWeight;
+  const valuesFitScore = (cardCounts.ValueSignal || 0) * cardWeight;
+
+  const total =
+    selfStrengthsScore +
+      curiosityRolesScore +
+      academicPathScore +
+      proofExperiencesScore +
+      valuesFitScore || 1;
+
   return [
-    { label: 'Reflection', value: (countByType.Reflection || 0) / total },
-    { label: 'Study', value: (countByType.Study || 0) / total },
-    { label: 'Applied', value: ((countByType.Project || 0) + (countByType.ExternalWork || 0)) / total },
-    { label: 'Collaboration', value: (countByType.Club || 0) / total },
-    { label: 'Exploration', value: (countByType.MiraeActivity || 0) / total },
+    { label: 'Self & Strengths', value: selfStrengthsScore / total },
+    { label: 'Curiosity & Roles', value: curiosityRolesScore / total },
+    { label: 'Academic Path', value: academicPathScore / total },
+    { label: 'Proof & Experiences', value: proofExperiencesScore / total },
+    { label: 'Values & Fit', value: valuesFitScore / total },
   ];
 };
 
@@ -261,7 +288,7 @@ export default function JourneyReportView({ logs, cards, studentName, onRefresh,
   const experiences = useMemo(() => buildExperiences(logs), [logs]);
   const weeklyCounts = useMemo(() => buildWeeklyCounts(logs), [logs]);
   const proofSpacing = useMemo(() => buildProofSpacing(experiences), [experiences]);
-  const radarMetrics = useMemo(() => buildRadarMetrics(logs), [logs]);
+  const radarMetrics = useMemo(() => buildRadarMetrics(logs, cards), [logs, cards]);
   const dateBounds = useMemo(() => getDateBounds(logs), [logs]);
   const profile = getUserProfile();
   const stage0Insights = (() => {
@@ -560,19 +587,20 @@ export default function JourneyReportView({ logs, cards, studentName, onRefresh,
             <div className="rounded-2xl border border-white/50 bg-white/80 p-4 sm:col-span-2">
               <p className="text-sm font-semibold text-slate-700 mb-2">Identity radar</p>
               {totalLogs > 0 ? (
-                <div className="flex flex-col items-center gap-3">
-                  <svg viewBox="0 0 200 200" className="w-48 h-48">
+                <div className="grid w-full grid-cols-[3fr_2fr] gap-6">
+                  <div className="flex items-center justify-center">
+                    <svg viewBox="0 0 240 240" className="w-48 h-48">
                     {[0.25, 0.5, 0.75, 1].map((level) => (
-                      <circle key={`ring-${level}`} cx="100" cy="100" r={80 * level} fill="none" stroke="#E2E8F0" strokeWidth="1" />
+                      <circle key={`ring-${level}`} cx="120" cy="120" r={110 * level} fill="none" stroke="#E2E8F0" strokeWidth="1" />
                     ))}
                     {radarMetrics.map((metric, index) => {
                       const angle = (Math.PI * 2 * index) / radarMetrics.length - Math.PI / 2;
-                      const x = 100 + Math.cos(angle) * 80;
-                      const y = 100 + Math.sin(angle) * 80;
+                      const x = 120 + Math.cos(angle) * 110;
+                      const y = 120 + Math.sin(angle) * 110;
                       return (
                         <g key={`axis-${metric.label}`}>
-                          <line x1="100" y1="100" x2={x} y2={y} stroke="#CBD5F5" strokeWidth="1" />
-                          <text x={100 + Math.cos(angle) * 95} y={100 + Math.sin(angle) * 95} fontSize="9" fill="#64748B" textAnchor="middle">
+                          <line x1="120" y1="120" x2={x} y2={y} stroke="#CBD5F5" strokeWidth="1" />
+                          <text x={120 + Math.cos(angle) * 125} y={120 + Math.sin(angle) * 125} fontSize="9" fill="#64748B" textAnchor="middle" dominantBaseline="middle">
                             {metric.label}
                           </text>
                         </g>
@@ -582,9 +610,11 @@ export default function JourneyReportView({ logs, cards, studentName, onRefresh,
                       points={radarMetrics
                         .map((metric, index) => {
                           const angle = (Math.PI * 2 * index) / radarMetrics.length - Math.PI / 2;
-                          const radius = 80 * metric.value;
-                          const x = 100 + Math.cos(angle) * radius;
-                          const y = 100 + Math.sin(angle) * radius;
+                          // Add baseline (30%) and amplify the remaining 70% by 1.4x to make blue area bigger
+                          const scaledValue = 0.3 + (metric.value * 0.7 * 1.4);
+                          const radius = 110 * Math.min(scaledValue, 1);
+                          const x = 120 + Math.cos(angle) * radius;
+                          const y = 120 + Math.sin(angle) * radius;
                           return `${x},${y}`;
                         })
                         .join(' ')}
@@ -592,33 +622,22 @@ export default function JourneyReportView({ logs, cards, studentName, onRefresh,
                       stroke="#9BCBFF"
                       strokeWidth="2"
                     />
-                  </svg>
-                  <div className="flex flex-wrap justify-center gap-2 text-[11px] text-slate-500">
+                    </svg>
+                  </div>
+                  <div className="flex flex-col justify-center space-y-2">
                     {radarMetrics.map((metric) => (
-                      <span key={`metric-${metric.label}`} className="rounded-full bg-white/80 px-2 py-1">
-                        {metric.label}: {Math.round(metric.value * 100)}%
-                      </span>
+                      <div
+                        key={`metric-${metric.label}`}
+                        className="flex items-center justify-between gap-3 rounded-lg bg-white/60 px-3 py-2"
+                      >
+                        <span className="text-xs font-medium text-slate-700">{metric.label}</span>
+                        <span className="text-xs font-semibold text-slate-600">{Math.round(metric.value * 100)}%</span>
+                      </div>
                     ))}
                   </div>
                 </div>
               ) : (
                 <p className="text-sm text-slate-400">Add activities to see your identity radar.</p>
-              )}
-            </div>
-            <div className="rounded-2xl border border-white/50 bg-white/80 p-4 sm:col-span-2">
-              <p className="text-sm font-semibold text-slate-700 mb-2">Signature cards</p>
-              {unlockedCards.length > 0 ? (
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {unlockedCards.slice(0, 3).map((card) => (
-                    <div key={card.id} className="rounded-xl border border-white/60 bg-white/90 p-3">
-                      <p className="text-xs uppercase tracking-wide text-slate-400">{stageLabels[card.stage]}</p>
-                      <p className="text-sm font-semibold text-slate-700">{card.title}</p>
-                      <p className="text-xs text-slate-500 mt-1">{card.description}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">Unlock cards to see your signature strengths.</p>
               )}
             </div>
           </div>
