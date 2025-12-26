@@ -7,7 +7,7 @@ import { useLanguageStore } from '@/lib/stores/languageStore';
 import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 import { loadActivityLogs, saveActivityLogs } from '@/lib/activityLogs';
 import Image from 'next/image';
-import { Sprout, Save } from 'lucide-react';
+import { Sprout } from 'lucide-react';
 import { withBasePath } from '@/lib/basePath';
 import type { CardType } from '@/components/MiraeCharacterEvolution';
 
@@ -120,7 +120,7 @@ export default function Stage3Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationState, setConversationState] = useState<ConversationState>('in_progress');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string>('');
+  const [, setSaveMessage] = useState<string>('');
   const [aiFeedback] = useState<string[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   
@@ -551,7 +551,7 @@ export default function Stage3Page() {
 
       // Create final result object (use keywords from state)
       const profile = getUserProfile();
-      const savedData = (profile as any).stage3Responses;
+      const savedData = profile.stage3Responses;
 
       const year = getYearLevelFromProfile();
       const semesterLabel = getSemesterLabel(getUserProfile().currentSemester);

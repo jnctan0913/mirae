@@ -109,6 +109,8 @@ export type UserProfile = {
     targetSemester?: string;
   };
   stage2Slots?: ({ anchor: string[]; signal: string[]; savedAt: string } | null)[];
+  stage3Responses?: Record<string, unknown>;
+  stage3Completed?: boolean;
   stage4Result?: {
     major: { id: string; name: string };
     university: { id: string; name: string };

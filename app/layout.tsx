@@ -7,7 +7,7 @@ import { ClientProviders } from '@/components/ClientProviders'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SCOPE+ - Career Exploration Platform',
+  title: 'Mirae.ai',
   description: 'Dashboard-based, multi-stage, AI-powered career exploration for Korean high school students',
   icons: {
     icon: [
