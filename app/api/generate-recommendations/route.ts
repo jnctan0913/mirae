@@ -132,23 +132,24 @@ Requirements: ${count} universities, strong ${currentMajor} programs, real Korea
         max_tokens: 1500, // Reduced for faster generation
         response_format: { type: "json_object" }, // Ensure JSON response
       });
-    } catch (openaiError: any) {
+    } catch (openaiError: unknown) {
       console.error('OpenAI API call failed:', openaiError);
-      console.error('Error status:', openaiError?.status);
-      console.error('Error code:', openaiError?.code);
-      console.error('Error type:', openaiError?.type);
+      const error = openaiError as { status?: number; code?: string; type?: string; message?: string };
+      console.error('Error status:', error?.status);
+      console.error('Error code:', error?.code);
+      console.error('Error type:', error?.type);
       
       // Provide more specific error messages
-      if (openaiError?.status === 401) {
+      if (error?.status === 401) {
         throw new Error('Invalid OpenAI API key. Please check your API key in .env.local');
-      } else if (openaiError?.status === 429) {
+      } else if (error?.status === 429) {
         throw new Error('OpenAI API rate limit exceeded. Please try again in a moment.');
-      } else if (openaiError?.status === 500 || openaiError?.status === 503) {
+      } else if (error?.status === 500 || error?.status === 503) {
         throw new Error('OpenAI service is temporarily unavailable. Please try again later.');
-      } else if (openaiError?.code === 'ETIMEDOUT' || openaiError?.message?.includes('timeout')) {
+      } else if (error?.code === 'ETIMEDOUT' || error?.message?.includes('timeout')) {
         throw new Error('Request to OpenAI timed out. Please try again.');
       } else {
-        throw new Error(`OpenAI API error: ${openaiError?.message || 'Unknown error'}`);
+        throw new Error(`OpenAI API error: ${error?.message || 'Unknown error'}`);
       }
     }
 
@@ -198,13 +199,17 @@ Requirements: ${count} universities, strong ${currentMajor} programs, real Korea
 
     // Validate each recommendation has required fields and add defaults
     const validRecommendations = recommendations
-      .filter((rec: any) => {
-        return rec && 
-               typeof rec.id === 'string' && 
-               typeof rec.name === 'string' && 
-               typeof rec.summary === 'string';
+      .filter((rec: unknown): rec is { id: string; name: string; summary: string; [key: string]: unknown } => {
+        return rec !== null && 
+               typeof rec === 'object' &&
+               'id' in rec &&
+               'name' in rec &&
+               'summary' in rec &&
+               typeof (rec as { id: unknown }).id === 'string' && 
+               typeof (rec as { name: unknown }).name === 'string' && 
+               typeof (rec as { summary: unknown }).summary === 'string';
       })
-      .map((rec: any) => {
+      .map((rec) => {
         // Ensure all required fields have defaults
         return {
           ...rec,

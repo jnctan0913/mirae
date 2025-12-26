@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { getUser } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
-import { useI18n } from '@/lib/i18n';
 import ActivityCalendar from '@/components/ActivityCalendar';
 import JourneyReportView from '@/components/JourneyReportView';
 import { loadActivityLogs, saveActivityLogs, type ActivityLog } from '@/lib/activityLogs';
@@ -20,6 +19,7 @@ import {
 } from '@/components/MiraeCharacterEvolution';
 import { AccessoryPanel } from '@/components/AccessoryPanel';
 import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
+import { useI18n } from '@/lib/i18n';
 
 // ============= Types =============
 type Stage = 'S' | 'C' | 'O' | 'P' | 'E';

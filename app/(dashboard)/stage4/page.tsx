@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/stores/userStore';
-import { useI18n } from '@/lib/i18n';
 import { getUserProfile, updateUserProfile } from '@/lib/userProfile';
 import { Candidate, generateAIRecommendations, extractUserSummary } from '@/lib/ai-recommendations';
 
@@ -63,7 +62,6 @@ export default function Stage4Page() {
   const [majorWinner, setMajorWinner] = useState<Candidate | null>(null);
   const [universityWinner, setUniversityWinner] = useState<Candidate | null>(null);
   const [history, setHistory] = useState<MatchSnapshot[]>([]);
-  const [personalizedMajors, setPersonalizedMajors] = useState<Candidate[]>([]);
   const [confidence, setConfidence] = useState(85);
   const [insightStrengths, setInsightStrengths] = useState<string[]>([]);
   const [insightRoles, setInsightRoles] = useState<string[]>([]);
@@ -136,7 +134,6 @@ export default function Stage4Page() {
       });
       
       if (result.success && result.recommendations.length > 0) {
-        setPersonalizedMajors(result.recommendations);
         setPhase('major');
         setMode('major');
         setRoundCandidates(result.recommendations);
@@ -488,7 +485,7 @@ export default function Stage4Page() {
               />
             </div>
             <p className="text-gray-700 mb-6 text-base leading-relaxed">
-              Based on your profile, we've prepared personalized recommendations. Select your favorites through quick comparisons.
+              Based on your profile, we&apos;ve prepared personalized recommendations. Select your favorites through quick comparisons.
             </p>
             
             <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-left">

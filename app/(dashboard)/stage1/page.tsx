@@ -149,7 +149,6 @@ export default function Stage1Page() {
   // AI-based role recommendations
   const [aiRecommendedRoles, setAiRecommendedRoles] = useState<typeof roles>([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
-  const [loadingError, setLoadingError] = useState(false);
 
   useEffect(() => {
     const fetchAIRecommendations = async () => {
@@ -195,7 +194,6 @@ export default function Stage1Page() {
         }
       } catch (error) {
         console.error('Failed to fetch AI recommendations:', error);
-        setLoadingError(true);
         // Fallback to all roles on error
         setAiRecommendedRoles(roles.slice(0, 5));
       } finally {

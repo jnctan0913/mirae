@@ -122,7 +122,18 @@ Format:
 
     if (result.recommendations && Array.isArray(result.recommendations)) {
       // Convert English-only response to bilingual format for compatibility
-      const bilingualRecommendations = result.recommendations.map((rec: any) => ({
+      const bilingualRecommendations = result.recommendations.map((rec: {
+        explanation: string | { en: string; ko: string };
+        roleData: {
+          title: string | { en: string; ko: string };
+          domain: string | { en: string; ko: string };
+          tagline: string | { en: string; ko: string };
+          roleModels: string[] | { en: string[]; ko: string[] };
+          companies: string[] | { en: string[]; ko: string[] };
+          details: string | { en: string; ko: string };
+          resources: string[] | { en: string[]; ko: string[] };
+        };
+      }) => ({
         ...rec,
         explanation: typeof rec.explanation === 'string'
           ? { en: rec.explanation, ko: rec.explanation }

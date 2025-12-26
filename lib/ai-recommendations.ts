@@ -18,6 +18,7 @@ export interface AIRecommendationResponse {
   error?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const extractUserSummary = (profile: any): string => {
   const sections = [];
   
@@ -96,9 +97,9 @@ export const generateAIRecommendations = async (
         body: JSON.stringify(request),
         signal: controller.signal,
       });
-    } catch (fetchError: any) {
+    } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
-      if (fetchError.name === 'AbortError') {
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         throw new Error('Request timed out. The AI service is taking longer than expected. Please try again.');
       }
       throw fetchError;
