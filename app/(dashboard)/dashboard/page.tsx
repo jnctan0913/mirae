@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { getUser } from '@/lib/auth';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -39,7 +39,7 @@ const academicStages = [
   { id: 'year-3-sem-2', label: 'Year 3 Semester 2' },
 ];
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { progress, userId, setUserId } = useUserStore();
@@ -528,5 +528,13 @@ export default function DashboardPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
