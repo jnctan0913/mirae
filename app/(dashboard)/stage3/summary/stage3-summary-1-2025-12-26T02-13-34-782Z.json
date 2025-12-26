@@ -1,0 +1,70 @@
+{
+  "user": {
+    "id": "1",
+    "name": "User",
+    "year": "year1",
+    "conversationDate": "2025-12-26T02:13:30.659Z",
+    "language": "en"
+  },
+  "responses": {},
+  "feedback": [],
+  "insights": [
+    "Your enthusiasm for biology is inspiring! Consider joining a biology club or group on campus to further explore your interests and connect with like-minded peers.",
+    "Joining public speaking is a great step toward leadership development. Look for workshops or seminars on campus that focus on public speaking and leadership skills to complement your involvement.",
+    "Practice makes perfect with public speaking. Try starting small by presenting in front of friends or family, then gradually increase your audience size as you gain more confidence.",
+    "Keep an eye out for opportunities to participate in conferences or symposiums related to biology. Presenting your ideas in such forums can be an excellent way to sharpen both your public speaking and scientific communication skills."
+  ],
+  "summary": "Year 1 student. Reflected on course uncertainty and motivation this semester, Semester 2.",
+  "keywords": [
+    "love",
+    "biology",
+    "doing",
+    "very",
+    "well",
+    "gove",
+    "semester",
+    "want",
+    "develop",
+    "leadership",
+    "skill",
+    "too",
+    "think",
+    "join",
+    "public"
+  ],
+  "transcript": "Mirae: Hi! I'm glad you want to talk. I see you're in Year 1, Semester 2.\nHow are you doing this semester?\nStudent: I love biology. I;m doing very well. and gove 95% this semester \nMirae: That’s fantastic! Your passion for biology really shines through with such an impressive score. Have you thought about any specific areas in biology that excite you the most, like environmental science or medicine?\nStudent: I want to develop my leadership skill too. I think I'll join public speaking \nMirae: That sounds like a wonderful idea! Developing your leadership skills through public speaking will not only boost your confidence but also help you express your ideas effectively. Are there any specific opportunities or events at school where you can practice public speaking?",
+  "conversation": [
+    {
+      "role": "ai",
+      "message": "Hi! I'm glad you want to talk. I see you're in Year 1, Semester 2.\nHow are you doing this semester?",
+      "timestamp": "2025-12-26T02:12:48.944Z"
+    },
+    {
+      "role": "user",
+      "message": "I love biology. I;m doing very well. and gove 95% this semester ",
+      "timestamp": "2025-12-26T02:13:04.360Z"
+    },
+    {
+      "role": "ai",
+      "message": "That’s fantastic! Your passion for biology really shines through with such an impressive score. Have you thought about any specific areas in biology that excite you the most, like environmental science or medicine?",
+      "timestamp": "2025-12-26T02:13:05.598Z"
+    },
+    {
+      "role": "user",
+      "message": "I want to develop my leadership skill too. I think I'll join public speaking ",
+      "timestamp": "2025-12-26T02:13:20.569Z"
+    },
+    {
+      "role": "ai",
+      "message": "That sounds like a wonderful idea! Developing your leadership skills through public speaking will not only boost your confidence but also help you express your ideas effectively. Are there any specific opportunities or events at school where you can practice public speaking?",
+      "timestamp": "2025-12-26T02:13:22.347Z"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "stage": "stage3",
+    "exportedAt": "2025-12-26T02:13:30.659Z",
+    "conversationState": "in_progress",
+    "totalMessages": 5
+  }
+}
