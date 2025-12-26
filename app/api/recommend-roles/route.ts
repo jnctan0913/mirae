@@ -80,6 +80,7 @@ Traits: ${answers.join(', ')}`;
 
 async function generateCustomRoles(
   userData: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _language: 'en' | 'ko'
 ): Promise<{ recommendations: AIRecommendation[] } | null> {
   // Generate English only for speed, translate on frontend if needed
@@ -176,6 +177,7 @@ Format:
 
 async function generateFallbackRoles(
   keywords: string[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _language: 'en' | 'ko'
 ): Promise<AIRecommendation[]> {
   // Generate basic generic roles as fallback (English only, duplicated for ko)
