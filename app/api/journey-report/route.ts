@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   ].join(' ');
 
   const user = {
-    role: 'user',
+    role: 'user' as const,
     content: JSON.stringify(
       {
         language,
