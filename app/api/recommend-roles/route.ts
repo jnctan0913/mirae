@@ -80,7 +80,7 @@ Traits: ${answers.join(', ')}`;
 
 async function generateCustomRoles(
   userData: string,
-  language: 'en' | 'ko'
+  _language: 'en' | 'ko'
 ): Promise<{ recommendations: AIRecommendation[] } | null> {
   // Generate English only for speed, translate on frontend if needed
   const prompt = `Career advisor: Generate 5 roles for this user.
@@ -176,7 +176,7 @@ Format:
 
 async function generateFallbackRoles(
   keywords: string[],
-  language: 'en' | 'ko'
+  _language: 'en' | 'ko'
 ): Promise<AIRecommendation[]> {
   // Generate basic generic roles as fallback (English only, duplicated for ko)
   const enText = 'A versatile role that combines creativity and problem-solving';

@@ -115,7 +115,7 @@ export const generateAIRecommendations = async (
       try {
         errorText = await response.text();
         errorData = JSON.parse(errorText);
-      } catch (e) {
+      } catch {
         // If parsing fails, use the text as is
       }
       

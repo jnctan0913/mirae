@@ -45,8 +45,8 @@ export default function SkillTranslationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentTurn, setCurrentTurn] = useState(0);
   const [currentPhase, setCurrentPhase] = useState<ConversationPhase>('recap');
-  const [completedPhases, setCompletedPhases] = useState<Set<ConversationPhase>>(new Set(['recap']));
-  const [source, setSource] = useState<'openai' | 'fallback' | 'mock'>('openai');
+  const [, setCompletedPhases] = useState<Set<ConversationPhase>>(new Set(['recap']));
+  const [, setSource] = useState<'openai' | 'fallback' | 'mock'>('openai');
   const [useMockMode, setUseMockMode] = useState(false);
   
   const t = translations[language];
@@ -319,9 +319,6 @@ export default function SkillTranslationPage() {
               {mainPhases.map((phase, idx) => {
                 const isCurrent = currentPhase === phase;
                 const isPast = mainPhases.indexOf(phase) < mainPhases.indexOf(currentPhase);
-                const phaseLabels = language === 'ko' 
-                  ? ['시작', '탐색', '마무리']
-                  : ['Start', 'Explore', 'Wrap Up'];
                 
                 return (
                   <div key={phase} className="flex items-center gap-2">
