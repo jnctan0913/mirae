@@ -1,5 +1,8 @@
 import { Candidate } from '@/lib/types/candidate';
 
+// Re-export Candidate type for convenience
+export type { Candidate };
+
 // Use relative path for API calls (works in both dev and production)
 const API_URL = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
 
